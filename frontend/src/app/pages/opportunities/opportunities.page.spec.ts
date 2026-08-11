@@ -290,4 +290,11 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
     expect(c.statusVariant('executing')).toBe('violet');
     expect(c.statusVariant('rejected')).toBe('danger');
   });
+
+  it('the active status tab carries CSS class "active" (matches theme.css)', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const allBtn = root.querySelector('[data-testid="status-filter"] button') as HTMLElement;
+    expect(allBtn.classList.contains('active')).toBe(true);
+  });
 });

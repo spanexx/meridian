@@ -117,7 +117,7 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
           <button
             type="button"
             [attr.aria-selected]="status() === s.key"
-            [class.tab-active]="status() === s.key"
+            [class.active]="status() === s.key"
             class="tab"
             [attr.data-filter-tab]="s.key"
             (click)="status.set(s.key)"
