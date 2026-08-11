@@ -100,8 +100,8 @@ export class UiIconComponent {
 
   /** Icon name. Unknown names render an empty svg with a debug attribute. */
   readonly name = input.required<string>();
-  /** Pixel size; default 16 matches lucide's `w-4 h-4` Tailwind size. */
-  readonly size = input<number>(16);
+  /** Pixel size; default 18 matches the wireframe's `w-4.5 h-4.5` visual weight. */
+  readonly size = input<number>(18);
   /** If set, the svg is exposed to assistive tech via aria-label + role=img. */
   readonly ariaLabel = input<string | null>(null);
 
