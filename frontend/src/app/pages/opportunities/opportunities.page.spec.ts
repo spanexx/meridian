@@ -1,26 +1,21 @@
 /**
- * Unit tests for OpportunitiesPageComponent.
+ * Unit tests for OpportunitiesPageComponent — wireframe-aligned.
  *
- * TDD RED phase: written first, designed to fail because the component
- * does not yet exist. When the component is implemented, these tests
- * pin the minimum behavior the page must expose.
- *
- * Behavior pins:
- *   1. Renders a top-level <h1> with the visible title "Opportunities".
- *   2. Renders category filter buttons: All categories + the 5 product
- *      categories (Apparel, Collectibles, Electronics, Equipment,
- *      Furniture).
- *   3. Renders status filter buttons: All + Pending + In Vetting +
- *      Approved + Executing + Rejected.
- *   4. Renders a <table> with columns Ref / Title / Category / Submitted
- *      by / Est. ROI / Capital / Votes / Status.
- *   5. Default selection is the first button in each filter; that
- *      button carries aria-pressed=true.
- *   6. Clicking a non-default category pill sets its aria-pressed to
- *      true and the previously-selected one's to false.
- *   7. Clicking a non-default status pill filters the visible table
- *      rows so the Status column matches the chosen pill.
- *   8. Clicking the "All" status pill restores the full set.
+ * Per the wireframe (wireframe/meridian/opportunities/index.html):
+ *   - title 'Opportunities' + 'The signal pipeline — 24 active across
+ *     all stages.'
+ *   - Search input + Category DROPDOWN (not inline pills) + Submit Signal
+ *   - Status tabs (single row): All / Pending / In Vetting / Approved /
+ *     Executing / Rejected, each with a count
+ *   - 9-column table: Ref / Title / Category / Submitted by / Est. ROI /
+ *     Capital / Votes / Status / (arrow column)
+ *   - 24 total rows in the dataset, 8 per page (3 pages of pagination)
+ *   - Vote cells render 'N↑ / N↓' when votes exist, '—' when not
+ *   - Capital rendered with thousands separator (e.g. $8,200)
+ *   - Est. ROI rendered with leading '+' and emerald color (e.g. +34.2%)
+ *   - Category cell shows a neutral badge (uppercase pill)
+ *   - Submitted by cell shows an avatar circle + name
+ *   - Footer 'Showing 8 of 24' + '1 / 3' pagination
  *
  * @owner   spanexx
  * @reviewed 2026-08-11
@@ -29,10 +24,6 @@ import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import type { OpportunitiesPageComponent } from './opportunities.page';
 
-/**
- * Mount the component inside a TestBed that provides the bare minimum
- * of Angular's runtime services.
- */
 async function renderStandalone(): Promise<ComponentFixture<OpportunitiesPageComponent>> {
   await TestBed.configureTestingModule({
     providers: [provideRouter([])],
@@ -47,135 +38,256 @@ const CATEGORIES = ['All categories', 'Apparel', 'Collectibles', 'Electronics', 
 const STATUSES = ['All', 'Pending', 'In Vetting', 'Approved', 'Executing', 'Rejected'];
 const COLUMNS = ['Ref', 'Title', 'Category', 'Submitted by', 'Est. ROI', 'Capital', 'Votes', 'Status'];
 
-/**
- * Find a button whose first text node exactly equals `label`. Buttons in
- * the status row have a trailing count span — we ignore that by walking
- * only the direct text nodes (not the descendants).
- */
-function findPill(buttons: HTMLButtonElement[], label: string): HTMLButtonElement | undefined {
-  return buttons.find((b) => {
-    // Concat the text of all direct child text nodes only.
-    let directText = '';
-    for (const node of Array.from(b.childNodes)) {
-      if (node.nodeType === Node.TEXT_NODE) directText += node.textContent;
-    }
-    return directText.trim() === label;
-  });
-}
-
-describe('OpportunitiesPage', () => {
+describe('OpportunitiesPage (wireframe-aligned)', () => {
   it('renders the page title "Opportunities"', async () => {
     const fixture = await renderStandalone();
     const h1 = fixture.nativeElement.querySelector('h1');
     expect(h1?.textContent?.trim()).toBe('Opportunities');
   });
 
-  it('renders every category filter pill', async () => {
+  it('subtitle mentions "signal pipeline — 24 active across all stages"', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const catSection = root.querySelector('[data-testid="category-filter"]')!;
-    const buttons = Array.from(catSection.querySelectorAll('button')) as HTMLButtonElement[];
-    expect(buttons.length).toBe(CATEGORIES.length);
-    for (const cat of CATEGORIES) {
-      expect(findPill(buttons, cat)).toBeTruthy();
-    }
+    expect(root.textContent).toContain('signal pipeline');
+    expect(root.textContent).toContain('24 active');
   });
 
-  it('renders every status filter pill', async () => {
+  it('renders a search input', async () => {
+    const fixture = await renderStandalone();
+    const input = fixture.nativeElement.querySelector('input[type="search"]');
+    expect(input).toBeTruthy();
+  });
+
+  it('exposes Category as a DROPDOWN (button + menu), not an inline pill row', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const statSection = root.querySelector('[data-testid="status-filter"]')!;
-    const buttons = Array.from(statSection.querySelectorAll('button')) as HTMLButtonElement[];
+    // No inline category pills
+    const inlineCatRow = root.querySelector('[data-testid="category-filter"]');
+    expect(inlineCatRow).toBeFalsy();
+    // Dropdown trigger button + hidden menu
+    const trigger = root.querySelector('[data-dropdown="catMenu"]');
+    const menu = root.querySelector('#catMenu');
+    expect(trigger).toBeTruthy();
+    expect(menu).toBeTruthy();
+  });
+
+  it('Category dropdown menu contains All categories + the 5 product categories', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const menu = root.querySelector('#catMenu');
+    const items = menu?.querySelectorAll('[data-filter-category]');
+    expect(items?.length).toBe(CATEGORIES.length);
+  });
+
+  it('renders every status filter tab with a count', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const tabs = root.querySelector('[data-testid="status-filter"]');
+    const buttons = Array.from(tabs?.querySelectorAll('button') ?? []);
     expect(buttons.length).toBe(STATUSES.length);
-    for (const status of STATUSES) {
-      expect(findPill(buttons, status)).toBeTruthy();
+    for (const stat of STATUSES) {
+      const match = buttons.find((b) => b.textContent?.includes(stat));
+      expect(match, `missing status tab: ${stat}`).toBeTruthy();
     }
   });
 
-  it('renders a table whose columns match the wireframe spec', async () => {
+  it('default status tab is "All" with aria-selected=true', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const ths = Array.from(root.querySelectorAll('thead th'));
-    const headers = ths.map((t) => t.textContent?.trim() ?? '');
-    expect(headers).toEqual(COLUMNS);
+    const allBtn = Array.from(root.querySelectorAll('[data-testid="status-filter"] button'))
+      .find((b) => b.textContent?.startsWith('All')) as HTMLElement | undefined;
+    expect(allBtn?.getAttribute('aria-selected')).toBe('true');
   });
 
-  it('marks the active category pill with aria-pressed=true on first paint', async () => {
+  it('renders a table with 9 columns including an arrow column', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const catSection = root.querySelector('[data-testid="category-filter"]')!;
-    const allPill = findPill(
-      Array.from(catSection.querySelectorAll('button')) as HTMLButtonElement[],
-      'All categories',
-    )!;
-    expect(allPill.getAttribute('aria-pressed')).toBe('true');
+    const headers = Array.from(root.querySelectorAll('thead th'))
+      .map((h) => h.textContent?.trim());
+    // 8 named columns + 1 empty (arrow)
+    expect(headers.length).toBe(COLUMNS.length + 1);
+    for (const col of COLUMNS) {
+      expect(headers).toContain(col);
+    }
   });
 
-  it('moves aria-pressed when a different category pill is clicked', async () => {
+  it('table renders 8 rows by default (one page)', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const catSection = root.querySelector('[data-testid="category-filter"]')!;
-    const buttons = Array.from(catSection.querySelectorAll('button')) as HTMLButtonElement[];
-    const apparel = findPill(buttons, 'Apparel');
-    expect(apparel).toBeTruthy();
-    apparel!.click();
+    const rows = root.querySelectorAll('tbody tr');
+    expect(rows.length).toBe(8);
+  });
+
+  it('underlying dataset has 24 rows (3 pages of 8)', async () => {
+    const fixture = await renderStandalone();
+    const comp = fixture.componentInstance;
+    expect(comp.all.length).toBe(24);
+  });
+
+  it('Est. ROI cells render with leading "+" and emerald color class', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const roiCells = root.querySelectorAll('tbody td .text-emerald-400');
+    expect(roiCells.length).toBeGreaterThan(0);
+    const text = Array.from(roiCells).some((c) => c.textContent?.startsWith('+'));
+    expect(text).toBe(true);
+  });
+
+  it('Capital cells render with thousands separator (e.g. $8,200)', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toMatch(/\$\d{1,3},\d{3}/);
+  });
+
+  it('Vote cells render "N↑ / N↓" with emerald/rose colors when votes exist', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const html = root.innerHTML;
+    expect(html).toMatch(/class="text-emerald-400"[^>]*>\d+↑/);
+    expect(html).toMatch(/class="text-rose-400"[^>]*>\d+↓/);
+  });
+
+  it('Vote cells render "—" when no votes yet', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toContain('—');
+  });
+
+  it('Submitted-by cells show a circular avatar with initials', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const avatars = root.querySelectorAll('tbody td .avatar');
+    expect(avatars.length).toBeGreaterThan(0);
+    const first = avatars[0] as HTMLElement;
+    expect(first.textContent?.trim().length).toBeGreaterThan(0);
+    // gradient background
+    const style = first.getAttribute('style') || '';
+    expect(style).toMatch(/gradient/);
+  });
+
+  it('Category cells show a neutral badge (uppercase pill)', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const catBadges = root.querySelectorAll('tbody td .badge-neutral, tbody td .badge');
+    expect(catBadges.length).toBeGreaterThan(0);
+  });
+
+  it('Status cells show colored badges (warning/info/success/violet)', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const statusBadges = root.querySelectorAll('tbody td .badge-warning, tbody td .badge-info, tbody td .badge-success, tbody td .badge-violet, tbody td .badge-danger');
+    expect(statusBadges.length).toBeGreaterThan(0);
+  });
+
+  it('Last column carries an arrow-right icon link to the detail page', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const html = root.innerHTML;
+    expect(html).toMatch(/<i[^>]*data-lucide="arrow-right"|arrow-right/);
+  });
+
+  it('footer renders "Showing N of 24" + pagination "1 / 3"', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const footer = root.querySelector('[data-testid="pagination"]');
+    expect(footer).toBeTruthy();
+    expect(footer?.textContent).toContain('Showing');
+    expect(footer?.textContent).toContain('of 24');
+    expect(footer?.textContent).toContain('1 / 3');
+  });
+
+  it('clicking the next-page button shows rows 9–16', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const next = root.querySelector('[data-page-next]') as HTMLButtonElement;
+    expect(next).toBeTruthy();
+    next.click();
     fixture.detectChanges();
-    expect(apparel!.getAttribute('aria-pressed')).toBe('true');
-    const all = findPill(buttons, 'All categories')!;
-    expect(all.getAttribute('aria-pressed')).toBe('false');
+    const rows = root.querySelectorAll('tbody tr');
+    expect(rows.length).toBe(8);
+    // The first row should NOT be O-2051 anymore (now O-2058 or so)
+    const firstRef = rows[0]?.querySelector('span.font-mono')?.textContent?.trim();
+    expect(firstRef).not.toBe('O-2051');
   });
 
-  it('filters table rows by the selected status pill', async () => {
+  it('clicking the prev-page button from page 2 returns to page 1', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const statSection = root.querySelector('[data-testid="status-filter"]')!;
-    const buttons = Array.from(statSection.querySelectorAll('button')) as HTMLButtonElement[];
-    const pending = findPill(buttons, 'Pending')!;
-    expect(pending).toBeTruthy();
-    pending.click();
+    const next = root.querySelector('[data-page-next]') as HTMLButtonElement;
+    next.click();
     fixture.detectChanges();
+    const prev = root.querySelector('[data-page-prev]') as HTMLButtonElement;
+    prev.click();
+    fixture.detectChanges();
+    const rows = root.querySelectorAll('tbody tr');
+    const firstRef = rows[0]?.querySelector('span.font-mono')?.textContent?.trim();
+    expect(firstRef).toBe('O-2051');
+  });
+
+  it('clicking a non-default status tab filters the visible rows', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const tabs = root.querySelectorAll('[data-testid="status-filter"] button');
+    const vetting = Array.from(tabs).find((b) => b.textContent?.startsWith('In Vetting')) as HTMLButtonElement;
+    expect(vetting).toBeTruthy();
+    vetting.click();
+    fixture.detectChanges();
+    // All visible rows should have status=vetting
     const rows = Array.from(root.querySelectorAll('tbody tr'));
     expect(rows.length).toBeGreaterThan(0);
-    for (const r of rows) {
-      const cells = r.querySelectorAll('td');
-      expect(cells[cells.length - 1]?.textContent?.trim()).toBe('Pending');
+    for (const row of rows) {
+      const status = row.getAttribute('data-status');
+      expect(status).toBe('vetting');
     }
   });
 
-  it('shows every row when the "All" status pill is selected', async () => {
-    const fixture = await renderStandalone();
-    const root = fixture.nativeElement as HTMLElement;
-    const statSection = root.querySelector('[data-testid="status-filter"]')!;
-    const buttons = Array.from(statSection.querySelectorAll('button')) as HTMLButtonElement[];
-    const pending = findPill(buttons, 'Pending')!;
-    pending.click();
-    fixture.detectChanges();
-    const pendingCount = root.querySelectorAll('tbody tr').length;
-    const all = findPill(buttons, 'All')!;
-    all.click();
-    fixture.detectChanges();
-    const allCount = root.querySelectorAll('tbody tr').length;
-    expect(allCount).toBeGreaterThanOrEqual(pendingCount);
+  // ─── format helpers (unit) ─────────────────────────────────────────────
+  // Re-mount a fresh component so we have access to componentInstance for
+  // method-level assertions.
+  it('formatCapital() renders with thousands separator', async () => {
+    const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
+    const fixture = TestBed.createComponent(Comp);
+    const c = fixture.componentInstance;
+    expect(c.formatCapital(8200)).toBe('$8,200');
+    expect(c.formatCapital(22000)).toBe('$22,000');
+    expect(c.formatCapital(900)).toBe('$900');
   });
 
-  it('registers a route at /opportunities in the app router', async () => {
-    const { routes } = await import('../../app.routes');
-    const match = routes.find(
-      (r) => typeof r.path === 'string' && r.path.startsWith('opportunities'),
-    );
-    expect(match).toBeTruthy();
+  it('formatRoi() renders "+X.X%" with one decimal', async () => {
+    const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
+    const fixture = TestBed.createComponent(Comp);
+    const c = fixture.componentInstance;
+    expect(c.formatRoi(34.2)).toBe('+34.2%');
+    expect(c.formatRoi(9)).toBe('+9.0%');
   });
 
-  it('countByStatus returns the demo dataset tally per status', async () => {
-    const fixture = await renderStandalone();
-    const comp = fixture.componentInstance as OpportunitiesPageComponent;
-    // The demo dataset contains 3 Pending, 2 In Vetting, 2 Approved,
-    // 1 Executing, 2 Rejected entries.
-    expect(comp.countByStatus('Pending')).toBe(3);
-    expect(comp.countByStatus('In Vetting')).toBe(2);
-    expect(comp.countByStatus('Approved')).toBe(2);
-    expect(comp.countByStatus('Executing')).toBe(1);
-    expect(comp.countByStatus('Rejected')).toBe(2);
-    expect(comp.countByStatus('NonExistent')).toBe(0);
+  it('categoryLabel() capitalizes the category slug', async () => {
+    const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
+    const fixture = TestBed.createComponent(Comp);
+    const c = fixture.componentInstance;
+    expect(c.categoryLabel('apparel')).toBe('Apparel');
+    expect(c.categoryLabel('collectibles')).toBe('Collectibles');
+  });
+
+  it('statusLabel() returns the wireframe label for each status', async () => {
+    const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
+    const fixture = TestBed.createComponent(Comp);
+    const c = fixture.componentInstance;
+    expect(c.statusLabel('pending')).toBe('Pending');
+    expect(c.statusLabel('vetting')).toBe('In Vetting');
+    expect(c.statusLabel('approved')).toBe('Approved');
+    expect(c.statusLabel('executing')).toBe('Executing');
+    expect(c.statusLabel('rejected')).toBe('Rejected');
+  });
+
+  it('statusVariant() maps each status to a badge color variant', async () => {
+    const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
+    const fixture = TestBed.createComponent(Comp);
+    const c = fixture.componentInstance;
+    expect(c.statusVariant('pending')).toBe('info');
+    expect(c.statusVariant('vetting')).toBe('warning');
+    expect(c.statusVariant('approved')).toBe('success');
+    expect(c.statusVariant('executing')).toBe('violet');
+    expect(c.statusVariant('rejected')).toBe('danger');
   });
 });

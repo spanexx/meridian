@@ -1,79 +1,132 @@
 /**
- * E2E test for the /opportunities page.
+ * E2E test for /opportunities — wireframe-aligned (post #14).
  *
- * Verifies the route resolves, the page renders structurally with the
- * wireframe's filter pills and the data table, the category/status
- * filters actually change the rendered state, and saves a full-page
- * screenshot for human inspection.
+ * Verifies:
+ *   - the route resolves with the correct title + subtitle
+ *   - Search input + Category DROPDOWN trigger are present
+ *   - 6 status tabs render with counts
+ *   - 9-column table renders with the right headers
+ *   - 8 rows per page, 24 rows total, 3 pages of pagination
+ *   - Vote cells render "N↑ / N↓" with green/red colors
+ *   - Footer shows "Showing N of 24" + "1 / 3"
  *
  * @owner   spanexx
  * @reviewed 2026-08-11
  */
 import { test, expect } from '@playwright/test';
 
-const CATEGORIES = ['All categories', 'Apparel', 'Collectibles', 'Electronics', 'Equipment', 'Furniture'];
-const STATUSES = ['All', 'Pending', 'In Vetting', 'Approved', 'Executing', 'Rejected'];
-const COLUMNS = ['Ref', 'Title', 'Category', 'Submitted by', 'Est. ROI', 'Capital', 'Votes', 'Status'];
-
-test.describe('opportunities page', () => {
-  test('route loads and renders the title', async ({ page }) => {
+test.describe('opportunities page (wireframe-aligned)', () => {
+  test('route loads and renders the title + subtitle', async ({ page }) => {
     const res = await page.goto('/opportunities');
     expect(res?.status()).toBeLessThan(400);
     await expect(page.locator('h1', { hasText: 'Opportunities' })).toBeVisible();
+    await expect(page.getByText('signal pipeline')).toBeVisible();
+    await expect(page.getByText('24 active')).toBeVisible();
   });
 
-  test('renders every category filter pill', async ({ page }) => {
+  test('renders a search input + Category dropdown trigger + Submit Signal CTA', async ({ page }) => {
     await page.goto('/opportunities');
-    const catSection = page.locator('[data-testid="category-filter"]');
-    for (const cat of CATEGORIES) {
-      await expect(catSection.getByRole('button', { name: cat, exact: true })).toBeVisible();
-    }
+    await expect(page.locator('input[type="search"]')).toBeVisible();
+    await expect(page.locator('[data-dropdown="catMenu"]')).toBeVisible();
+    // Both the shell sidebar and the page header have an
+    // <a href="/submit-signal">. Scope to the page CTA via .btn-primary.
+    await expect(page.locator('section.page a[href="/submit-signal"].btn-primary')).toBeVisible();
   });
 
-  test('renders every status filter pill', async ({ page }) => {
+  test('Category is a DROPDOWN — no inline category pill row', async ({ page }) => {
     await page.goto('/opportunities');
-    const statSection = page.locator('[data-testid="status-filter"]');
-    for (const status of STATUSES) {
-      // Match buttons whose first direct text node equals `status` exactly.
-      // The status pills render "Pending (3)" etc.; we want to skip the
-      // trailing count span, hence the :text-is() pseudo-class.
-      await expect(statSection.locator(`button:text-is("${status}")`).first()).toBeVisible();
-    }
+    expect(await page.locator('[data-testid="category-filter"]').count()).toBe(0);
+    expect(await page.locator('#catMenu').count()).toBe(1);
   });
 
-  test('table columns match the wireframe spec', async ({ page }) => {
+  test('renders all 6 status tabs with counts', async ({ page }) => {
+    await page.goto('/opportunities');
+    const tabs = page.locator('[data-testid="status-filter"] button');
+    await expect(tabs).toHaveCount(6);
+    await expect(tabs.nth(0)).toContainText('All');
+    await expect(tabs.nth(0)).toContainText('24');
+    await expect(tabs.nth(1)).toContainText('Pending');
+    await expect(tabs.nth(1)).toContainText('8');
+    await expect(tabs.nth(2)).toContainText('In Vetting');
+    await expect(tabs.nth(2)).toContainText('5');
+    await expect(tabs.nth(3)).toContainText('Approved');
+    await expect(tabs.nth(3)).toContainText('3');
+    await expect(tabs.nth(4)).toContainText('Executing');
+    await expect(tabs.nth(4)).toContainText('2');
+    await expect(tabs.nth(5)).toContainText('Rejected');
+    await expect(tabs.nth(5)).toContainText('6');
+  });
+
+  test('default tab "All" is aria-selected=true', async ({ page }) => {
+    await page.goto('/opportunities');
+    const all = page.locator('[data-testid="status-filter"] button').nth(0);
+    await expect(all).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('table has 9 columns including an empty arrow column', async ({ page }) => {
     await page.goto('/opportunities');
     const headers = await page.locator('thead th').allTextContents();
-    expect(headers.map((h) => h.trim())).toEqual(COLUMNS);
+    expect(headers).toEqual([
+      'Ref', 'Title', 'Category', 'Submitted by',
+      'Est. ROI', 'Capital', 'Votes', 'Status', '',
+    ]);
   });
 
-  test('clicking a non-default category pill moves aria-pressed', async ({ page }) => {
+  test('table renders 8 rows by default', async ({ page }) => {
     await page.goto('/opportunities');
-    const catSection = page.locator('[data-testid="category-filter"]');
-    const apparel = catSection.getByRole('button', { name: 'Apparel', exact: true });
-    await apparel.click();
-    await expect(apparel).toHaveAttribute('aria-pressed', 'true');
-    const all = catSection.getByRole('button', { name: 'All categories', exact: true });
-    await expect(all).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('tbody tr')).toHaveCount(8);
   });
 
-  test('clicking a status pill filters the table to that status', async ({ page }) => {
+  test('Capital cells render with thousands separator', async ({ page }) => {
     await page.goto('/opportunities');
-    const statSection = page.locator('[data-testid="status-filter"]');
-    await statSection.locator('button:text-is("Pending")').first().click();
-    const statusCells = await page.locator('tbody tr td:last-child').allTextContents();
-    expect(statusCells.length).toBeGreaterThan(0);
-    for (const cell of statusCells) {
-      expect(cell.trim()).toBe('Pending');
-    }
+    const html = await page.locator('body').innerHTML();
+    expect(html).toMatch(/\$\d{1,3},\d{3}/);
+  });
+
+  test('Est. ROI cells render with leading "+" and emerald color', async ({ page }) => {
+    await page.goto('/opportunities');
+    const firstRoi = page.locator('tbody td .text-emerald-400').first();
+    await expect(firstRoi).toBeVisible();
+    const text = await firstRoi.textContent();
+    expect(text).toMatch(/^\+\d+(\.\d)?%$/);
+  });
+
+  test('Vote cells render "N↑ / N↓" when votes exist; "—" when not', async ({ page }) => {
+    await page.goto('/opportunities');
+    const html = await page.locator('body').innerHTML();
+    expect(html).toMatch(/\d+↑/);
+    expect(html).toMatch(/\d+↓/);
+    expect(html).toContain('—');
+  });
+
+  test('Submitted-by cells show avatar circles + names', async ({ page }) => {
+    await page.goto('/opportunities');
+    const avatars = page.locator('tbody td .avatar');
+    expect(await avatars.count()).toBeGreaterThan(0);
+    const first = avatars.first();
+    const initials = await first.textContent();
+    expect(initials?.trim().length).toBeGreaterThan(0);
+  });
+
+  test('footer renders pagination "Showing ... of 24" + "1 / 3"', async ({ page }) => {
+    await page.goto('/opportunities');
+    const footer = page.locator('[data-testid="pagination"]');
+    await expect(footer).toBeVisible();
+    await expect(footer).toContainText('Showing');
+    await expect(footer).toContainText('of 24');
+    await expect(footer).toContainText('1 / 3');
+  });
+
+  test('clicking the next button advances to page 2', async ({ page }) => {
+    await page.goto('/opportunities');
+    const next = page.locator('[data-page-next]');
+    await next.click();
+    const footer = page.locator('[data-testid="pagination"]');
+    await expect(footer).toContainText('2 / 3');
   });
 
   test('opportunities page screenshot saved for visual review', async ({ page }) => {
     await page.goto('/opportunities');
-    await page.waitForTimeout(500);
-    await page.screenshot({
-      path: 'e2e/screenshots/opportunities.png',
-      fullPage: true,
-    });
+    await page.screenshot({ path: 'e2e/screenshots/opportunities.png', fullPage: true });
   });
 });

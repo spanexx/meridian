@@ -86,7 +86,7 @@ EXPORTED_CONST_FN = re.compile(
     re.MULTILINE,
 )
 PUBLIC_METHOD = re.compile(
-    r"^\s+(?:public\s+)?(?:async\s+)?([A-Za-z_]\w*)\s*\(",
+    r"^\s+(?:public\s+)?(?:async\s+)?(?!(?:if|for|while|switch|catch|return|throw|new|delete|typeof|instanceof|in|of|do|else|function|class|const|let|var|yield|await|async|case|break|continue|debugger|export|import|static|get|set|null|undefined|true|false|void|this|super)\b)([A-Za-z_]\w*)\s*\(",
     re.MULTILINE,
 )
 TEST_COUPLED_MARKER = re.compile(r"//\s*TEST-COUPLED:")
