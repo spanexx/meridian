@@ -59,7 +59,8 @@ interface Row {
     UiStatBarComponent,
   ],
   template: `
-    <main class="main">
+
+    <section class="page">
       <h1 class="page-title">UI primitives — smoke test</h1>
       <p class="page-subtitle">Every primitive renders and matches theme.css tokens.</p>
 
@@ -198,9 +199,9 @@ interface Row {
           <ui-button variant="primary">Browse opportunities</ui-button>
         </ui-empty-state>
       </div>
-    </main>
+    </section>
   `,
-  styles: [':host { display: block; padding: 2rem; max-width: 1100px; margin: 0 auto; }'],
+  styles: [':host { display: contents; }'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShowcaseComponent {

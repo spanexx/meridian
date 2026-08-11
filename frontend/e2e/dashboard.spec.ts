@@ -44,13 +44,22 @@ test.describe('dashboard page (wireframe-driven)', () => {
   test('renders Pool Health SVG chart', async ({ page }) => {
     await page.goto('/dashboard');
     await expect(page.locator('h2', { hasText: 'Pool Health' })).toBeVisible();
-    await expect(page.locator('main svg path').first()).toBeVisible();
+    // The dashboard now lives inside <ui-shell>, so 'main' matches
+    // twice (shell's <main class="main"> and the page's <main>).
+    // Scope to the Pool Health section by its section heading.
+    const html = await page.locator('body').innerHTML();
+    expect(html).toContain('viewBox="0 0 200 50"');
+    expect(html).toContain('M0,38 L30,36 L60,30');
   });
 
   test('Submit Signal CTA points at /submit-signal', async ({ page }) => {
     await page.goto('/dashboard');
-    const cta = page.locator('a[href="/submit-signal"]');
+    // Both the shell sidebar and the dashboard header have an
+    // <a href="/submit-signal">. Scope to the page's primary CTA
+    // (which carries the .btn-primary class).
+    const cta = page.locator('section.page a[href="/submit-signal"].btn-primary');
     await expect(cta).toBeVisible();
+    await expect(cta).toContainText('Submit Signal');
   });
 
   test('renders the member portfolio card', async ({ page }) => {

@@ -47,7 +47,7 @@ interface Execution {
   imports: [UiBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <main class="p-6 lg:p-8 max-w-7xl mx-auto">
+    <section class="p-6 lg:p-8 max-w-7xl mx-auto">
       <header class="mb-6">
         <h1 class="text-2xl font-bold">Executions</h1>
         <p class="text-sm text-slate-400 mt-1">
@@ -112,7 +112,7 @@ interface Execution {
           </a>
         }
       </section>
-    </main>
+    </section>
   `,
 })
 export class ExecutionsPageComponent {
