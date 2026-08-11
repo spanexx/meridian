@@ -127,4 +127,122 @@ describe('DashboardPage (wireframe-driven)', () => {
     );
     expect(match).toBeTruthy();
   });
+  // ─── Layout rework tests (per wireframe 3-col grid) ─────────────────
+  it('uses a 3-column grid below the KPI row', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    const grid = root.querySelector('section.page > div.grid');
+    expect(grid).toBeTruthy();
+    expect(grid?.className).toMatch(/lg:grid-cols-3/);
+  });
+
+  it('left column spans 2 of the 3 grid columns', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    const left = root.querySelector('section.page > div.grid > div.lg\\:col-span-2');
+    expect(left).toBeTruthy();
+  });
+
+  it('places Active Executions inside the left column', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    const left = root.querySelector('section.page > div.grid > div.lg\\:col-span-2');
+    expect(left?.textContent).toContain('Active Executions');
+  });
+
+  it('places Latest Opportunities inside the left column', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    const left = root.querySelector('section.page > div.grid > div.lg\\:col-span-2');
+    expect(left?.textContent).toContain('Latest Opportunities');
+  });
+
+  it('places Pool Health inside the right column (not left)', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    const right = root.querySelector('section.page > div.grid > div:not(.lg\\:col-span-2)');
+    expect(right?.textContent).toContain('Pool Health');
+  });
+
+  it('places Your Portfolio inside the right column', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    const right = root.querySelector('section.page > div.grid > div:not(.lg\\:col-span-2)');
+    expect(right?.textContent).toContain('Your Portfolio');
+  });
+
+  // ─── Content fixes vs wireframe ───────────────────────────────────────
+  it('Active Members KPI says "+8 this week" not "new this month"', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    // The wireframe renders '+8' and 'this week' in two spans, so
+    // collapse whitespace when asserting.
+    const text = root.textContent?.replace(/\s+/g, ' ') ?? '';
+    expect(text).toContain('+8 this week');
+    expect(text).not.toContain('new this month');
+  });
+
+  it('Open Opportunities KPI says "8 awaiting your vote"', async () => {
+    const fixture = await renderDashboard();
+    const html = (fixture.nativeElement as HTMLElement).innerHTML;
+    expect(html).toContain('8 awaiting your vote');
+  });
+
+  it('Each Active Execution row carries a status subtitle on the right', async () => {
+    const fixture = await renderDashboard();
+    const html = (fixture.nativeElement as HTMLElement).innerHTML;
+    // Per wireframe: "3 of 8 sold", "Closing", "ETA 4 days"
+    expect(html).toContain('3 of 8 sold');
+    expect(html).toContain('Closing');
+    expect(html).toContain('ETA 4 days');
+  });
+
+  it('Active Executions use multi-color progress bars (emerald / violet / blue)', async () => {
+    const fixture = await renderDashboard();
+    const html = (fixture.nativeElement as HTMLElement).innerHTML;
+    // 3 rows, each with a different progress-fill color class
+    expect(html).toMatch(/progress-fill-emerald/);
+    expect(html).toMatch(/progress-fill-violet/);
+    expect(html).toMatch(/progress-fill-blue/);
+  });
+
+  it('Pool Health renders three metrics: Reserve ratio, Liquidity, Deployment', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.textContent).toContain('Reserve ratio');
+    expect(root.textContent).toContain('Liquidity');
+    expect(root.textContent).toContain('Deployment');
+  });
+
+  it('Pool Health sparkline has separate SVG paths per period (7d/30d/90d)', async () => {
+    const fixture = await renderDashboard();
+    const html = (fixture.nativeElement as HTMLElement).innerHTML;
+    expect(html).toContain('data-chart-set="7d"');
+    expect(html).toContain('data-chart-set="30d"');
+    expect(html).toContain('data-chart-set="90d"');
+  });
+
+  it('Latest Opportunities renders a TABLE (thead + tbody), not just cards', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    const left = root.querySelector('section.page > div.grid > div.lg\\:col-span-2');
+    const table = left?.querySelector('table');
+    expect(table).toBeTruthy();
+    expect(table?.querySelector('thead tr')).toBeTruthy();
+    expect(table?.querySelector('tbody tr')).toBeTruthy();
+  });
+
+  it('Latest Opportunities table has columns: Ref / Title / Category / Est. ROI / Status / Votes', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    const headers = Array.from(root.querySelectorAll('section.page thead th')).map(
+      (h) => h.textContent?.trim(),
+    );
+    expect(headers).toContain('Ref');
+    expect(headers).toContain('Title');
+    expect(headers).toContain('Category');
+    expect(headers).toContain('Est. ROI');
+    expect(headers).toContain('Status');
+    expect(headers).toContain('Votes');
+  });
 });
