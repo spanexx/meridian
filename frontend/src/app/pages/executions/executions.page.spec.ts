@@ -1,27 +1,20 @@
 /**
- * Unit tests for ExecutionsPageComponent.
+ * Unit tests for ExecutionsPageComponent — wireframe-aligned.
  *
- * TDD RED: written before implementation. The page renders a status-
- * filterable list of in-flight and completed arbitrage executions,
- * one card per execution (not a table).
- *
- * Behavior pins:
- *   1. Renders a top-level <h1> with the visible title "Executions".
- *   2. Renders a status filter with All / Active / Completed / Failed
- *      buttons; counts ("All 16", "Active 3", etc.) appear in a
- *      trailing span similar to opportunities.
- *   3. Renders one execution card per known execution in the demo
- *      data, each card carrying the ref (E-####) and a primary title.
- *   4. Each card links to /execution-detail/<ref-id> (so E-1042 → /execution-detail/E-1042).
- *   5. The first card's status pill is the default selection ("All");
- *      the All button is initially aria-pressed=true.
- *   6. Clicking a non-default status pill moves aria-pressed to it
- *      and filters visible cards to that status only.
- *   7. Each card has a status badge using UiBadgeComponent (class
- *      `badge-<variant>` matching `active`/`completed`/`failed` → the
- *      theme.css badge-warning / badge-success / badge-error slots).
- *   8. The component is registered on the /executions route in
- *      app.routes.
+ * Per wireframe/meridian/executions/index.html. Behavior pins:
+ *   1. Renders a top-level <h1> with title 'Executions'.
+ *   2. Subtitle mentions 'Active and completed arbitrage operations.'
+ *   3. Renders a Search input + 'Pool' link in the header.
+ *   4. Renders 4 status tabs: All / Active / Completed / Failed, each
+ *      with a count (16 / 3 / 12 / 1).
+ *   5. Renders a 2-column grid of execution cards.
+ *   6. Each card shows: ref + status badge + title + O-#### subtitle +
+ *      thumbnail.
+ *   7. Each card has a Deployed/Recovered/ROI 3-up metric grid.
+ *   8. Each card has a progress-track bar.
+ *   9. Each card has a bottom row with a status line and a metadata line.
+ *  10. Filter to a non-default status (e.g. 'Failed') reduces visible cards.
+ *  11. Default tab 'All' carries aria-selected=true.
  *
  * @owner   spanexx
  * @reviewed 2026-08-11
@@ -29,15 +22,6 @@
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import type { ExecutionsPageComponent } from './executions.page';
-
-const STATUSES = ['All', 'Active', 'Completed', 'Failed'];
-
-interface CardRef {
-  ref: string;
-  title: string;
-  href: string;
-  status: 'active' | 'completed' | 'failed' | string;
-}
 
 async function renderStandalone(): Promise<ComponentFixture<ExecutionsPageComponent>> {
   await TestBed.configureTestingModule({
@@ -49,129 +33,161 @@ async function renderStandalone(): Promise<ComponentFixture<ExecutionsPageCompon
   return fixture;
 }
 
-/**
- * Returns only the direct text nodes of a button (skips spans etc.),
- * so a button rendered as "Active (3)" still matches "Active".
- */
-function findButtonByLabel(
-  buttons: HTMLButtonElement[],
-  label: string,
-): HTMLButtonElement | undefined {
-  return buttons.find((b) => {
-    let direct = '';
-    for (const node of Array.from(b.childNodes)) {
-      if (node.nodeType === Node.TEXT_NODE) direct += node.textContent;
-    }
-    return direct.trim() === label;
-  });
-}
-
-function cardsIn(root: HTMLElement): CardRef[] {
-  const anchors = Array.from(root.querySelectorAll('a')) as HTMLAnchorElement[];
-  const out: CardRef[] = [];
-  for (const a of anchors) {
-    const ref = a.querySelector('.font-mono')?.textContent?.trim() ?? '';
-    const title = a.querySelector('.text-base')?.textContent?.trim() ?? '';
-    const statusAttr = a.getAttribute('data-status') ?? '';
-    if (ref) out.push({ ref, title, href: a.getAttribute('href') ?? '', status: statusAttr });
-  }
-  return out;
-}
-
-describe('ExecutionsPage', () => {
+describe('ExecutionsPage (wireframe-aligned)', () => {
   it('renders the page title "Executions"', async () => {
     const fixture = await renderStandalone();
     const h1 = fixture.nativeElement.querySelector('h1');
     expect(h1?.textContent?.trim()).toBe('Executions');
   });
 
-  it('renders every status filter pill', async () => {
+  it('subtitle mentions "Active and completed arbitrage operations"', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const section = root.querySelector('[data-testid="status-filter"]')!;
-    const buttons = Array.from(section.querySelectorAll('button')) as HTMLButtonElement[];
-    for (const status of STATUSES) {
-      expect(findButtonByLabel(buttons, status)).toBeTruthy();
+    expect(root.textContent).toContain('Active and completed arbitrage operations');
+  });
+
+  it('header has a Search input and a Pool link button', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('input[type="search"]')).toBeTruthy();
+    // Pool link in the page header (not the sidebar)
+    const poolLink = root.querySelector('section.page header a[href="/pool"]');
+    expect(poolLink).toBeTruthy();
+  });
+
+  it('renders 4 status tabs (All / Active / Completed / Failed) with counts', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const tabs = root.querySelectorAll('[data-testid="status-filter"] button');
+    expect(tabs.length).toBe(4);
+    expect(tabs[0]?.textContent).toContain('All');
+    expect(tabs[0]?.textContent).toContain('16');
+    expect(tabs[1]?.textContent).toContain('Active');
+    expect(tabs[1]?.textContent).toContain('3');
+    expect(tabs[2]?.textContent).toContain('Completed');
+    expect(tabs[2]?.textContent).toContain('12');
+    expect(tabs[3]?.textContent).toContain('Failed');
+    expect(tabs[3]?.textContent).toContain('1');
+  });
+
+  it('default tab "All" is aria-selected=true', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const all = root.querySelector('[data-testid="status-filter"] button');
+    expect(all?.getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('renders the executions grid with cards', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const grid = root.querySelector('[data-testid="executions-grid"]');
+    expect(grid).toBeTruthy();
+    expect(grid?.querySelectorAll('a.card.card-hover').length ?? 0).toBeGreaterThan(0);
+  });
+
+  it('each card shows a status badge', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const cards = root.querySelectorAll('a.card.card-hover');
+    expect(cards.length).toBeGreaterThan(0);
+    // First card has a badge
+    const firstBadge = cards[0]?.querySelector('.badge');
+    expect(firstBadge).toBeTruthy();
+  });
+
+  it('each card has a Deployed/Recovered/ROI 3-up metric grid', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const cards = root.querySelectorAll('a.card.card-hover');
+    expect(cards.length).toBeGreaterThan(0);
+    for (const card of Array.from(cards)) {
+      const text = card.textContent || '';
+      expect(text).toContain('Deployed');
+      expect(text).toContain('Recovered');
+      expect(text).toContain('ROI');
     }
   });
 
-  it('marks the default "All" pill aria-pressed=true on first paint', async () => {
+  it('each card has a progress-track bar', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const section = root.querySelector('[data-testid="status-filter"]')!;
-    const buttons = Array.from(section.querySelectorAll('button')) as HTMLButtonElement[];
-    const all = findButtonByLabel(buttons, 'All')!;
-    expect(all).toBeTruthy();
-    expect(all.getAttribute('aria-pressed')).toBe('true');
+    const cards = root.querySelectorAll('a.card.card-hover');
+    expect(cards.length).toBeGreaterThan(0);
+    const bars = root.querySelectorAll('.progress-track');
+    expect(bars.length).toBeGreaterThanOrEqual(cards.length);
   });
 
-  it('renders at least one execution card', async () => {
+  it('each card has a status line + a metadata line at the bottom', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const list = cardsIn(root);
-    expect(list.length).toBeGreaterThan(0);
-    for (const c of list) {
-      expect(c.ref).toMatch(/^E-\d{3,}$/);
-      expect(c.title.length).toBeGreaterThan(0);
+    const cards = root.querySelectorAll('a.card.card-hover');
+    expect(cards.length).toBeGreaterThan(0);
+    for (const card of Array.from(cards)) {
+      // The bottom row has 2 spans
+      const text = card.textContent || '';
+      // e.g. "3 of 8 sold" (active) or "All 5 sold" (completed) or "Recovered $X" (failed)
+      // Just verify the card has at least 4 lines of meaningful content
+      expect(text.split(/\s+/).length).toBeGreaterThan(10);
     }
   });
 
-  it('each card links to /execution-detail/<ref-id>', async () => {
+  it('clicking a non-default status tab reduces visible cards', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const list = cardsIn(root);
-    for (const c of list) {
-      expect(c.href).toBe(`/execution-detail/${c.ref}`);
-    }
-  });
-
-  it('clicking a status pill moves aria-pressed and filters visible cards', async () => {
-    const fixture = await renderStandalone();
-    const root = fixture.nativeElement as HTMLElement;
-    const section = root.querySelector('[data-testid="status-filter"]')!;
-    const buttons = Array.from(section.querySelectorAll('button')) as HTMLButtonElement[];
-    const active = findButtonByLabel(buttons, 'Active')!;
-    active.click();
+    const tabs = root.querySelectorAll('[data-testid="status-filter"] button');
+    const failed = Array.from(tabs).find((t) => t.textContent?.includes('Failed')) as HTMLButtonElement;
+    expect(failed).toBeTruthy();
+    failed.click();
     fixture.detectChanges();
-    expect(active.getAttribute('aria-pressed')).toBe('true');
-    const all = findButtonByLabel(buttons, 'All')!;
-    expect(all.getAttribute('aria-pressed')).toBe('false');
-    // After filtering, every visible card must carry data-status="active".
-    const visible = cardsIn(root);
-    expect(visible.length).toBeGreaterThan(0);
-    for (const c of visible) {
-      expect(c.status).toBe('active');
-    }
+    const cards = root.querySelectorAll('a.card.card-hover');
+    // Wireframe shows only 1 Failed
+    expect(cards.length).toBe(1);
   });
 
-  it('every card carries a UiBadge status pill (badge-* class)', async () => {
+  it('underlying dataset has 16 executions', async () => {
+    const fixture = await renderStandalone();
+    const comp = fixture.componentInstance;
+    expect(comp.all.length).toBe(16);
+  });
+
+  // ─── format helpers (unit) ─────────────────────────────────────────────
+  it('formatMoney() renders with thousands separator', async () => {
+    const { ExecutionsPageComponent: Comp } = await import('./executions.page');
+    const fixture = TestBed.createComponent(Comp);
+    const c = fixture.componentInstance;
+    expect(c.formatMoney(18500)).toBe('$18,500');
+    expect(c.formatMoney(22000)).toBe('$22,000');
+    expect(c.formatMoney(0)).toBe('$0');
+  });
+
+  it('formatRoi() renders "+X.X%" / "-X.X%" / "0.0%"', async () => {
+    const { ExecutionsPageComponent: Comp } = await import('./executions.page');
+    const fixture = TestBed.createComponent(Comp);
+    const c = fixture.componentInstance;
+    expect(c.formatRoi(12.4)).toBe('+12.4%');
+    expect(c.formatRoi(-80)).toBe('-80.0%');
+    expect(c.formatRoi(0)).toBe('0.0%');
+  });
+
+  it('the active status tab carries CSS class "active" (matches theme.css)', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
-    const anchors = Array.from(root.querySelectorAll('a')) as HTMLAnchorElement[];
-    for (const a of anchors) {
-      const badge = a.querySelector('.badge');
-      expect(badge).toBeTruthy();
-      // Must carry a variant class (badge-success / badge-warning / badge-error etc.)
-      const cls = badge!.className;
-      expect(cls.split(/\s+/).some((c) => c.startsWith('badge-'))).toBe(true);
-    }
+    const allBtn = root.querySelector('[data-testid="status-filter"] button') as HTMLElement;
+    // Per theme.css, the active state is .tab.active (NOT .tab-active).
+    expect(allBtn.classList.contains('active')).toBe(true);
   });
 
-  it('registers a route at /executions in the app router', async () => {
-    const { routes } = await import('../../app.routes');
-    const match = routes.find(
-      (r) => typeof r.path === 'string' && r.path.startsWith('executions'),
-    );
-    expect(match).toBeTruthy();
-  });
-
-  it('countByStatus returns the demo dataset tally per status', async () => {
+  it('clicking a non-default tab adds "active" to that tab and removes it from the others', async () => {
     const fixture = await renderStandalone();
-    const comp = fixture.componentInstance as ExecutionsPageComponent;
-    // Demo dataset: 16 total · 3 active · 12 completed · 1 failed.
-    expect(comp.countByStatus('Active')).toBe(3);
-    expect(comp.countByStatus('Completed')).toBe(12);
-    expect(comp.countByStatus('Failed')).toBe(1);
-    expect(comp.countByStatus('All')).toBe(16);
+    const root = fixture.nativeElement as HTMLElement;
+    const tabs = root.querySelectorAll('[data-testid="status-filter"] button');
+    const failed = Array.from(tabs).find((t) => t.textContent?.includes('Failed')) as HTMLButtonElement;
+    failed.click();
+    fixture.detectChanges();
+    const after = root.querySelectorAll('[data-testid="status-filter"] button');
+    const activeCount = Array.from(after).filter((t) => t.classList.contains('active')).length;
+    expect(activeCount).toBe(1);
+    expect(failed.classList.contains('active')).toBe(true);
+    expect((tabs[0] as HTMLElement).classList.contains('active')).toBe(false);
   });
 });

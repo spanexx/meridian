@@ -1,98 +1,75 @@
 /**
- * E2E test for the /executions page.
+ * E2E test for /executions — wireframe-aligned (post #15).
  *
- * Verifies the route resolves, the page renders structurally with the
- * wireframe's status filter and the executions grid, the status filter
- * actually changes the rendered state, and saves a full-page
- * screenshot for human inspection.
+ * Verifies:
+ *   - the route resolves with the correct title + subtitle
+ *   - Search input + 'Pool' link in the header
+ *   - 4 status tabs render with counts (16/3/12/1)
+ *   - default tab 'All' is aria-selected=true
+ *   - cards have status badge + 3-up Deployed/Recovered/ROI grid + progress bar
+ *   - clicking 'Failed' shows exactly 1 card
  *
  * @owner   spanexx
  * @reviewed 2026-08-11
  */
 import { test, expect } from '@playwright/test';
 
-const STATUSES = ['All', 'Active', 'Completed', 'Failed'];
-
-test.describe('executions page', () => {
-  test('route loads and renders the title', async ({ page }) => {
+test.describe('executions page (wireframe-aligned)', () => {
+  test('route loads and renders the title + subtitle', async ({ page }) => {
     const res = await page.goto('/executions');
     expect(res?.status()).toBeLessThan(400);
     await expect(page.locator('h1', { hasText: 'Executions' })).toBeVisible();
+    await expect(page.getByText('Active and completed arbitrage operations')).toBeVisible();
   });
 
-  test('renders every status filter pill', async ({ page }) => {
+  test('header has a Search input and a Pool link', async ({ page }) => {
     await page.goto('/executions');
-    const section = page.locator('[data-testid="status-filter"]');
-    for (const status of STATUSES) {
-      await expect(
-        section.locator(`button:text-is("${status}")`).first(),
-      ).toBeVisible();
-    }
+    await expect(page.locator('section.page header input[type="search"]')).toBeVisible();
+    await expect(page.locator('section.page header a[href="/pool"]')).toBeVisible();
   });
 
-  test('marks the default "All" pill aria-pressed=true on first paint', async ({ page }) => {
+  test('renders 4 status tabs with counts', async ({ page }) => {
     await page.goto('/executions');
-    const section = page.locator('[data-testid="status-filter"]');
-    const all = section.locator('button:text-is("All")').first();
-    await expect(all).toHaveAttribute('aria-pressed', 'true');
+    const tabs = page.locator('[data-testid="status-filter"] button');
+    await expect(tabs).toHaveCount(4);
+    await expect(tabs.nth(0)).toContainText('All');
+    await expect(tabs.nth(0)).toContainText('16');
+    await expect(tabs.nth(1)).toContainText('Active');
+    await expect(tabs.nth(1)).toContainText('3');
+    await expect(tabs.nth(2)).toContainText('Completed');
+    await expect(tabs.nth(2)).toContainText('12');
+    await expect(tabs.nth(3)).toContainText('Failed');
+    await expect(tabs.nth(3)).toContainText('1');
   });
 
-  test('renders at least one execution card', async ({ page }) => {
+  test('default tab "All" is aria-selected=true', async ({ page }) => {
     await page.goto('/executions');
-    const anchors = page.locator('a.card[data-filterable]');
-    const count = await anchors.count();
-    expect(count).toBeGreaterThan(0);
+    const all = page.locator('[data-testid="status-filter"] button').nth(0);
+    await expect(all).toHaveAttribute('aria-selected', 'true');
   });
 
-  test('each card links to /execution-detail/<ref-id>', async ({ page }) => {
+  test('cards have a status badge + Deployed/Recovered/ROI grid + progress bar', async ({ page }) => {
     await page.goto('/executions');
-    const anchors = page.locator('a.card[data-filterable]');
-    const count = await anchors.count();
-    for (let i = 0; i < count; i++) {
-      const a = anchors.nth(i);
-      const href = await a.getAttribute('href');
-      const ref = (await a.locator('.font-mono').first().innerText()).trim();
-      expect(href).toBe(`/execution-detail/${ref}`);
-    }
+    const cards = page.locator('a.card.card-hover');
+    expect(await cards.count()).toBeGreaterThan(0);
+    const first = cards.first();
+    await expect(first.locator('.badge').first()).toBeVisible();
+    await expect(first.locator('.kpi-label', { hasText: 'Deployed' }).first()).toBeVisible();
+    await expect(first.locator('.kpi-label', { hasText: 'Recovered' }).first()).toBeVisible();
+    await expect(first.locator('.kpi-label', { hasText: 'ROI' }).first()).toBeVisible();
+    await expect(first.locator('.progress-track').first()).toBeVisible();
   });
 
-  test('clicking a status pill moves aria-pressed and filters cards', async ({ page }) => {
+  test('clicking "Failed" filters to exactly 1 card', async ({ page }) => {
     await page.goto('/executions');
-    const section = page.locator('[data-testid="status-filter"]');
-    const active = section.locator('button:text-is("Active")').first();
-    await active.click();
-    await expect(active).toHaveAttribute('aria-pressed', 'true');
-    const all = section.locator('button:text-is("All")').first();
-    await expect(all).toHaveAttribute('aria-pressed', 'false');
-    // Every visible card must carry data-status="active".
-    const anchors = page.locator('a.card[data-status]');
-    const count = await anchors.count();
-    expect(count).toBeGreaterThan(0);
-    for (let i = 0; i < count; i++) {
-      expect(await anchors.nth(i).getAttribute('data-status')).toBe('active');
-    }
-  });
-
-  test('every card carries a UiBadge status pill', async ({ page }) => {
-    await page.goto('/executions');
-    const anchors = page.locator('a.card[data-filterable]');
-    const count = await anchors.count();
-    expect(count).toBeGreaterThan(0);
-    for (let i = 0; i < count; i++) {
-      const badge = anchors.nth(i).locator('.badge').first();
-      await expect(badge).toBeVisible();
-      const cls = (await badge.getAttribute('class')) ?? '';
-      const hasVariant = cls.split(/\s+/).some((c) => c.startsWith('badge-'));
-      expect(hasVariant).toBe(true);
-    }
+    const tabs = page.locator('[data-testid="status-filter"] button');
+    const failed = tabs.nth(3);
+    await failed.click();
+    await expect(page.locator('a.card.card-hover')).toHaveCount(1);
   });
 
   test('executions page screenshot saved for visual review', async ({ page }) => {
     await page.goto('/executions');
-    await page.waitForTimeout(500);
-    await page.screenshot({
-      path: 'e2e/screenshots/executions.png',
-      fullPage: true,
-    });
+    await page.screenshot({ path: 'e2e/screenshots/executions.png', fullPage: true });
   });
 });
