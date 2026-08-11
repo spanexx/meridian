@@ -20,4 +20,11 @@ export const routes: Routes = [
         (m) => m.OpportunitiesPageComponent,
       ),
   },
+  {
+    path: 'executions',
+    loadComponent: () =>
+      import('./pages/executions/executions.page').then(
+        (m) => m.ExecutionsPageComponent,
+      ),
+  },
 ];
