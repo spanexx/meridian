@@ -75,4 +75,36 @@ test.describe('dashboard page (wireframe-driven)', () => {
     await page.waitForTimeout(500);
     await page.screenshot({ path: 'e2e/screenshots/dashboard.png', fullPage: true });
   });
+
+
+  test('layout: 3-column body grid below KPI row (Active Executions left, Pool Health right)', async ({ page }) => {
+    await page.goto('/dashboard');
+    const html = await page.locator('body').innerHTML();
+    expect(html).toMatch(/lg:grid-cols-3/);
+    expect(html).toContain('lg:col-span-2');
+  });
+
+  test('Active Executions rows show status text on the right (3 of 8 sold / Closing / ETA 4 days)', async ({ page }) => {
+    await page.goto('/dashboard');
+    const html = await page.locator('body').innerHTML();
+    expect(html).toContain('3 of 8 sold');
+    expect(html).toContain('Closing');
+    expect(html).toContain('ETA 4 days');
+  });
+
+  test('Latest Opportunities renders a TABLE not cards', async ({ page }) => {
+    await page.goto('/dashboard');
+    const table = page.locator('table');
+    await expect(table.first()).toBeVisible();
+    const headers = await table.first().locator('thead th').allTextContents();
+    expect(headers).toEqual(expect.arrayContaining(['Ref', 'Title', 'Category', 'Est. ROI', 'Status', 'Votes']));
+  });
+
+  test('Pool Health has three metric bars (Reserve ratio, Liquidity, Deployment)', async ({ page }) => {
+    await page.goto('/dashboard');
+    const html = await page.locator('body').innerHTML();
+    expect(html).toContain('Reserve ratio');
+    expect(html).toContain('Liquidity');
+    expect(html).toContain('Deployment');
+  });
 });
