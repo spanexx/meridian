@@ -61,14 +61,37 @@ jobs:
           retention-days: 7
 
   # ─────────────────────────────────────────────────────────────────
+  # Detect whether backend/ exists. Outputs a boolean that downstream
+  # jobs use to decide whether to run. hashFiles() is not allowed in
+  # job-level `if:` (see
+  # https://github.com/orgs/community/discussions/25790), so we capture
+  # the file existence in a step's GITHUB_OUTPUT and consume the
+  # output from `needs`.
+  # ─────────────────────────────────────────────────────────────────
+  detect:
+    name: Detect repo layout
+    runs-on: ubuntu-latest
+    outputs:
+      has_backend: ${{ steps.detect.outputs.has_backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: detect
+        run: |
+          if [ -f backend/go.mod ]; then
+            echo "has_backend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_backend=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ─────────────────────────────────────────────────────────────────
   # Backend CI: vet, test, build (deferred until backend/ exists)
   # ─────────────────────────────────────────────────────────────────
   backend:
     name: Backend (vet + test + build)
     runs-on: ubuntu-latest
+    needs: [detect]
     # Skip the entire backend job when backend/ doesn't exist yet.
-    # The job lights up automatically once the first backend file lands.
-    if: hashFiles('backend/go.mod') != ''
+    if: needs.detect.outputs.has_backend == 'true'
     defaults:
       run:
         working-directory: backend
@@ -159,16 +182,19 @@ jobs:
   aggregate:
     name: All gates green
     runs-on: ubuntu-latest
-    needs: [frontend, backend, docs]
+    needs: [detect, frontend, backend, docs]
     if: always()
     steps:
       - name: Check job results
         run: |
+          # detect is a pure sensor; treat it as success regardless of result.
           # backend is conditional on backend/go.mod existing; treat
           # 'skipped' as success so this gate passes for frontend-only repos.
+          DETECT="${{ needs.detect.result }}"
           FRONTEND="${{ needs.frontend.result }}"
           BACKEND="${{ needs.backend.result }}"
           DOCS="${{ needs.docs.result }}"
+          [ "$DETECT" = "success" ] || [ "$DETECT" = "skipped" ] || { echo "detect failed"; exit 1; }
           [ "$BACKEND" = "success" ] || [ "$BACKEND" = "skipped" ] || { echo "backend failed"; exit 1; }
           [ "$FRONTEND" = "success" ] || { echo "frontend failed"; exit 1; }
           [ "$DOCS" = "success" ] || { echo "docs failed"; exit 1; }
