@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'notifications' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../kit/theme.css">
+</head>
+<body>
+
+<div id="app-shell"></div>
+
+<main class="main">
+
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+    <div>
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-subtitle">Everything happening across the pool — derived from the event stream.</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button class="btn btn-secondary" data-mark-read><i data-lucide="check-check" class="w-4 h-4"></i>Mark all read</button>
+      <button class="btn btn-primary" data-modal-open="notifSettings"><i data-lucide="settings" class="w-4 h-4"></i>Preferences</button>
+    </div>
+  </header>
+
+  <!-- Preferences modal -->
+  <div class="modal-overlay" id="notifSettings" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title">Notification preferences</h2>
+          <p class="text-xs text-slate-500 mt-1">Choose what reaches you.</p>
+        </div>
+        <button class="icon-btn" data-modal-close><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div><div class="text-sm font-medium">Voting reminders</div><div class="text-xs text-slate-500">When a signal needs your vote</div></div>
+          <button class="switch" role="switch" aria-checked="true" data-toggle></button>
+        </div>
+        <div class="flex items-center justify-between">
+          <div><div class="text-sm font-medium">Execution updates</div><div class="text-xs text-slate-500">Sales, listings, funding milestones</div></div>
+          <button class="switch" role="switch" aria-checked="true" data-toggle></button>
+        </div>
+        <div class="flex items-center justify-between">
+          <div><div class="text-sm font-medium">Pool health alerts</div><div class="text-xs text-slate-500">Reserve &amp; liquidity threshold crossings</div></div>
+          <button class="switch" role="switch" aria-checked="true" data-toggle></button>
+        </div>
+        <div class="flex items-center justify-between">
+          <div><div class="text-sm font-medium">Payouts</div><div class="text-xs text-slate-500">Distribution confirmations</div></div>
+          <button class="switch" role="switch" aria-checked="true" data-toggle></button>
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button class="btn btn-ghost" data-modal-close>Cancel</button>
+          <button class="btn btn-primary" id="savePrefsBtn">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="tabs mb-6" data-filter-tabs>
+    <button class="tab active" data-filter-tab="all" aria-selected="true">All <span class="text-slate-500">8</span></button>
+    <button class="tab" data-filter-tab="unread" aria-selected="false">Unread <span class="text-slate-500" data-unread-count>3</span></button>
+  </div>
+
+  <div data-list data-page-size="10">
+
+    <!-- Skeleton -->
+    <section class="card p-0 overflow-hidden" data-skeleton>
+      <div class="p-5 space-y-4">
+        <div class="skeleton h-12 w-full"></div>
+        <div class="skeleton h-12 w-full"></div>
+        <div class="skeleton h-12 w-full"></div>
+        <div class="skeleton h-12 w-full"></div>
+        <div class="skeleton h-12 w-full"></div>
+      </div>
+    </section>
+
+    <section class="card p-0 overflow-hidden" data-list-body hidden>
+      <div class="divide-y" style="--tw-divide-y-reverse: 0; border-bottom: 1px solid var(--border-subtle);">
+
+        <a href="../opportunity-detail/index.html" class="flex items-start gap-4 p-5 table-row" data-filterable data-status="unread" data-notif-item data-read="false">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+            <i data-lucide="vote" class="w-5 h-5 text-violet-400"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-sm font-medium">O-2051 needs 1 more vote to approve</div>
+              <span class="text-[11px] text-slate-500 whitespace-nowrap">2m ago</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">Vetting closes in 18h — the Bulk Lego Set Resale is 4/5 weighted votes.</div>
+          </div>
+          <span class="pulse-dot bg-violet-400 mt-2" data-unread-dot></span>
+        </a>
+
+        <a href="../execution-detail/index.html" class="flex items-start gap-4 p-5 table-row" data-filterable data-status="unread" data-notif-item data-read="false">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+            <i data-lucide="package" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-sm font-medium">E-1042 · Size 10.5 sold on GOAT</div>
+              <span class="text-[11px] text-slate-500 whitespace-nowrap">1h ago</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">$2,880 recovered — 3 of 8 items sold, ROI tracking at +12.4%.</div>
+          </div>
+          <span class="pulse-dot bg-emerald-400 mt-2" data-unread-dot></span>
+        </a>
+
+        <a href="../pool/index.html" class="flex items-start gap-4 p-5 table-row" data-filterable data-status="unread" data-notif-item data-read="false">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(245,158,11,0.12);">
+            <i data-lucide="banknote" class="w-5 h-5 text-amber-400"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-sm font-medium">Reserve ratio steady at 18.2%</div>
+              <span class="text-[11px] text-slate-500 whitespace-nowrap">3h ago</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">Above the 12% community target. No action needed.</div>
+          </div>
+          <span class="pulse-dot bg-amber-400 mt-2" data-unread-dot></span>
+        </a>
+
+        <a href="../payouts/index.html" class="flex items-start gap-4 p-5 table-row" data-filterable data-status="read" data-notif-item data-read="true">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+            <i data-lucide="circle-dollar-sign" class="w-5 h-5 text-violet-400"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-sm font-medium">Payout preview updated for E-1039</div>
+              <span class="text-[11px] text-slate-500 whitespace-nowrap">5h ago</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">Projected net profit $5,982 · distribution pending vote outcome.</div>
+          </div>
+        </a>
+
+        <a href="../governance/index.html" class="flex items-start gap-4 p-5 table-row" data-filterable data-status="read" data-notif-item data-read="true">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(96,165,250,0.12);">
+            <i data-lucide="vote" class="w-5 h-5 text-blue-400"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-sm font-medium">New proposal: ROI floor → 18%</div>
+              <span class="text-[11px] text-slate-500 whitespace-nowrap">8h ago</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">Dana Voss proposed raising the ROI floor. Vote closes in 22h.</div>
+          </div>
+        </a>
+
+        <a href="../execution-detail/index.html" class="flex items-start gap-4 p-5 table-row" data-filterable data-status="read" data-notif-item data-read="true">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-sm font-medium">Daily reconciliation: BALANCED</div>
+              <span class="text-[11px] text-slate-500 whitespace-nowrap">Yesterday</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">Every dollar accounted for. Audit trail intact.</div>
+          </div>
+        </a>
+
+        <a href="../profile/index.html" class="flex items-start gap-4 p-5 table-row" data-filterable data-status="read" data-notif-item data-read="true">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+            <i data-lucide="award" class="w-5 h-5 text-violet-400"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-sm font-medium">Reputation milestone: Tier 3 reached</div>
+              <span class="text-[11px] text-slate-500 whitespace-nowrap">2 days ago</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">Vetting weight now ×1.4. Keep it up.</div>
+          </div>
+        </a>
+
+        <a href="../pool/index.html" class="flex items-start gap-4 p-5 table-row" data-filterable data-status="read" data-notif-item data-read="true">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(96,165,250,0.12);">
+            <i data-lucide="download" class="w-5 h-5 text-blue-400"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-3">
+              <div class="text-sm font-medium">Pool snapshot available</div>
+              <span class="text-[11px] text-slate-500 whitespace-nowrap">3 days ago</span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1">The weekly pool.snapshot_taken report is ready to export.</div>
+          </div>
+        </a>
+
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty" data-empty hidden>
+        <i data-lucide="bell-off" class="w-10 h-10 mx-auto"></i>
+        <p class="text-sm font-medium text-slate-400 mb-1">You're all caught up</p>
+        <p class="text-xs">No notifications in this view.</p>
+      </div>
+    </section>
+
+  </div>
+
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const save = document.getElementById('savePrefsBtn');
+    if (save) save.addEventListener('click', () => {
+      document.getElementById('notifSettings').hidden = true;
+      toast('Notification preferences saved', 'success');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MERIDIAN — Wireframe Index</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script src="kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="kit/theme.css">
+</head>
+<body>
+
+<!-- Ambient backdrop -->
+<div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+  <div class="absolute -top-1/4 left-1/2 -translate-x-1/2 w-[1200px] h-[800px] rounded-full" style="background: radial-gradient(closest-side, rgba(201,138,66,0.10), transparent 70%);"></div>
+  <div class="absolute bottom-0 right-0 w-[800px] h-[600px] rounded-full" style="background: radial-gradient(closest-side, rgba(16,185,129,0.08), transparent 70%);"></div>
+</div>
+
+<main class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+
+  <!-- Header -->
+  <header class="mb-16">
+    <div class="flex items-center justify-between mb-8">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: var(--gradient-violet);">
+          <i data-lucide="diamond" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="text-xs uppercase tracking-[0.2em] text-slate-500">Collective Arbitrage Engine</div>
+          <div class="text-sm font-medium text-slate-300">Prototype · Wireframe Set</div>
+        </div>
+      </div>
+      <button class="icon-btn" data-theme-toggle title="Toggle theme"><i data-lucide="moon" class="w-4 h-4"></i></button>
+    </div>
+
+    <h1 class="text-5xl md:text-6xl font-semibold tracking-tight leading-[1.05] mb-6">
+      <span class="text-gradient">MERIDIAN</span>
+    </h1>
+    <p class="text-xl text-slate-300 max-w-2xl leading-relaxed">
+      Pool capital, signals, and access so members profit from real arbitrage that none could execute alone.
+    </p>
+    <div class="mt-6 flex items-center gap-3 flex-wrap">
+      <span class="badge badge-info">v1 · One Community</span>
+      <span class="badge badge-premium">Light + Dark</span>
+      <span class="badge badge-neutral">20 Pages</span>
+      <a href="landing/index.html" class="btn btn-secondary"><i data-lucide="globe" class="w-4 h-4"></i>View Landing</a>
+      <a href="dashboard/index.html" class="btn btn-primary"><i data-lucide="arrow-right" class="w-4 h-4"></i>Enter the app</a>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+    <a href="pool/index.html" class="card card-hover p-5 block">
+      <div class="kpi-label mb-2">Pool</div>
+      <div class="kpi-number text-gradient-emerald">$1.42M</div>
+      <div class="text-xs text-slate-500 mt-2">Available capital</div>
+    </a>
+    <a href="executions/index.html" class="card card-hover p-5 block">
+      <div class="kpi-label mb-2">Active capital</div>
+      <div class="kpi-number">$487K</div>
+      <div class="text-xs text-slate-500 mt-2">Deployed in 3 executions</div>
+    </a>
+    <a href="members/index.html" class="card card-hover p-5 block">
+      <div class="kpi-label mb-2">Members</div>
+      <div class="kpi-number">124</div>
+      <div class="text-xs text-slate-500 mt-2">42 capital · 67 signal · 15 access</div>
+    </a>
+    <a href="opportunities/index.html" class="card card-hover p-5 block">
+      <div class="kpi-label mb-2">Open opportunities</div>
+      <div class="kpi-number text-gradient-violet">12</div>
+      <div class="text-xs text-slate-500 mt-2">8 in vetting</div>
+    </a>
+  </section>
+
+  <!-- Platform -->
+  <section class="mb-12">
+    <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 mb-4">Platform</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <a href="landing/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(168,162,158,0.12);">
+            <i data-lucide="globe" class="w-5 h-5 text-slate-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Landing Page</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Public-facing marketing page explaining MERIDIAN's value proposition and sign-up flow.</div>
+      </a>
+
+      <a href="dashboard/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+            <i data-lucide="layout-dashboard" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Dashboard</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Pool health, active executions, latest opportunities, and your portfolio.</div>
+      </a>
+
+      <a href="opportunities/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+            <i data-lucide="lightbulb" class="w-5 h-5 text-violet-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Opportunities</div>
+        <div class="text-sm text-slate-400 leading-relaxed">The signal pipeline — filter by status and category, search, paginate.</div>
+      </a>
+
+      <a href="opportunity-detail/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(245,158,11,0.12);">
+            <i data-lucide="gavel" class="w-5 h-5 text-amber-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Opportunity Detail</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Vet a signal — auto-checks, live vote tally, working comment feed.</div>
+      </a>
+
+      <a href="executions/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(96,165,250,0.12);">
+            <i data-lucide="zap" class="w-5 h-5 text-blue-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Executions</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Active, completed, failed — filter, search, track ROI per operation.</div>
+      </a>
+
+      <a href="execution-detail/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+            <i data-lucide="package" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Execution Detail</div>
+        <div class="text-sm text-slate-400 leading-relaxed">From approval to liquidation — timeline, capital, inventory, event log, payout preview.</div>
+      </a>
+
+      <a href="pool/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+            <i data-lucide="banknote" class="w-5 h-5 text-violet-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Capital Pool</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Pool health, reserve gauge, switchable chart periods, working deposit &amp; withdraw modals.</div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- Community -->
+  <section class="mb-12">
+    <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 mb-4">Community</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <a href="communities/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+            <i data-lucide="users" class="w-5 h-5 text-violet-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Communities</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Browse all communities, their pool health, and governance parameters. v1 runs one; model supports multiple.</div>
+      </a>
+
+      <a href="community-detail/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+            <i data-lucide="building-2" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Community Detail</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Deep dive into a community: KPIs, governance parameters, member composition, recent executions, and safety rails.</div>
+      </a>
+
+      <a href="members/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(96,165,250,0.12);">
+            <i data-lucide="users" class="w-5 h-5 text-blue-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Members</div>
+        <div class="text-sm text-slate-400 leading-relaxed">The member directory — filter by tier and role, search, inspect reputation.</div>
+      </a>
+
+      <a href="member-detail/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+            <i data-lucide="user" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Member Detail</div>
+        <div class="text-sm text-slate-400 leading-relaxed">A member's reputation breakdown, contributions, credentials, and history.</div>
+      </a>
+
+      <a href="payouts/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+            <i data-lucide="circle-dollar-sign" class="w-5 h-5 text-violet-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Payouts</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Distribution history, the community-governed split formula, pending payments.</div>
+      </a>
+
+      <a href="governance/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(245,158,11,0.12);">
+            <i data-lucide="vote" class="w-5 h-5 text-amber-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Governance</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Community-Governed Parameters, active proposals with working votes, safety rails.</div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- Account & auth -->
+  <section class="mb-12">
+    <h2 class="text-sm font-semibold uppercase tracking-widest text-slate-500 mb-4">Account &amp; Auth</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      <a href="profile/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(245,158,11,0.12);">
+            <i data-lucide="user" class="w-5 h-5 text-amber-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Your Profile</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Reputation, contribution history, privileges, and sign-out.</div>
+      </a>
+
+      <a href="settings/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(96,165,250,0.12);">
+            <i data-lucide="settings" class="w-5 h-5 text-blue-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Settings</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Profile, security, notification toggles, and the working light/dark theme picker.</div>
+      </a>
+
+      <a href="notifications/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+            <i data-lucide="bell" class="w-5 h-5 text-violet-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Notifications</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Everything from the event stream — mark all read, filter unread, preferences.</div>
+      </a>
+
+      <a href="submit-signal/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+            <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Submit Signal</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Multi-step form — details, acquisition, resale, drag-and-drop evidence, review.</div>
+      </a>
+
+      <a href="login/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+            <i data-lucide="log-in" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Sign in</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Authentication flow with passkey and 2FA alternatives.</div>
+      </a>
+
+      <a href="register/index.html" class="card card-hover p-6 group">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+            <i data-lucide="user-plus" class="w-5 h-5 text-violet-400"></i>
+          </div>
+          <i data-lucide="arrow-up-right" class="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors"></i>
+        </div>
+        <div class="text-base font-semibold mb-1">Create account</div>
+        <div class="text-sm text-slate-400 leading-relaxed">Registration with the member agreement — no ponzi mechanics, ever.</div>
+      </a>
+
+    </div>
+  </section>
+
+  <footer class="mt-20 pt-8 border-t" style="border-color: var(--border-subtle);">
+    <p class="text-xs text-slate-500">MERIDIAN · Wireframe prototype · Vanilla HTML + Tailwind + Lucide. Not affiliated with any real exchange.</p>
+  </footer>
+
+</main>
+
+</body>
+</html>

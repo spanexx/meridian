@@ -1,0 +1,1 @@
+export { UiTabsComponent, type UiTab } from './tabs.component';

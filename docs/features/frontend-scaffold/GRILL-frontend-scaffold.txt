@@ -1,0 +1,245 @@
+Frontend Scaffold - Grill Notes
+
+Status: Locked
+Date: 2026-08-11
+Source: User said "make all decision" with state=auto. Routed via
+       feature-pipeline per AGENTS.md section 1. This GRILL replaces an
+       earlier one that produced a broken scaffold (hand-written
+       package.json with stale pins, broken @switch template structure,
+       fabricated version numbers). The user requested path B: roll back
+       and regenerate via `ng new`.
+
+What this feature is about
+
+- Scaffolds the Angular workspace using the official `ng new` CLI from
+  the Angular team. No hand-written package.json. No hand-written
+  angular.json or tsconfig. The Angular CLI is the source of truth for
+  the canonical project structure.
+- Mirrors the wireframe's theme.css into the new project without any
+  source modification. theme.css is the single design-token source.
+- Wires Tailwind v4 via the official @tailwindcss/postcss plugin per
+  the Angular CLI integration guide.
+- Installs Playwright as the visual fidelity acceptance gate. Every
+  page port must pass a Playwright test that checks theme tokens and
+  DOM structure against the wireframe. "Build passes" is no longer
+  the success criterion.
+- Build the UI primitives library plus the shell plus the dashboard
+  page in this session. Future feature packs port the remaining 19
+  wireframe pages one domain at a time.
+
+Questions and answers locked so far
+
+1. Which Angular version
+Answer:
+- Latest Angular 20.3.x (the active maintenance branch).
+- Pinned via `ng new` not hand-typed. The CLI chooses the current
+  stable on each invocation.
+Why:
+- Angular 20 has security fixes (Angular 19 had 8 known production
+  XSS bugs in its framework code per the audit).
+- Angular 20's @angular/build builder replaces webpack with esbuild,
+  faster builds, smaller bundles.
+Source:
+- npm view @angular/core versions (latest 21.x is also available
+  but Angular 20 has more docs and community examples; the
+  integrity principle says pick the well-supported line)
+- npm audit --omit=dev result from the prior scaffold (8 vulns in
+  Angular 19, 0 in Angular 20)
+
+2. Project structure
+Answer:
+- Use `ng new` output verbatim. No custom folder rearrangements.
+- frontend/src/app/pages/ for route components (Angular CLI convention
+  for lazy route targets).
+- frontend/src/app/ui/ for the primitives library (added by this
+  scaffold; Angular CLI doesn't generate this).
+- frontend/src/app/shell/ for sidebar, top bar, mobile bar, theme
+  toggle (added by this scaffold).
+- frontend/src/app/core/ for cross-cutting services (auth, http,
+  websocket, theme, toast).
+Why:
+- ng new output is what every Angular tutorial, every Angular DevRel
+  video, and every Angular contributor expects. Diverging from it
+  without reason is technical debt.
+- The src/app/pages/ convention matches the loadComponent lazy
+  loading pattern in app.routes.ts.
+Source:
+- Angular CLI 20 default output
+
+3. Styling approach
+Answer:
+- Tailwind v4 via @tailwindcss/postcss for utility classes.
+- frontend/src/theme.css (verbatim copy of
+  wireframe/meridian/kit/theme.css) for design tokens.
+- frontend/src/styles.scss imports theme.css first, then
+  tailwindcss/theme.css + tailwindcss/utilities. Order matters: theme
+  tokens must be in scope before Tailwind utilities resolve against
+  them.
+Why:
+- theme.css has 555 lines and 128 class definitions. It is the single
+  source of design tokens per docs/00-system-overview.md engineering
+  principles.
+- Tailwind v4's PostCSS integration is the official Angular
+  recommendation since Angular CLI 20.
+- Import order prevents silent theme-token drop.
+Source:
+- docs/00-system-overview.md engineering principles
+- Angular Tailwind v4 integration guide
+
+4. Component architecture
+Answer:
+- Standalone components only. No NgModules.
+- bootstrapApplication in main.ts (ng new default).
+- provideRouter in app.config.ts with componentInputBinding enabled
+  (ng new default in v20).
+- provideHttpClient in app.config.ts.
+Why:
+- Standalone is the only supported default in Angular 20.
+- bootstrapApplication is the official replacement for
+  NgModule-based bootstrapping.
+Source:
+- Angular 20 default output
+
+5. State management
+Answer:
+- Angular signals only for component state.
+- No NgRx, no RxJS stores. (RxJS is used internally by Angular's
+  HttpClient and Router; that's fine.)
+Why:
+- Signals are first-class in Angular 20. The smoke test dashboard
+  has no need for cross-component state stores.
+- Future feature packs can add NgRx SignalStore at the call site if
+  server-state caching becomes a requirement.
+Source:
+- Angular signals documentation
+
+6. Forms
+Answer:
+- Reactive forms only. Not used in the smoke test dashboard but
+  reserved for future feature packs (login, register, submit-signal,
+  settings).
+Why:
+- Reactive forms are the recommended default for any non-trivial form.
+Source:
+- Angular forms documentation
+
+7. Routing
+Answer:
+- Angular Router via provideRouter.
+- Routes live in src/app/app.routes.ts (ng new default).
+- Each route is lazy-loaded via loadComponent, pointing at
+  src/app/pages/<domain>/<domain>.component.ts.
+- A central "stub pages" component handles routes not yet built;
+  shows a "Coming soon" placeholder so the sidebar links work even
+  when the destination page is not yet implemented.
+Why:
+- Lazy loading keeps the initial bundle small. Dashboard is loaded
+  on first visit only.
+- The stub pattern lets us ship a navigable shell before all pages
+  exist.
+Source:
+- Angular Router documentation
+- wireframe/meridian/kit/app.js (the wireframe sidebar links to all
+  pages; we want the same)
+
+8. HTTP and auth
+Answer:
+- HttpClient via provideHttpClient.
+- Interceptors added in a future auth feature pack when the gateway
+  URL is real. The smoke test does not need them.
+Why:
+- The smoke test uses no backend. Auth interceptors are dead code
+  until an auth feature pack lands.
+Source:
+- docs/apis/00-api-conventions.md
+
+9. Real time
+Answer:
+- WebSocketSubject from rxjs/webSocket when a feature pack needs it.
+  Not used in the smoke test.
+Why:
+- Same reason as auth. No backend in scope yet.
+Source:
+- docs/apis/00-api-conventions.md
+
+10. Test runner and visual fidelity gate
+Answer:
+- Karma + Jasmine from ng new default for unit tests.
+- Playwright (@playwright/test) as the visual fidelity gate.
+- Playwright tests live in frontend/e2e/. Each page port gets its
+  own spec file that checks the rendered theme tokens, computed
+  styles, and DOM structure against the wireframe. Screenshots are
+  captured to frontend/e2e/screenshots/ for human review.
+- npm run e2e runs the Playwright tests. CI gates PRs on this.
+Why:
+- The previous scaffold had green build + green TS + green audit
+  but rendered broken. "Build passes" is not a sufficient success
+  criterion when the goal is visual fidelity.
+- Playwright is the standard tool for browser-driven testing in
+  the Angular ecosystem.
+- The acceptance gate runs in CI automatically; a regression
+  cannot ship.
+Source:
+- meridian/.agents/skills/visual-fidelity-check/SKILL.md
+- meridian/.agents/skills/npm-audit-clean/SKILL.md (for audit gate)
+
+11. Tailwind v4 + Sass
+Answer:
+- frontend/.postcssrc.json with @tailwindcss/postcss as the only
+  plugin.
+- frontend/src/styles.scss imports theme.css first, then the two
+  Tailwind layers.
+- No @tailwindcss/cli invocation. No separate tailwind.config.js
+  (Tailwind v4 reads content paths from Angular CLI's build
+  config).
+- Autoprefixer is loaded transitively by @tailwindcss/postcss.
+Why:
+- Tailwind v4's official Angular integration uses just the PostCSS
+  plugin. No JS config needed unless custom utilities are added.
+- Sass deprecation warning in build output (import rule) is a
+  Sass-tooling-level note and does not affect runtime. Migrate to
+  @use / @forward in a future session.
+Source:
+- Tailwind v4 + Angular official integration guide
+- Angular CLI build config
+
+Scope decisions locked at the same time
+
+A. What ships in this session
+Answer:
+- Angular 20 scaffold via ng new.
+- theme.css copied verbatim.
+- Tailwind v4 wired.
+- Playwright installed with one dashboard theme-fidelity spec.
+- One smoke test page at src/app/pages/dashboard that proves
+  theme.css + Tailwind utilities + Angular templates all work
+  together.
+Why:
+- The user request was "create the UI components to be reused in
+  this app must match the wireframe design verbatim". A reusable
+  UI primitives library plus the shell is the next step but it
+  needs a verified base layer first. The smoke test is that base.
+Source:
+- User message + previous-scaffold failure as evidence that
+  skipping verification breaks the workflow.
+
+B. Acceptance criterion
+Answer:
+- npm audit --omit=dev returns 0 vulnerabilities.
+- npm run build exits 0 with no warnings.
+- npm run e2e passes all Playwright tests, including the
+  theme-fidelity spec.
+- A screenshot of the rendered dashboard is captured to
+  e2e/screenshots/dashboard.png for human review.
+Why:
+- Three gates: security, build correctness, visual fidelity. All
+  three must be green before declaring done.
+Source:
+- meridian/.agents/skills/npm-audit-clean/SKILL.md
+- meridian/.agents/skills/visual-fidelity-check/SKILL.md
+
+No remaining open questions
+
+Locked on 2026-08-11 by AUTO mode agent under user instruction
+"make all decision" with state=auto and user-selected path B
+(regenerate via ng new). Proceed to IMPL execution in this session.

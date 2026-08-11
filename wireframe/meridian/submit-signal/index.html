@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit Signal — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'submit-signal' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../kit/theme.css">
+</head>
+<body>
+
+<div id="app-shell"></div>
+
+<main class="main">
+
+  <header class="mb-8">
+    <h1 class="page-title">Submit Signal</h1>
+    <p class="page-subtitle">An arbitrage opportunity for the community to vet.</p>
+  </header>
+
+  <!-- Stepper -->
+  <div class="stepper mb-8" data-stepper data-final-label="Submit for vetting" data-on-complete="completeSignal">
+    <div class="step active" data-step="0"><span class="step-num">1</span><span>Details</span></div>
+    <div class="step-divider"></div>
+    <div class="step" data-step="1"><span class="step-num">2</span><span>Acquisition</span></div>
+    <div class="step-divider"></div>
+    <div class="step" data-step="2"><span class="step-num">3</span><span>Resale</span></div>
+    <div class="step-divider"></div>
+    <div class="step" data-step="3"><span class="step-num">4</span><span>Evidence</span></div>
+    <div class="step-divider"></div>
+    <div class="step" data-step="4"><span class="step-num">5</span><span>Review</span></div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <div class="lg:col-span-2" data-step-panels>
+
+      <!-- Step 1: Details -->
+      <section class="card p-6" data-step-panel="0">
+        <h2 class="text-base font-semibold mb-1">Details</h2>
+        <p class="text-xs text-slate-500 mb-5">What is the opportunity?</p>
+        <div class="space-y-4">
+          <div>
+            <label>Title</label>
+            <input type="text" class="input" placeholder="e.g. Travis Scott × Nike Sneakers" value="Travis Scott × Nike Sneakers">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label>Category</label>
+              <select class="input">
+                <option>Apparel</option>
+                <option>Collectibles</option>
+                <option>Electronics</option>
+                <option>Equipment</option>
+                <option>Furniture</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label>Risk level</label>
+              <select class="input">
+                <option>Low</option>
+                <option selected>Medium</option>
+                <option>High</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea class="input" rows="4" placeholder="Concise description of the opportunity, the source, and why it works.">Limited drop resale — wholesale acquisition from boutique, 8 pairs, 14-day liquidation via StockX, GOAT, eBay.</textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Acquisition -->
+      <section class="card p-6" data-step-panel="1" hidden>
+        <h2 class="text-base font-semibold mb-1">Acquisition</h2>
+        <p class="text-xs text-slate-500 mb-5">How and where will the asset be acquired?</p>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label>Source</label>
+              <input type="text" class="input" value="Boutique wholesale">
+            </div>
+            <div>
+              <label>Location</label>
+              <input type="text" class="input" value="Boston, MA">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div>
+              <label>Estimated cost</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">$</span>
+                <input type="text" class="input" style="padding-left: 1.75rem;" value="14,200">
+              </div>
+            </div>
+            <div>
+              <label>Quantity</label>
+              <input type="text" class="input" value="8 pairs">
+            </div>
+            <div>
+              <label>Deadline</label>
+              <input type="date" class="input" value="2026-03-28">
+            </div>
+          </div>
+          <div>
+            <label>Access needed?</label>
+            <select class="input">
+              <option>Yes — boutique relationship</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div>
+            <label>Skills needed</label>
+            <input type="text" class="input" placeholder="e.g. authentication, photography">
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: Resale -->
+      <section class="card p-6" data-step-panel="2" hidden>
+        <h2 class="text-base font-semibold mb-1">Resale</h2>
+        <p class="text-xs text-slate-500 mb-5">Channels and projections.</p>
+        <div class="space-y-4">
+          <div>
+            <label>Channels</label>
+            <div class="flex flex-wrap gap-2 mt-1">
+              <label class="flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer" style="background: var(--bg-overlay); border-color: var(--v-400);">
+                <input type="checkbox" checked> <span class="text-sm">StockX</span>
+              </label>
+              <label class="flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer" style="background: var(--bg-overlay); border-color: var(--v-400);">
+                <input type="checkbox" checked> <span class="text-sm">GOAT</span>
+              </label>
+              <label class="flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer" style="background: var(--bg-overlay); border-color: var(--v-400);">
+                <input type="checkbox" checked> <span class="text-sm">eBay</span>
+              </label>
+              <label class="flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer" style="background: var(--bg-overlay); border-color: var(--border-subtle);">
+                <input type="checkbox"> <span class="text-sm">Local</span>
+              </label>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div>
+              <label>Estimated value</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">$</span>
+                <input type="text" class="input" style="padding-left: 1.75rem;" value="21,500">
+              </div>
+            </div>
+            <div>
+              <label>Time to liquidate</label>
+              <input type="text" class="input" value="14 days">
+            </div>
+            <div>
+              <label>Confidence</label>
+              <select class="input">
+                <option>Low</option>
+                <option>Medium</option>
+                <option selected>High</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="card p-4">
+              <div class="kpi-label mb-1.5">Estimated profit</div>
+              <div class="text-2xl font-light text-gradient-emerald">$7,300</div>
+            </div>
+            <div class="card p-4">
+              <div class="kpi-label mb-1.5">Estimated ROI</div>
+              <div class="text-2xl font-light text-gradient-emerald">+51.4%</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 4: Evidence -->
+      <section class="card p-6" data-step-panel="3" hidden>
+        <h2 class="text-base font-semibold mb-1">Evidence</h2>
+        <p class="text-xs text-slate-500 mb-5">Link proof of source, recent sales, market data.</p>
+        <div class="space-y-4">
+          <div>
+            <label>Upload images</label>
+            <input type="file" id="uploadInput" hidden accept="image/*" multiple>
+            <div class="card upload-zone p-8 text-center cursor-pointer" style="border-style: dashed;" data-upload-zone data-upload-input="uploadInput" data-upload-name="uploadName">
+              <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-slate-500 mb-3"></i>
+              <div class="text-sm mb-1">Drop images here or click to upload</div>
+              <div class="text-xs text-slate-500">PNGs, JPGs · up to 10 MB each</div>
+            </div>
+            <p class="text-xs text-emerald-400 mt-2" id="uploadName"></p>
+          </div>
+          <div>
+            <label>Add links</label>
+            <div class="space-y-2" id="linksBox">
+              <input type="text" class="input" value="https://stockx.com/travis-scott-x-nike-air-jordan-1-low-og">
+              <input type="text" class="input" value="https://www.goat.com/sneakers/travis-scott-x-air-jordan-1-low-og-sp-ps">
+              <button type="button" class="btn btn-ghost text-xs" id="addLinkBtn"><i data-lucide="plus" class="w-3 h-3"></i>Add another link</button>
+            </div>
+          </div>
+          <div>
+            <label>Notes</label>
+            <textarea class="input" rows="3" placeholder="Comparable recent sales, market commentary, anything else relevant.">Last 30 days: 12 sales on StockX, avg $2,725 (size 9.5). Premium pairs (10+) at $2,900+. Vintage SNKRS release confirmed via boutique.</textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 5: Review -->
+      <section class="card p-6" data-step-panel="4" hidden>
+        <h2 class="text-base font-semibold mb-1">Review</h2>
+        <p class="text-xs text-slate-500 mb-5">Confirm and submit for vetting.</p>
+        <div class="space-y-4">
+          <div class="card p-4">
+            <div class="text-xs uppercase tracking-wider text-slate-500 mb-2">Opportunity</div>
+            <div class="text-lg font-semibold">Travis Scott × Nike Sneakers</div>
+            <div class="text-xs text-slate-500 mt-1">Apparel · Limited-drop resale</div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="card p-4">
+              <div class="kpi-label mb-1.5">Cost</div>
+              <div class="text-xl font-light">$14,200</div>
+            </div>
+            <div class="card p-4">
+              <div class="kpi-label mb-1.5">Est. return</div>
+              <div class="text-xl font-light text-gradient-emerald">$21,500</div>
+            </div>
+            <div class="card p-4">
+              <div class="kpi-label mb-1.5">Est. profit</div>
+              <div class="text-xl font-light text-gradient-emerald">$7,300</div>
+            </div>
+            <div class="card p-4">
+              <div class="kpi-label mb-1.5">Est. ROI</div>
+              <div class="text-xl font-light text-gradient-emerald">+51.4%</div>
+            </div>
+          </div>
+          <div class="card p-4 text-xs text-slate-400" style="background: rgba(96,165,250,0.04); border-color: rgba(96,165,250,0.2);">
+            <div class="flex items-start gap-2">
+              <i data-lucide="info" class="w-4 h-4 text-blue-400 mt-0.5"></i>
+              <div>On submit, auto-checks will run (duplicate, fraud, math) and the opportunity will enter the vetting queue. As a Vetter, your vote carries weight × 1.4.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Nav buttons -->
+      <div class="flex items-center justify-between mt-6">
+        <button class="btn btn-ghost" data-step-prev disabled><i data-lucide="chevron-left" class="w-4 h-4"></i>Back</button>
+        <div class="flex items-center gap-2">
+          <button class="btn btn-secondary" id="draftBtn">Save as draft</button>
+          <button class="btn btn-primary" data-step-next>Next <i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Live Preview</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span class="text-xs text-slate-400">Title</span><span class="text-xs text-right">Travis Scott × Nike</span></div>
+          <div class="flex justify-between"><span class="text-xs text-slate-400">Category</span><span class="text-xs">Apparel</span></div>
+          <div class="flex justify-between"><span class="text-xs text-slate-400">Capital needed</span><span class="text-xs">$14,200</span></div>
+          <div class="flex justify-between"><span class="text-xs text-slate-400">Est. profit</span><span class="text-xs text-emerald-400">$7,300</span></div>
+          <div class="flex justify-between"><span class="text-xs text-slate-400">ROI</span><span class="text-xs text-emerald-400">+51.4%</span></div>
+          <div class="flex justify-between"><span class="text-xs text-slate-400">Channels</span><span class="text-xs">3</span></div>
+        </div>
+      </section>
+
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Tips</h2>
+        <ul class="space-y-3 text-xs text-slate-400">
+          <li class="flex gap-2"><i data-lucide="check" class="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5"></i>Link real comparable sales to back your ROI estimate.</li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5"></i>Auto-checks flag duplicates and suspicious math — submit clean numbers.</li>
+          <li class="flex gap-2"><i data-lucide="check" class="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5"></i>Higher confidence ratings correlate with faster approvals.</li>
+        </ul>
+      </section>
+
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Auto-checks</h2>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between p-2 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-400">Duplicate</span>
+            <span class="text-slate-500 opacity-50">pending</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-400">Fraud</span>
+            <span class="text-slate-500 opacity-50">pending</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-400">Math</span>
+            <span class="text-slate-500 opacity-50">pending</span>
+          </div>
+        </div>
+        <div class="text-[10px] text-slate-500 mt-3">Run automatically on submit.</div>
+      </section>
+
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+  function completeSignal() {
+    toast('Signal submitted — auto-checks running', 'success');
+    setTimeout(() => { location.href = '../opportunities/index.html'; }, 900);
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const draft = document.getElementById('draftBtn');
+    if (draft) draft.addEventListener('click', () => toast('Draft saved — you can resume anytime', 'success'));
+    const addLink = document.getElementById('addLinkBtn');
+    if (addLink) {
+      addLink.addEventListener('click', () => {
+        const box = document.getElementById('linksBox');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'input';
+        input.placeholder = 'https://';
+        box.insertBefore(input, addLink);
+        toast('Link field added', 'success');
+      });
+    }
+  });
+</script>
+</body>
+</html>

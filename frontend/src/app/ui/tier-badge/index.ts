@@ -1,0 +1,1 @@
+export { UiTierBadgeComponent, type UiTier } from './tier-badge.component';

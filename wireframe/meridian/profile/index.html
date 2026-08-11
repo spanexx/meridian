@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'profile' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="../kit/theme.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="app-shell"></div>
+<main class="main">
+<!-- Hero -->
+<section class="glass p-8 mb-6 relative overflow-hidden">
+<div class="absolute -top-1/4 right-0 w-96 h-96 rounded-full" style="background: radial-gradient(closest-side, rgba(201,138,66,0.12), transparent 70%);"></div>
+<div class="relative flex flex-col sm:flex-row sm:items-start gap-6">
+<div class="w-24 h-24 rounded-2xl flex items-center justify-center text-2xl font-semibold text-white" style="background: var(--gradient-violet);">
+        AC
+      </div>
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-1">
+<h1 class="text-2xl font-semibold tracking-tight">Alex Chen</h1>
+<span class="badge badge-premium">Vetter · T3</span>
+<span class="badge badge-success">Verified</span>
+</div>
+<div class="text-sm text-slate-400 mb-4">San Francisco, CA · Member since March 2024</div>
+<div class="flex items-center gap-6">
+<div>
+<div class="text-xs uppercase tracking-wider text-slate-500">Overall</div>
+<div class="text-2xl font-light text-gradient-violet">78</div>
+</div>
+<div class="w-px h-10" style="background: var(--border-subtle);"></div>
+<div>
+<div class="text-xs uppercase tracking-wider text-slate-500">Signals</div>
+<div class="text-2xl font-light">8 of 14</div>
+<div class="text-[10px] text-slate-500">approved</div>
+</div>
+<div class="w-px h-10" style="background: var(--border-subtle);"></div>
+<div>
+<div class="text-xs uppercase tracking-wider text-slate-500">Lifetime</div>
+<div class="text-2xl font-light text-gradient-emerald">+$1,847</div>
+</div>
+</div>
+</div>
+<div class="flex flex-row sm:flex-col gap-2">
+<a class="btn btn-secondary" href="../settings/index.html"><i class="w-4 h-4" data-lucide="settings"></i>Settings</a>
+<button class="btn btn-ghost" data-signout=""><i class="w-4 h-4" data-lucide="log-out"></i>Sign out</button>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Reputation -->
+<section class="card p-6 lg:col-span-2">
+<div class="flex items-center justify-between mb-5">
+<div>
+<h2 class="text-base font-semibold">Reputation</h2>
+<p class="text-xs text-slate-500 mt-0.5">Across your four contribution types</p>
+</div>
+<span class="text-xs text-slate-500">Vetting weight · 1.4×</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="card p-5">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+<i class="w-4 h-4 text-violet-400" data-lucide="lightbulb"></i>
+</div>
+<div>
+<div class="text-sm font-medium">Signal</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500">Accuracy</div>
+</div>
+</div>
+<div class="text-2xl font-light text-gradient-violet">78</div>
+</div>
+<div class="progress-track mb-3">
+<div class="progress-fill progress-fill-violet" style="width: 78%;"></div>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs">
+<div><span class="text-slate-500">Approval rate</span><div class="text-slate-200">57%</div></div>
+<div><span class="text-slate-500">Avg ROI</span><div class="text-emerald-400">+24.6%</div></div>
+</div>
+</div>
+<div class="card p-5">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+<i class="w-4 h-4 text-emerald-400" data-lucide="banknote"></i>
+</div>
+<div>
+<div class="text-sm font-medium">Capital</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500">Stability</div>
+</div>
+</div>
+<div class="text-2xl font-light text-gradient-emerald">65</div>
+</div>
+<div class="progress-track mb-3">
+<div class="progress-fill progress-fill-emerald" style="width: 65%;"></div>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs">
+<div><span class="text-slate-500">Tenure</span><div class="text-slate-200">2y 0m</div></div>
+<div><span class="text-slate-500">Avg balance</span><div class="text-slate-200">$12,500</div></div>
+</div>
+</div>
+<div class="card p-5">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(96,165,250,0.12);">
+<i class="w-4 h-4 text-blue-400" data-lucide="key"></i>
+</div>
+<div>
+<div class="text-sm font-medium">Access</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500">Utilization</div>
+</div>
+</div>
+<div class="text-2xl font-light">42</div>
+</div>
+<div class="progress-track mb-3">
+<div class="progress-fill progress-fill-blue" style="width: 42%;"></div>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs">
+<div><span class="text-slate-500">Credentials</span><div class="text-slate-200">1</div></div>
+<div><span class="text-slate-500">Success rate</span><div class="text-emerald-400">100%</div></div>
+</div>
+</div>
+<div class="card p-5">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(245,158,11,0.12);">
+<i class="w-4 h-4 text-amber-400" data-lucide="users"></i>
+</div>
+<div>
+<div class="text-sm font-medium">Community</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500">Participation</div>
+</div>
+</div>
+<div class="text-2xl font-light text-amber-400">85</div>
+</div>
+<div class="progress-track mb-3">
+<div class="progress-fill progress-fill-amber" style="width: 85%;"></div>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs">
+<div><span class="text-slate-500">Votes</span><div class="text-slate-200">142 cast</div></div>
+<div><span class="text-slate-500">Alignment</span><div class="text-emerald-400">89%</div></div>
+</div>
+</div>
+</div>
+<!-- Privileges -->
+<div class="mt-5 pt-5 border-t" style="border-color: var(--border-subtle);">
+<div class="text-xs uppercase tracking-wider text-slate-500 mb-3">Privileges</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+<div class="flex items-center gap-2"><i class="w-3 h-3 text-emerald-400" data-lucide="check-circle-2"></i>Can vote</div>
+<div class="flex items-center gap-2"><i class="w-3 h-3 text-emerald-400" data-lucide="check-circle-2"></i>Can operate</div>
+<div class="flex items-center gap-2"><i class="w-3 h-3 text-emerald-400" data-lucide="check-circle-2"></i>Capital share +5%</div>
+<div class="flex items-center gap-2"><i class="w-3 h-3 text-emerald-400" data-lucide="check-circle-2"></i>Max signal $50k</div>
+</div>
+<p class="text-[11px] text-slate-500 mt-3">Proposals are open to any member — <a class="text-violet-400 hover:text-violet-300" href="../governance/index.html">see governance →</a></p>
+</div>
+</section>
+<!-- Payouts & KYC -->
+<div class="space-y-6">
+<section class="card p-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-base font-semibold">Payouts</h2>
+<a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" href="../payouts/index.html">History<i class="w-3 h-3" data-lucide="arrow-right"></i></a>
+</div>
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-400">Capital</span>
+<span class="text-sm font-semibold text-emerald-400">+$1,162.40</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-400">Signal</span>
+<span class="text-sm font-semibold text-emerald-400">+$482.10</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-400">Access</span>
+<span class="text-sm font-semibold text-emerald-400">+$202.73</span>
+</div>
+<div class="flex items-center justify-between pt-3 border-t" style="border-color: var(--border-subtle);">
+<span class="text-sm">Total</span>
+<span class="text-sm font-semibold text-gradient-emerald">+$1,847.23</span>
+</div>
+</div>
+</section>
+<section class="card p-6">
+<h2 class="text-base font-semibold mb-4">Identity</h2>
+<div class="space-y-3 text-sm">
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-400">Email</span>
+<span class="text-xs">alex@meridian.com</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-400">KYC</span>
+<span class="badge badge-success">Verified</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-400">2FA</span>
+<span class="badge badge-success">TOTP</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-400">Country</span>
+<span class="text-xs">🇺🇸 USA</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Recent history -->
+<section class="card p-6 mt-6">
+<h2 class="text-base font-semibold mb-4">Recent Activity</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th class="hidden sm:table-cell">Date</th>
+<th>Event</th>
+<th>Result</th>
+<th class="hidden md:table-cell">Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr class="table-row">
+<td class="hidden sm:table-cell"><span class="text-xs text-slate-500">Mar 14</span></td>
+<td><a class="text-sm" href="../opportunity-detail/index.html">Vote cast on O-2049</a></td>
+<td><span class="badge badge-success">Approve</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-emerald-400">+rep</span></td>
+</tr>
+<tr class="table-row">
+<td class="hidden sm:table-cell"><span class="text-xs text-slate-500">Mar 12</span></td>
+<td><a class="text-sm" href="../opportunity-detail/index.html">Signal O-2045 approved</a></td>
+<td><span class="badge badge-success">Approved</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-emerald-400">+rep</span></td>
+</tr>
+<tr class="table-row">
+<td class="hidden sm:table-cell"><span class="text-xs text-slate-500">Mar 9</span></td>
+<td><a class="text-sm" href="../execution-detail/index.html">E-1042 listed</a></td>
+<td><span class="badge badge-warning">Live</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-500">—</span></td>
+</tr>
+<tr class="table-row">
+<td class="hidden sm:table-cell"><span class="text-xs text-slate-500">Mar 4</span></td>
+<td><a class="text-sm" href="../payouts/index.html">Payout received (E-1030)</a></td>
+<td><span class="badge badge-success">+$412.50</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-emerald-400">+rep</span></td>
+</tr>
+<tr class="table-row">
+<td class="hidden sm:table-cell"><span class="text-xs text-slate-500">Feb 28</span></td>
+<td><a class="text-sm" href="../pool/index.html">Capital deposit</a></td>
+<td><span class="badge badge-info">+$2,500</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-500">—</span></td>
+</tr>
+</tbody>
+</table></div>
+</section>
+</main>
+</body>
+</html>

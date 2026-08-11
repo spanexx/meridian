@@ -1,0 +1,1 @@
+export { UiKpiCardComponent } from './kpi-number.component';

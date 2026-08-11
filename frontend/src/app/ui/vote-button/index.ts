@@ -1,0 +1,1 @@
+export { UiVoteButtonComponent, type UiVote } from './vote-button.component';

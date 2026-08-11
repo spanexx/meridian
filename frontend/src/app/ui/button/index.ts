@@ -1,0 +1,1 @@
+export { UiButtonComponent, type UiButtonVariant, type UiButtonSize } from './button.component';

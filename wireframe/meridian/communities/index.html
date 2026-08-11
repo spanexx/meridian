@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Communities — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'communities' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../kit/theme.css">
+</head>
+<body>
+
+<div id="app-shell"></div>
+
+<main class="main">
+
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+    <div>
+      <h1 class="page-title">Communities</h1>
+      <p class="page-subtitle">Member-owned arbitrage collectives. v1 runs one community; the governance model supports multiple.</p>
+    </div>
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <input class="input w-full sm:w-56" data-search placeholder="Search communities…" type="search">
+      <button class="btn btn-secondary" data-dropdown="statusMenu"><i data-lucide="filter" class="w-4 h-4"></i>Status</button>
+    </div>
+  </header>
+
+  <!-- Status dropdown -->
+  <div class="menu" id="statusMenu" hidden>
+    <div class="menu-head">Status</div>
+    <button class="menu-item active" data-filter-category="all"><i data-lucide="layout-grid" class="w-4 h-4"></i>All communities</button>
+    <button class="menu-item" data-filter-category="active"><span class="badge badge-success text-[10px]">Active</span>Operating</button>
+    <button class="menu-item" data-filter-category="proposed"><span class="badge badge-warning text-[10px]">Proposed</span>In voting</button>
+    <button class="menu-item" data-filter-category="archived"><span class="badge badge-neutral text-[10px]">Archived</span>Closed</button>
+  </div>
+
+  <!-- Status tabs -->
+  <div class="tabs mb-6" data-filter-tabs>
+    <button class="tab active" data-filter-tab="all" aria-selected="true">All <span class="text-slate-500">3</span></button>
+    <button class="tab" data-filter-tab="active" aria-selected="false">Active <span class="text-slate-500">1</span></button>
+    <button class="tab" data-filter-tab="proposed" aria-selected="false">Proposed <span class="text-slate-500">1</span></button>
+    <button class="tab" data-filter-tab="archived" aria-selected="false">Archived <span class="text-slate-500">1</span></button>
+  </div>
+
+  <div data-list data-page-size="6">
+    <!-- Skeleton -->
+    <section class="card p-0 overflow-hidden" data-skeleton>
+      <div class="p-5 space-y-4">
+        <div class="skeleton h-10 w-full"></div>
+        <div class="skeleton h-14 w-full"></div>
+        <div class="skeleton h-14 w-full"></div>
+        <div class="skeleton h-14 w-full"></div>
+        <div class="skeleton h-14 w-full"></div>
+      </div>
+    </section>
+
+    <section class="card p-0 overflow-hidden" data-list-body hidden>
+      <div class="table-scroll"><table>
+        <thead>
+          <tr>
+            <th>Community</th>
+            <th class="hidden md:table-cell">Status</th>
+            <th>Pool</th>
+            <th class="hidden sm:table-cell">Members</th>
+            <th class="hidden md:table-cell">ROI</th>
+            <th class="hidden lg:table-cell">Executions</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="table-row" data-category="active" data-filterable data-status="active">
+            <td>
+              <a class="flex items-center gap-3" href="../community-detail/index.html">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--gradient-violet);">
+                  <i data-lucide="users" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-medium">MERIDIAN Alpha</div>
+                  <div class="text-xs text-slate-500">General arbitrage · Global</div>
+                </div>
+              </a>
+            </td>
+            <td class="hidden md:table-cell"><span class="badge badge-success">Active</span></td>
+            <td><span class="text-sm font-semibold text-gradient-emerald">$1.42M</span></td>
+            <td class="hidden sm:table-cell"><span class="text-sm">124</span></td>
+            <td class="hidden md:table-cell"><span class="text-sm text-emerald-400">+18.4%</span></td>
+            <td class="hidden lg:table-cell"><span class="text-xs text-slate-400">47</span></td>
+            <td><a href="../community-detail/index.html"><i data-lucide="arrow-right" class="w-4 h-4 text-slate-500"></i></a></td>
+          </tr>
+
+          <tr class="table-row" data-category="proposed" data-filterable data-status="proposed">
+            <td>
+              <a class="flex items-center gap-3" href="../community-detail/index.html">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--gradient-amber);">
+                  <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-medium">Tech Arbitrage</div>
+                  <div class="text-xs text-slate-500">Electronics focus · Asia-Pacific</div>
+                </div>
+              </a>
+            </td>
+            <td class="hidden md:table-cell"><span class="badge badge-warning">Proposed</span></td>
+            <td><span class="text-sm font-semibold text-slate-400">$0</span></td>
+            <td class="hidden sm:table-cell"><span class="text-sm">23</span></td>
+            <td class="hidden md:table-cell"><span class="text-xs text-slate-500">—</span></td>
+            <td class="hidden lg:table-cell"><span class="text-xs text-slate-500">0</span></td>
+            <td><a href="../community-detail/index.html"><i data-lucide="arrow-right" class="w-4 h-4 text-slate-500"></i></a></td>
+          </tr>
+
+          <tr class="table-row" data-category="archived" data-filterable data-status="archived">
+            <td>
+              <a class="flex items-center gap-3" href="../community-detail/index.html">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--gradient-blue);">
+                  <i data-lucide="archive" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-medium">Vintage Collective</div>
+                  <div class="text-xs text-slate-500">Closed · Merged into Alpha</div>
+                </div>
+              </a>
+            </td>
+            <td class="hidden md:table-cell"><span class="badge badge-neutral">Archived</span></td>
+            <td><span class="text-sm font-semibold text-slate-400">$0</span></td>
+            <td class="hidden sm:table-cell"><span class="text-sm">0</span></td>
+            <td class="hidden md:table-cell"><span class="text-sm text-emerald-400">+12.1%</span></td>
+            <td class="hidden lg:table-cell"><span class="text-xs text-slate-400">18</span></td>
+            <td><a href="../community-detail/index.html"><i data-lucide="arrow-right" class="w-4 h-4 text-slate-500"></i></a></td>
+          </tr>
+        </tbody>
+      </table></div>
+
+      <!-- Empty state -->
+      <div class="empty" data-empty hidden>
+        <i data-lucide="users" class="w-8 h-8 mx-auto"></i>
+        <p class="text-sm mt-2">No communities found</p>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-between px-5 py-4 border-t" style="border-color: var(--border-subtle);">
+        <div class="text-xs text-slate-500">
+          Showing <span data-page-num>1-3</span> of 3 communities
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn btn-ghost" data-page-prev disabled><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+          <button class="btn btn-ghost" data-page-next disabled><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Create community modal -->
+  <div class="modal-overlay" id="createCommunityModal" hidden>
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title">Propose a new community</h2>
+          <p class="text-xs text-slate-500 mt-1">Any member may propose. Requires community vote for approval.</p>
+        </div>
+        <button class="icon-btn" data-modal-close><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form class="space-y-4" data-auth-form data-success="Community proposal submitted for voting">
+        <div>
+          <label>Community name</label>
+          <input type="text" class="input" placeholder="e.g., Tech Arbitrage Collective" required>
+        </div>
+        <div>
+          <label>Focus area</label>
+          <select class="input">
+            <option>General arbitrage</option>
+            <option>Electronics</option>
+            <option>Collectibles</option>
+            <option>Fashion</option>
+            <option>Regional focus</option>
+          </select>
+        </div>
+        <div>
+          <label>Geographic scope</label>
+          <select class="input">
+            <option>Global</option>
+            <option>North America</option>
+            <option>Europe</option>
+            <option>Asia-Pacific</option>
+            <option>Specific region</option>
+          </select>
+        </div>
+        <div>
+          <label>Description</label>
+          <textarea class="input" rows="3" placeholder="Explain the community's purpose and focus..."></textarea>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="terms" required>
+          <label for="terms" style="margin-bottom: 0;" class="text-xs">I agree to the community formation terms</label>
+        </div>
+        <button type="submit" class="btn btn-primary w-full justify-center"><i data-lucide="send" class="w-4 h-4"></i>Submit proposal</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="mt-8 flex items-center justify-between">
+    <p class="text-xs text-slate-500">v1 limitation: Only one active community. The governance model supports multiple communities for future expansion.</p>
+    <button class="btn btn-secondary" data-modal-open="createCommunityModal"><i data-lucide="plus" class="w-4 h-4"></i>Propose community</button>
+  </div>
+
+</main>
+
+</body>
+</html>

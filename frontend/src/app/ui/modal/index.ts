@@ -1,0 +1,1 @@
+export { UiModalComponent } from './modal.component';

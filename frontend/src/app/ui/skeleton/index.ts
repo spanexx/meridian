@@ -1,0 +1,1 @@
+export { UiSkeletonComponent } from './skeleton.component';

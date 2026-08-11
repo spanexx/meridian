@@ -1,0 +1,704 @@
+MERIDIAN API ENDPOINTS PER PAGE
+A page by page list of every API endpoint each wireframe page needs to load, render, and link to.
+
+Conventions used throughout, taken from docs/apis/00-api-conventions.md:
+
+Base URL on production: https://api.meridian.com/api/v1
+WebSocket on production: wss://api.meridian.com/ws
+Auth header on every authenticated request:  Authorization Bearer access_token
+Mutating requests carry a header:  X-Idempotency-Key operation user timestamp
+All responses follow the envelope:  success data or error plus meta with request_id and timestamp
+List endpoints accept the standard pagination and filtering query params from 00: page limit sort order plus per endpoint filters
+Money values are strings with two decimals: 5000.00
+Dates are ISO 8601: 2026 03 13T10:00:00Z
+IDs are strings with type prefixes: mem opp exec pay vote tx ev dep wd wm notif gov pool
+
+Status of the API docs:
+docs/apis/ contains the conventions plus 01 auth 03 capital 04 opportunity and members.
+The other six API docs listed in docs/00 system overview (02 member 05 execution 06 payout 07 reputation 08 marketplace 09 admin) are not yet written.
+Where this file names an endpoint that has no doc yet, the path and shape follow the existing convention exactly so the entry is the spec the doc will need to match. These are clearly labeled TBD each time they appear.
+
+IDs in this file use the doc convention when the doc already names them (mem_ opp_ exec_) and the wireframe's wireframe IDs (O-2049, E-1042) are sometimes shown alongside to make the link to what the user sees on screen explicit.
+
+
+1  LANDING  at wireframe/meridian/landing/index.html
+
+Connection to previous page. None. This is the public entry point.
+
+Endpoints used to load this page.
+
+GET /api/v1/capital/pool/status
+  No auth. Public.
+  Returns totals total_capital available_capital deployed_capital health reserve_ratio deployment_ratio activity active_executions contributors_count performance avg_roi_30d total_profit_30d executions_completed_30d snapshot_at.
+  The landing reads totals to render pool capital 1.42M members 124 and the four numbers in the hero stat strip. It reads performance to render the YTD ROI chip.
+
+GET /api/v1/executions?status=active limit 6
+  No auth. Public. Recent ones already shown in the ticker.
+  The landing renders the live ticker of in flight opportunities by reading recent executions and their referenced opportunity title and progress.
+
+GET /api/v1/opportunities?status=approved limit 8
+  No auth. Public. The ticker also surfaces approved signals that are about to execute.
+
+GET /api/v1/capital/pool/history?period=30d and period=90d and period=1y
+  No auth. Public.
+  Powers the landing numbers section pool capital sparkline and avg execution ROI sparkline. Three pre shaped SVG paths are already in the page; this endpoint returns the numeric series.
+
+GET /api/v1/testimonials
+  TBD. Not yet documented. Used by the testimonials section. Returns a list of member quotes, name, role badges, avatar gradient. Public.
+
+Endpoints exposed from this page. The landing does not own resources. It sends the user to:
+  POST /api/v1/auth/register for join the community
+  POST /api/v1/auth/login for sign in
+  GET /api/v1/opportunities and GET /api/v1/executions for view live opportunities
+
+WebSocket channels subscribed.
+  wss://api.meridian.com/ws
+  subscribe to channel pool. The page re renders pool capital and the ticker when a message of type EVENT with channel pool arrives. The terminal card on the right is fed entirely from the pool channel playback.
+
+
+2  REGISTER  at wireframe/meridian/register/index.html
+
+Connection to previous page. From landing via join the community.
+
+Endpoint used on this page.
+
+POST /api/v1/auth/register
+  Request body: email, password, password_confirm, terms_accepted true.
+  Response 201: member_id, email, status PENDING, message verification email sent.
+  Side effects per the existing auth doc: creates member at PENDING, creates zero balance capital account, creates zero reputation record, sends verification email, logs member.registered.
+
+Connection forward. The page redirects to dashboard. That move requires a successful login (which is not yet performed) so register should also implicitly log the member in on success. Per the existing auth doc the cleanest path is to issue tokens immediately on register completion by chaining to verify email or by issuing tokens after register when email_verified_at is set. See follow up notes at the bottom of this file for the resolved token question.
+
+
+3  LOGIN  at wireframe/meridian/login/index.html
+
+Connection to previous page. From landing via sign in or anywhere session has expired.
+
+Endpoints used on this page.
+
+POST /api/v1/auth/login
+  Request body: email, password.
+  Response 200 with tokens and member plus requires_2fa false; or response with requires_2fa true and temp_token.
+  Side effects: updates last_login_at, creates session, logs member.login.
+
+POST /api/v1/auth/login/2fa
+  Used only when login returns requires_2fa true. Request: temp_token, code. Returns access and refresh tokens.
+
+POST /api/v1/auth/forgot-password
+  Triggered by the forgot password button. Request body: email. Returns 200 message whether or not the email exists for security.
+
+WebSocket channels subscribed on success.
+  wss://api.meridian.com/ws subscribe to channel member self where self is the member_id from the login response. This is the channel from 00 api conventions that delivers member notifications and is the basis for the bell badge.
+
+Connection forward. Tokens stored locally and the page redirects to dashboard.
+
+
+4  DASHBOARD  at wireframe/meridian/dashboard/index.html
+
+Connection to previous page. From login or register via redirect. The default home for any signed in member.
+
+Endpoints used to load this page.
+
+GET /api/v1/capital/pool/status
+  Powers the four hero KPI cards total pool, active capital, active members, open opportunities.
+  The doc shows public access.
+
+GET /api/v1/executions?status=active limit 5
+  Powers the active executions card on the left column.
+
+GET /api/v1/opportunities?status=vetting limit 5
+  Powers the latest opportunities table on the left column.
+
+GET /api/v1/capital/balance
+  Authenticated. Fills the your portfolio card capital contributed and lifetime earnings, along with reputation tier. Comes from the capital doc.
+
+GET /api/v1/members/me
+  Authenticated. Source of the display name and avatar in the greeting. Comes from members doc.
+
+GET /api/v1/pool/health
+  TBD. Not yet documented. Returns reserve_ratio liquidity deployment_ratio band, plus the three time windows 7d 30d 90d of pool value series. Used for the pool health card and the chart period switcher.
+
+GET /api/v1/payouts/ytd?member=self
+  TBD. Not yet documented. Returns distributed YTD, pending, and avg execution ROI for the floor callout. The portfolio card shows lifetime earnings directly; this endpoint supports the bottom row of the pool health card.
+
+Endpoints exposed from this page. KPI cards and your portfolio link out to:
+  GET /api/v1/executions for active capital card
+  GET /api/v1/members for active members card
+  GET /api/v1/opportunities for open opportunities card
+  GET /api/v1/profile for signals count link
+  GET /api/v1/governance/proposals for votes count link
+  POST /api/v1/opportunities for submit signal header button
+
+WebSocket channels subscribed.
+  wss subscribe pool for live pool capital numbers. The chart and KPI cards update on EVENT messages.
+  wss subscribe member self for new notifications bell badge. The dashboard does not render a notifications list but uses the unread count.
+
+
+5  COMMUNITIES LIST  at wireframe/meridian/communities/index.html
+
+Connection to previous page. Sidebar or deep link. The dashboard does not feature communities prominently.
+
+Endpoints used to load this page.
+
+GET /api/v1/communities
+  TBD. Not yet documented. List communities in the cooperative. Returns the community row shown in the table: id, name, icon color, focus, geography, status active proposed archived, pool, member count, ROI YTD, executions count.
+
+GET /api/v1/communities?status=active
+  TBD. Same as above filtered. Used by the active tab.
+
+GET /api/v1/communities?status=proposed
+  TBD. Same as above filtered. Used by the proposed tab.
+
+GET /api/v1/communities?status=archived
+  TBD. Same as above filtered. Used by the archived tab.
+
+Endpoint used on this page.
+
+POST /api/v1/communities
+  TBD. Not yet documented. Opens the propose a new community modal. Request body: name, focus, geographic_scope, description, terms_accepted true. Returns 201 community_id, status proposed, proposed_at, vote_required 5 weighted votes per the existing opportunity submit pattern.
+
+Endpoints exposed from this page. The community rows link out to GET /api/v1/communities and from there to GET /api/v1/communities and admin scope, plus GET /api/v1/governance/proposals for proposals that change that community.
+
+WebSocket channels subscribed. None.
+
+
+6  COMMUNITY DETAIL  at wireframe/meridian/community-detail/index.html
+
+Connection to previous page. Click on any row of the communities list.
+
+Endpoints used to load this page.
+
+GET /api/v1/communities and id
+  TBD. Not yet documented. Single community read. Returns full community: name, status, pool, members (124), ROI YTD, executions count, region, founded, min contribution, governance parameters snapshot, safety rails.
+
+GET /api/v1/governance/parameters?community and id
+  TBD. Not yet documented. Returns the current community governed parameters with provenance: ROI floor 15, win-rate target 75, distribution shares 60:25:15, reserve ratio target 18, plus last_updated, proposed_by for each. Used by the left column.
+
+GET /api/v1/executions?community and id and limit 4
+  TBD. Not yet documented. Used by recent executions cards on the left column. Returns executions limited to that community.
+
+GET /api/v1/communities and id and members
+  TBD. Not yet documented. Returns capital, signal, access composition percentages. Used by member composition card.
+
+Endpoints exposed from this page. The actions menu in the header links to:
+  GET /api/v1/governance and community and id to view governance
+  GET /api/v1/members and community and id to view members
+  GET /api/v1/communities and id and settings to community settings subpage
+
+WebSocket channels subscribed.
+  wss subscribe community and id. Updates community KPIs, parameters, and recent executions live.
+
+
+7  COMMUNITY SETTINGS  at wireframe/meridian/community-detail/settings/index.html
+
+Connection to previous page. From community detail via the actions menu Community settings entry.
+
+Endpoints used to load this page.
+
+GET /api/v1/communities and id
+  TBD. Same as community detail. Loads general section fields.
+
+GET /api/v1/governance/parameters?community and id
+  TBD. Loads the governance parameters section.
+
+GET /api/v1/notifications/preferences and member self and category voting
+  TBD. Loads members and roles default state.
+
+Endpoints used on this page.
+
+PATCH /api/v1/communities and id
+  TBD. Saves the general section. Request body: name, focus, geographic_scope, min_contribution, description. Note: this endpoint exists to save identity style fields. The governance parameters do not get saved here; see below.
+
+POST /api/v1/governance/proposals
+  TBD. Triggered by every propose change button. Opens a governance vote that, if passed, applies to future executions. Request body: parameter, proposed_value, rationale, scope community and id. This matches docs/00 goal analysis.md where every community governed parameter changes through a governance vote and never unilaterally.
+
+POST /api/v1/communities and id and archive
+  TBD. Triggered by the archive community button in the danger zone.
+
+POST /api/v1/communities and id and transfer
+  TBD. Triggered by the transfer admin button in the danger zone.
+
+PATCH /api/v1/communities and id and members-and-roles
+  TBD. Saves the three switches open enrollment, KYC at join, vetter auto-promotion.
+
+WebSocket channels subscribed. None on this page.
+
+
+8  MEMBERS LIST  at wireframe/meridian/members/index.html
+
+Connection to previous page. From the dashboard active members KPI card or the deep link in the community detail actions menu.
+
+Endpoints used to load this page.
+
+GET /api/v1/members?page size 8 and sort tier desc
+  TBD. Not yet documented. (A different and older draft exists at docs/apis/members.md but only covers the /me prefix.) Returns the roster: avatar initials with gradient, display_name, location, role, tier, reputation score, total contribution, signals count and approvals.
+
+GET /api/v1/members?role capital
+  TBD. Used by the capital tab.
+
+GET /api/v1/members?role signal
+  TBD. Used by the signal tab.
+
+GET /api/v1/members?role access
+  TBD. Used by the access tab.
+
+GET /api/v1/members?tier and t4
+  TBD. Used by the tier dropdown filter.
+
+GET /api/v1/members?tier and t3
+  TBD. Used by tier filter.
+
+GET /api/v1/members?tier and t2
+  TBD. Used by tier filter.
+
+GET /api/v1/members?tier and t1
+  TBD. Used by tier filter.
+
+Endpoints exposed from this page. Each row links to GET /api/v1/members and id for member detail.
+
+WebSocket channels subscribed. None.
+
+
+9  MEMBER DETAIL  at wireframe/meridian/member-detail/index.html
+
+Connection to previous page. From any member row in the members list or from a submitter/operator link on opportunity and execution detail pages.
+
+Endpoints used to load this page.
+
+GET /api/v1/members and id
+  TBD. Not yet documented. Returns the four reputation scores per dimension: signal accuracy, capital stability, access utilization, community participation. Plus identity location verified badge.
+
+GET /api/v1/members and id and capital
+  TBD. Returns capital deployed, executions funded, avg share of pool, privileges.
+
+GET /api/v1/members and id and access-credentials
+  TBD. Returns the verified resources card.
+
+GET /api/v1/members and id and activity?page size 10
+  TBD. Returns the recent activity rows. Each row carries a reference to a different entity: capital allocation links to GET /api/v1/executions and id, vote links to GET /api/v1/governance and id, payout links to GET /api/v1/payouts and id, deposit links to GET /api/v1/capital/transactions and id.
+
+Endpoints exposed from this page. Activity row deep links follow back to the underlying pages.
+
+WebSocket channels subscribed.
+  wss subscribe member and id. New activity rows arrive as events.
+
+
+10  OPPORTUNITIES LIST  at wireframe/meridian/opportunities/index.html
+
+Connection to previous page. From the dashboard latest opportunities table or any view all opportunities link elsewhere.
+
+Endpoints used to load this page.
+
+GET /api/v1/opportunities?page size 8
+  This endpoint exists in docs/apis/04 opportunity API. Returns the list. Default sort is created_at desc with all statuses included, then status tabs apply on the client side via filter.
+
+GET /api/v1/opportunities?status vetting
+  Same path, filtered. Powers the vetting tab.
+
+GET /api/v1/opportunities?status pending
+  Powers the pending tab.
+
+GET /api/v1/opportunities?status approved
+  Powers the approved tab.
+
+GET /api/v1/opportunities?status executing
+  Powers the executing tab. Executions in this state appear as opportunities because they originated from a signal; the doc status set includes EXECUTED so this filter probably becomes EXECUTING in the wireframe enum.
+
+GET /api/v1/opportunities?status rejected
+  Powers the rejected tab.
+
+GET /api/v1/opportunities?category apparel and category collectibles and so on
+  Powers the category filter dropdown.
+
+Endpoints exposed from this page. Each row points to either:
+  GET /api/v1/opportunities and id for vetting, pending, approved, or rejected state
+  GET /api/v1/executions and id for executing state
+Each submitted_by link points to GET /api/v1/members and id.
+
+WebSocket channels subscribed.
+  wss subscribe pool for general activity ticker.
+  wss subscribe opportunity invalid placeholder for per opportunity channel; the doc defines opportunity and id as a channel so the table can update statuses live.
+
+
+11  OPPORTUNITY DETAIL  at wireframe/meridian/opportunity-detail/index.html
+
+Connection to previous page. From a row in the opportunities list.
+
+Endpoints used to load this page.
+
+GET /api/v1/opportunities and id
+  This endpoint exists in docs/apis/04. Returns title, status, category, description, financial summary, evidence list, vetting, submitter.
+
+GET /api/v1/opportunities and id and evidence
+  Returns the three evidence images.
+
+GET /api/v1/opportunities and id and vetting
+  Returns the auto checks, current tally votes_for votes_against votes_needed expires_at your_vote, the comment list, the per voter breakdown.
+
+GET /api/v1/members and id
+  Returns the submitter card.
+
+Endpoints used on this page.
+
+POST /api/v1/opportunities and id and vote
+  This endpoint exists in docs/apis/04 with vote APPROVE or REJECT plus confidence plus comment plus optional rejection_reason. Response 200 returns updated tally in the page via the data-tally-scope container so the vote bar and the count beside your vote reflow without reload.
+
+POST /api/v1/opportunities and id and comments
+  TBD. Returns the new comment which is appended to the list. Same shape as a vetting comment.
+
+POST /api/v1/notifications/snooze and id
+  TBD. Triggered by the bookmark button. Saves the signal to the watchlist and toasts it.
+
+GET /api/v1/notifications/share and id
+  TBD. Triggered by the share button. Returns a short share URL the data-copy puts on the clipboard.
+
+Endpoints exposed from this page. The submitter card opens GET /api/v1/members and id.
+
+WebSocket channels subscribed.
+  wss subscribe opportunity and id. The vote tally updates live and the comment list streams new comments.
+  wss subscribe member and id for follower notifications.
+
+
+12  SUBMIT SIGNAL  at wireframe/meridian/submit-signal/index.html
+
+Connection to previous page. From the submit signal button in the header of dashboard or opportunities list.
+
+Endpoints used to load this page. None on initial load beyond the live preview and tips which are static content.
+
+Endpoints used on this page.
+
+POST /api/v1/opportunities
+  This endpoint exists in docs/apis/04. Creates the draft when the member saves as draft or auto saves each step. Request body matches the five wizard steps: title, category, risk_level, description, source name and location, acquisition estimated_cost quantity deadline, resale channels estimated_value time_to_liquidate confidence, requirements capital_needed, access_needed, skills_needed, plus the implicit submitter derived from auth.
+
+POST /api/v1/opportunities and id and evidence
+  Triggered in step four when the member drops in an image. Multipart upload per the doc.
+
+POST /api/v1/opportunities and id and submit
+  Triggered at the end of step five when the member presses submit for vetting. Body: confidence plus notes. Returns 200 with the new status SUBMITTED plus auto_checks ran plus estimated_review_time.
+
+Connection forward. On successful submit the page redirects to GET /api/v1/opportunities, the list page in vetting tab.
+
+WebSocket channels subscribed. None.
+
+
+13  EXECUTIONS LIST  at wireframe/meridian/executions/index.html
+
+Connection to previous page. From the dashboard active capital KPI card or view all button on the active executions card.
+
+Endpoints used to load this page.
+
+GET /api/v1/executions?page size 12
+  TBD. Not yet documented. (Different from /api/v1/executions and id which is implied.) Returns execution cards: id, status active completed failed, title, source opportunity ref, deployed, recovered, ROI, progress percentage, current counter and ETA, image thumbnail.
+
+GET /api/v1/executions?status active
+  Powers the active tab.
+
+GET /api/v1/executions?status completed
+  Powers the completed tab.
+
+GET /api/v1/executions?status failed
+  Powers the failed tab.
+
+Endpoints exposed from this page. Each active card and completed and failed card links to GET /api/v1/executions and id for execution detail. Completed cards have a paid out link to GET /api/v1/payouts filtered to that execution. Failed cards have a reserve link to GET /api/v1/pool showing where the loss landed.
+
+WebSocket channels subscribed.
+  wss subscribe pool for general activity updates. The execution progress updates would also benefit from per-execution channels.
+
+
+14  EXECUTION DETAIL  at wireframe/meridian/execution-detail/index.html
+
+Connection to previous page. From any execution card in the executions list, or from the originating opportunity detail.
+
+Endpoints used to load this page.
+
+GET /api/v1/executions and id
+  TBD. Not yet documented. Returns the timeline approved funded acquired listed sold plus the capital cards allocated spent recovered and inventory event log.
+
+GET /api/v1/executions and id and inventory
+  TBD. Returns per item image, size, channel, asking price, status listed or sold.
+
+GET /api/v1/executions and id and events
+  TBD. Returns the bottom event log: opportunity.approved, money.allocated, execution.acquired, execution.item_sold, execution.item_listed. Each row is a kernel event per docs/01 architecture.md.
+
+GET /api/v1/executions and id and payout-preview
+  TBD. Returns the payout preview right column: gross_revenue, total_costs, platform_fee 5 percent, net_profit, plus the split shares 46 30 12 8 4 percent.
+
+GET /api/v1/executions and id and participants
+  TBD. Returns the participants list operator plus signal and access contributors.
+
+Endpoints used on this page.
+
+POST /api/v1/executions and id and export
+  TBD. Triggered by the export button. Queues a CSV of the event log and toasts.
+
+Endpoints exposed from this page. Each inventory event row, each participant, and the originating opportunity all link back to their respective endpoints.
+
+WebSocket channels subscribed.
+  wss subscribe execution and id. Live updates of item sold, item listed, progress bar, and payout preview. This channel is the primary mechanism that makes executions feel real time.
+
+
+15  POOL  at wireframe/meridian/pool/index.html
+
+Connection to previous page. From the dashboard pool health card, from a failed execution's reserve link, or from community detail.
+
+Endpoints used to load this page.
+
+GET /api/v1/capital/pool/status
+  Same endpoint as landing and dashboard. Powers the four KPI cards.
+
+GET /api/v1/capital/pool/history?period 7d 90d 1y
+  TBD. Not yet documented. Returns the available, locked, and reserve series for the chart. The wireframe has three pre-rendered SVG groups the period switch flips between; a real backend returns numeric series and a charting layer renders the SVG.
+
+GET /api/v1/capital/pool/health
+  TBD. Returns the gauge dial value 18.2 plus bands.
+
+GET /api/v1/capital/pool/top-contributors?limit 5
+  TBD. Returns the top capital contributors table.
+
+Endpoints used on this page.
+
+POST /api/v1/capital/deposits
+  This endpoint exists in docs/apis/03. Triggered by the deposit modal. Body: amount, payment_method, idempotency_key. Returns 201 with the payment client secret and fees.
+
+POST /api/v1/capital/withdrawals
+  This endpoint exists in docs/apis/03. Triggered by the withdrawal modal. Body: amount, withdrawal_method_id, idempotency_key. Returns 201 with status PENDING_VERIFICATION plus requires_2fa true.
+
+POST /api/v1/capital/withdrawals and id and verify
+  This endpoint exists in docs/apis/03. Triggered when the modal asks for a 2FA code after the withdrawal is requested.
+
+POST /api/v1/capital/pool/snapshot
+  TBD. Triggered by the snapshot button. Records a pool_snapshots document per the data model.
+
+GET /api/v1/capital/withdrawal-methods
+  This endpoint exists in docs/apis/03. Surfaces the list inside the withdrawal modal.
+
+POST /api/v1/capital/withdrawal-methods
+  This endpoint exists in docs/apis/03. Add a new method; returns verification method.
+
+Endpoints exposed from this page. Top contributors link out to GET /api/v1/members and id.
+
+WebSocket channels subscribed.
+  wss subscribe pool. KPI cards and the chart update whenever a capital.allocation, capital.release, capital.distribution, or money.deposit_confirmed event arrives.
+
+
+16  PAYOUTS  at wireframe/meridian/payouts/index.html
+
+Connection to previous page. From the dashboard portfolio card, the profile payouts card, or a completed execution's paid out link.
+
+Endpoints used to load this page.
+
+GET /api/v1/payouts?page size 8
+  TBD. Not yet documented. List payouts across members and executions. Returns: id, execution_id, member_id, member avatar and name, contribution_type capital signal access, amount, share_percent, status pending or paid, date or estimated_date.
+
+GET /api/v1/payouts?status pending
+  Powers the pending tab.
+
+GET /api/v1/payouts?status paid
+  Powers the paid tab.
+
+GET /api/v1/payouts?member self
+  Filters to current member only when a member view is desired.
+
+GET /api/v1/payouts?execution and id
+  Filters to a specific execution. Used when linking from a completed execution.
+
+GET /api/v1/payouts/ytd?member self
+  TBD. Returns the three KPI tiles: distributed YTD, pending amount, avg execution ROI with community floor.
+
+GET /api/v1/governance/parameters?community and id
+  TBD. Returns the current distribution shares plus date and approval percent for the split formula card. (Same endpoint as community detail.)
+
+Endpoints exposed from this page. Each execution_id cell links to GET /api/v1/executions and id. Each member_id cell links to GET /api/v1/members and id. The split formula link goes to GET /api/v1/governance and community and id.
+
+WebSocket channels subscribed.
+  wss subscribe member self. Pending payouts become paid when money.payout_confirmed arrives and the page reflects the new state.
+
+
+17  GOVERNANCE  at wireframe/meridian/governance/index.html
+
+Connection to previous page. From the dashboard votes count link, from community detail view proposals, from settings propose change buttons, or from a new proposal notification.
+
+Endpoints used to load this page.
+
+GET /api/v1/governance/proposals?status voting
+  TBD. Not yet documented. Returns the active proposals cards: id, title, parameter name, proposed_value, current_value, proposer, rationale, votes_for, votes_against, votes_needed, expires_at.
+
+GET /api/v1/governance/proposals?status passed and status rejected
+  TBD. Powers the recent votes card on the right column.
+
+GET /api/v1/governance/parameters?community and id
+  TBD. Powers the current values grid: ROI floor, win-rate target, reserve target, single execution cap, distribution shares. Each carries set_by_vote set_at approval_percent for provenance per docs/00 goal analysis.md.
+
+GET /api/v1/governance/safety-rails
+  TBD. Returns the locked items list shown in the safety rails card.
+
+Endpoints used on this page.
+
+POST /api/v1/governance/proposals
+  TBD. Triggered by the propose change modal. Body: parameter, proposed_value, rationale, scope community and id. Returns 201 proposal_id status voting expires_at.
+
+POST /api/v1/governance/proposals and id and vote
+  TBD. Triggered by the approve and reject buttons. Body: vote APPROVE or REJECT plus optional comment. Updates the vote bar live via the data-tally-scope pattern.
+
+Endpoints exposed from this page. Distribution shares card links to GET /api/v1/payouts for the live payout view. Each proposer links to GET /api/v1/members and id.
+
+WebSocket channels subscribed.
+  wss subscribe governance. Updates active proposals tally in real time as votes come in.
+  wss subscribe pool for the floor + ceiling callouts.
+
+
+18  NOTIFICATIONS  at wireframe/meridian/notifications/index.html
+
+Connection to previous page. From the bell badge in the shell header on any page.
+
+Endpoints used to load this page.
+
+GET /api/v1/notifications?page size 10
+  TBD. Not yet documented. The doc says notifications derive from the event stream. Returns the list: id, type vote execution pool payout governance profile reconciliation, headline, supporting line, timestamp, read false or true, deep_link to the underlying entity.
+
+GET /api/v1/notifications?status unread
+  Powers the unread tab.
+
+GET /api/v1/notifications/unread-count
+  TBD. Returns just the count for the bell badge. This is what the shell header reads on every page load.
+
+GET /api/v1/notifications/preferences
+  TBD. Used by the preferences modal to render default switch states.
+
+Endpoints used on this page.
+
+POST /api/v1/notifications/mark-all-read
+  TBD. Triggered by the mark all read button.
+
+POST /api/v1/notifications/preferences
+  TBD. Triggered by save in the preferences modal. Body: voting_reminders, execution_updates, pool_health_alerts, payouts four booleans. The page itself only stores the four booleans; the actual reach logic lives in the notification dispatcher per docs/01.
+
+POST /api/v1/notifications and id and read
+  TBD. Fired when the member clicks a single notification. Sets read true and navigates to the deep link in the same call.
+
+Endpoints exposed from this page. Each notification deep links to its underlying entity and from there the full API surface for that entity.
+
+WebSocket channels subscribed.
+  wss subscribe member self. New notifications appear at the top of the list with the unread dot and the bell badge updates.
+
+
+19  PROFILE  at wireframe/meridian/profile/index.html
+
+Connection to previous page. From the dashboard portfolio card or from any member's avatar in the shell header.
+
+Endpoints used to load this page.
+
+GET /api/v1/members/me
+  This endpoint exists at docs/apis/members.md. Returns the full identity, plus status, KYC, two factor, country.
+
+GET /api/v1/members/me and reputation
+  TBD. Returns the four per-dimension reputation cards with score, breakdown numbers like approval_rate and avg_roi for signal, or tenure and avg_balance for capital, etc.
+
+GET /api/v1/payouts?member self
+  TBD. Powers the payouts breakdown card by contribution type.
+
+GET /api/v1/members/me and activity?page size 10
+  TBD. Powers the recent activity table. Same shape as member detail activity.
+
+GET /api/v1/members/me and privileges
+  TBD. Returns the privileges list and vetting_weight multiplier.
+
+Endpoints used on this page.
+
+POST /api/v1/auth/logout
+  This endpoint exists at docs/apis/01. Triggered by the sign out button.
+
+Endpoints exposed from this page. Activity rows deep link to opportunity detail, execution detail, payouts, and pool. The settings button goes to GET /api/v1/members/me and settings for the settings page.
+
+WebSocket channels subscribed.
+  wss subscribe member self. Activity rows stream in when the member's own events fire.
+
+
+20  SETTINGS  at wireframe/meridian/settings/index.html
+
+Connection to previous page. From the profile settings button or the gear icon in the shell header.
+
+Endpoints used to load this page.
+
+GET /api/v1/members/me
+  Same as profile. Fills the profile tab name and avatar fields.
+
+GET /api/v1/members/me and settings
+  TBD. Not yet documented as a single endpoint, but the existing members doc lists GET /members/me/settings which would fit.
+
+Endpoints used on this page.
+
+PATCH /api/v1/members/me
+  Existing. Triggered by save changes in the profile tab. Body: first_name, last_name, display_name, bio per the wireframe. Updates the member record and emits member.profile_updated.
+
+POST /api/v1/auth/upload-avatar
+  TBD. Triggered by upload photo. Multipart upload to storage per docs/01 S3-compatible storage provider; returns the avatar_url.
+
+PATCH /api/v1/members/me and photo
+  TBD. Triggered by remove. Sets avatar_url to null.
+
+PUT /api/v1/auth/change-password
+  This endpoint exists at docs/apis/01. Triggered by update password. Body: current_password, new_password, new_password_confirm. Revokes other sessions, activates a 24 hour withdrawal hold per the doc.
+
+POST /api/v1/auth/2fa/setup
+  Existing. Triggered if the user is enabling 2FA.
+
+POST /api/v1/auth/2fa/verify
+  Existing. Confirms 2FA code.
+
+POST /api/v1/auth/2fa/disable
+  Existing. Disables 2FA with current code plus password for safety.
+
+POST /api/v1/notifications/preferences
+  TBD. Triggered indirectly via the notifications preferences controls (the wireframe modal on the notifications page uses the same endpoint).
+
+PATCH /api/v1/preferences/theme
+  TBD. Triggered by the theme cards. Body: theme dark or light. Also handled by the shell data-theme-toggle which already exists; this endpoint optionally persists across devices.
+
+PATCH /api/v1/preferences/compact-tables
+  TBD. Triggered by the compact tables switch.
+
+POST /api/v1/auth/logout
+  Triggered by sign out others per the existing auth doc.
+
+WebSocket channels subscribed. None on this page.
+
+
+SUMMARY OF API SURFACE NEEDED
+
+Existing documented endpoints reused in the wireframe:
+
+auth: register, login, login 2fa, refresh, logout, me, forgot password, change password, 2fa setup, 2fa verify, 2fa disable
+capital: balance, deposits, deposits and id, withdrawals, withdrawals and id, verify, withdrawal methods, withdrawals and id and cancel, pool status
+opportunity: opportunities, opportunities and id, opportunities and id and evidence, opportunities and id and submit, vetting queue, opportunities and id and vote
+members: members me, members me put, members me settings, members me settings put
+
+Surface area not yet documented (TBD) and what they cover:
+
+members (roster): GET /members with filters role and tier; GET /members and id
+communities: GET /communities, POST /communities, GET /communities and id, PATCH /communities and id, GET /communities and id and settings, GET /governance/parameters and community and id, POST /governance/proposals with scope, GET /communities and id and members, GET /communities and id and executions
+executions: GET /executions, GET /executions and id, GET /executions and id and inventory, GET /executions and id and events, GET /executions and id and payout-preview, GET /executions and id and participants, POST /executions and id and export
+payouts: GET /payouts, GET /payouts and id, GET /payouts and ytd and member self
+governance: GET /governance/proposals, POST /governance/proposals, POST /governance/proposals and id and vote, GET /governance/parameters and community and id, GET /governance/safety rails
+pool: GET /capital/pool/history, GET /capital/pool/health, GET /capital/pool/top contributors, POST /capital/pool/snapshot
+notifications: GET /notifications, GET /notifications and unread count, POST /notifications and mark all read, POST /notifications and id and read, GET /notifications/preferences, POST /notifications/preferences
+profile extras: GET /members me and reputation, GET /members me and activity, GET /members me and privileges, GET /members and id and activity, GET /members and id and access credentials
+comments: POST /opportunities and id and comments
+preferences: GET /members me and settings, PATCH /preferences/theme, PATCH /preferences/compact tables
+
+Real time channels needed:
+
+wss and subscribe pool, used by landing, dashboard, pool, opportunity list, community detail
+wss and subscribe member and id, used by member detail
+wss and subscribe member self, used by dashboard bell badge, notifications, payouts, profile activity
+wss and subscribe opportunity and id, used by opportunity detail and the opportunity list live tallies
+wss and subscribe execution and id, used by execution detail
+wss and subscribe community and id, used by community detail
+wss and subscribe governance, used by governance page
+wss and subscribe pool remains the canonical pool state channel from 00 api conventions
+
+Two open implementation questions to resolve in the docs before the wireframe becomes implementation ready:
+
+First, registration should issue tokens immediately on success because the wireframe redirects to dashboard which needs an authenticated session. The existing 01 auth doc has register creating PENDING status and sending a verification email rather than tokens, and verify email issues tokens. Either register should issue tokens when email_verified_at is already set or the page should chain through a verify call after register. The cleanest spec is to keep PENDING as the post register status but have register return requires_2fa false plus tokens when the member was created already active, which is a single line in the auth doc.
+
+Second, the wireframe shows opportunity statuses pending vetting approved executing rejected while the existing 04 opportunity doc uses DRAFT SUBMITTED VETTING APPROVED REJECTED EXECUTED and adds EXECUTING as a derived view. Either the wireframe status badges are renamed to the existing enum or the enum in 04 is extended with EXECUTING. The wireframe pages should match the canonical enum from the docs not invent new states.

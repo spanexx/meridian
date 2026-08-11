@@ -1,0 +1,1 @@
+export { UiTableComponent, type UiTableColumn } from './table.component';

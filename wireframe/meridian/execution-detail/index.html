@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-1042 · Sneaker Resale — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'executions' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../kit/theme.css">
+</head>
+<body>
+
+<div id="app-shell"></div>
+
+<main class="main">
+
+  <div class="flex items-center gap-2 text-xs text-slate-500 mb-4">
+    <a href="../executions/index.html" class="hover:text-slate-300">Executions</a>
+    <i data-lucide="chevron-right" class="w-3 h-3"></i>
+    <span class="text-slate-300">E-1042</span>
+  </div>
+
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
+    <div>
+      <div class="flex items-center gap-3 mb-3">
+        <span class="text-xs text-slate-500 font-mono">E-1042</span>
+        <span class="badge badge-warning">Listed</span>
+        <span class="badge badge-neutral">Apparel</span>
+      </div>
+      <h1 class="page-title text-3xl">Limited Edition Sneaker Resale</h1>
+      <p class="page-subtitle max-w-2xl mt-2">From <a href="../opportunity-detail/index.html" class="text-violet-400 hover:text-violet-300">O-2037 · Travis Scott × Nike</a> · Operator Marcus Rivera · 4 days 12 hours in flight</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button class="btn btn-ghost" data-copy="https://meridian.example/executions/E-1042"><i data-lucide="share-2" class="w-4 h-4"></i></button>
+      <button class="btn btn-secondary" id="exportBtn"><i data-lucide="download" class="w-4 h-4"></i>Export</button>
+    </div>
+  </header>
+
+  <!-- Timeline -->
+  <section class="card p-6 mb-6">
+    <h2 class="text-base font-semibold mb-5">Timeline</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div class="text-center">
+        <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2" style="background: var(--gradient-emerald);">
+          <i data-lucide="check" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="text-xs font-medium">Approved</div>
+        <div class="text-[10px] text-slate-500 mt-1">Mar 5</div>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2" style="background: var(--gradient-emerald);">
+          <i data-lucide="check" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="text-xs font-medium">Funded</div>
+        <div class="text-[10px] text-slate-500 mt-1">Mar 6</div>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2" style="background: var(--gradient-emerald);">
+          <i data-lucide="check" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="text-xs font-medium">Acquired</div>
+        <div class="text-[10px] text-slate-500 mt-1">Mar 8</div>
+      </div>
+      <div class="text-center">
+        <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2" style="background: var(--gradient-amber); box-shadow: 0 0 30px rgba(245,158,11,0.4);">
+          <i data-lucide="tag" class="w-5 h-5 text-white"></i>
+        </div>
+        <div class="text-xs font-medium text-amber-400">Listed</div>
+        <div class="text-[10px] text-slate-500 mt-1">Mar 9 · current</div>
+      </div>
+      <div class="text-center opacity-40">
+        <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2" style="background: var(--bg-overlay); border: 1px solid var(--border-subtle);">
+          <i data-lucide="circle-dollar-sign" class="w-5 h-5 text-slate-500"></i>
+        </div>
+        <div class="text-xs font-medium">Sold</div>
+        <div class="text-[10px] text-slate-500 mt-1">~Mar 19</div>
+      </div>
+    </div>
+    <div class="mt-5 progress-track">
+      <div class="progress-fill progress-fill-amber" style="width: 60%;"></div>
+    </div>
+    <div class="flex justify-between text-[10px] uppercase tracking-wider text-slate-500 mt-2">
+      <span>Funded</span>
+      <span>Acquired</span>
+      <span>Listed</span>
+      <span>Paid out</span>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Main -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Capital -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Capital</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div class="card p-4">
+            <div class="kpi-label mb-1.5">Allocated</div>
+            <div class="text-2xl font-light">$18,500</div>
+            <div class="text-xs text-slate-500 mt-1">From 42 capital contributors</div>
+          </div>
+          <div class="card p-4">
+            <div class="kpi-label mb-1.5">Spent</div>
+            <div class="text-2xl font-light">$18,200</div>
+            <div class="text-xs text-slate-500 mt-1">8 pairs @ $2,275</div>
+          </div>
+          <div class="card p-4">
+            <div class="kpi-label mb-1.5">Recovered</div>
+            <div class="text-2xl font-light text-gradient-emerald">$4,280</div>
+            <div class="text-xs text-emerald-400 mt-1">3 of 8 sold</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Inventory -->
+      <section class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-semibold">Inventory</h2>
+          <span class="text-xs text-slate-500">8 items</span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="card p-2">
+            <img src="https://picsum.photos/seed/sneaker-a/300/300" class="w-full aspect-square rounded-md object-cover" loading="lazy">
+            <div class="mt-2 px-1">
+              <div class="text-xs font-medium">Size US 9</div>
+              <div class="text-[10px] text-slate-500">Listed · StockX</div>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs font-semibold">$2,850</span>
+                <span class="badge badge-warning">Listed</span>
+              </div>
+            </div>
+          </div>
+          <div class="card p-2">
+            <img src="https://picsum.photos/seed/sneaker-b/300/300" class="w-full aspect-square rounded-md object-cover" loading="lazy">
+            <div class="mt-2 px-1">
+              <div class="text-xs font-medium">Size US 9.5</div>
+              <div class="text-[10px] text-slate-500">Listed · GOAT</div>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs font-semibold">$2,900</span>
+                <span class="badge badge-warning">Listed</span>
+              </div>
+            </div>
+          </div>
+          <div class="card p-2">
+            <img src="https://picsum.photos/seed/sneaker-c/300/300" class="w-full aspect-square rounded-md object-cover" loading="lazy">
+            <div class="mt-2 px-1">
+              <div class="text-xs font-medium">Size US 10</div>
+              <div class="text-[10px] text-slate-500">Sold · eBay</div>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs font-semibold text-emerald-400">$2,620</span>
+                <span class="badge badge-success">Sold</span>
+              </div>
+            </div>
+          </div>
+          <div class="card p-2">
+            <img src="https://picsum.photos/seed/sneaker-d/300/300" class="w-full aspect-square rounded-md object-cover" loading="lazy">
+            <div class="mt-2 px-1">
+              <div class="text-xs font-medium">Size US 10</div>
+              <div class="text-[10px] text-slate-500">Sold · StockX</div>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs font-semibold text-emerald-400">$2,780</span>
+                <span class="badge badge-success">Sold</span>
+              </div>
+            </div>
+          </div>
+          <div class="card p-2">
+            <img src="https://picsum.photos/seed/sneaker-e/300/300" class="w-full aspect-square rounded-md object-cover" loading="lazy">
+            <div class="mt-2 px-1">
+              <div class="text-xs font-medium">Size US 10.5</div>
+              <div class="text-[10px] text-slate-500">Sold · GOAT</div>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs font-semibold text-emerald-400">$2,880</span>
+                <span class="badge badge-success">Sold</span>
+              </div>
+            </div>
+          </div>
+          <div class="card p-2">
+            <img src="https://picsum.photos/seed/sneaker-f/300/300" class="w-full aspect-square rounded-md object-cover" loading="lazy">
+            <div class="mt-2 px-1">
+              <div class="text-xs font-medium">Size US 11</div>
+              <div class="text-[10px] text-slate-500">Listed · eBay</div>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs font-semibold">$2,800</span>
+                <span class="badge badge-warning">Listed</span>
+              </div>
+            </div>
+          </div>
+          <div class="card p-2">
+            <img src="https://picsum.photos/seed/sneaker-g/300/300" class="w-full aspect-square rounded-md object-cover" loading="lazy">
+            <div class="mt-2 px-1">
+              <div class="text-xs font-medium">Size US 11.5</div>
+              <div class="text-[10px] text-slate-500">Listed · StockX</div>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs font-semibold">$2,750</span>
+                <span class="badge badge-warning">Listed</span>
+              </div>
+            </div>
+          </div>
+          <div class="card p-2">
+            <img src="https://picsum.photos/seed/sneaker-h/300/300" class="w-full aspect-square rounded-md object-cover" loading="lazy">
+            <div class="mt-2 px-1">
+              <div class="text-xs font-medium">Size US 12</div>
+              <div class="text-[10px] text-slate-500">Listed · GOAT</div>
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="text-xs font-semibold">$2,700</span>
+                <span class="badge badge-warning">Listed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Event log -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Event Log</h2>
+        <p class="text-xs text-slate-500 mb-4">Append-only record — every action traceable. Reconstructable from the event stream.</p>
+        <div class="space-y-2 max-h-72 overflow-y-auto">
+          <div class="flex items-center gap-3 text-xs p-2.5 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-500 font-mono w-24">Mar 9 14:22</span>
+            <span class="badge badge-info text-[10px]">execution.item_listed</span>
+            <span class="text-slate-300">Size US 12 · GOAT</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs p-2.5 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-500 font-mono w-24">Mar 9 14:18</span>
+            <span class="badge badge-success text-[10px]">execution.item_sold</span>
+            <span class="text-slate-300">Size US 10.5 · GOAT · $2,880</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs p-2.5 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-500 font-mono w-24">Mar 9 11:42</span>
+            <span class="badge badge-info text-[10px]">execution.item_listed</span>
+            <span class="text-slate-300">Size US 11.5 · StockX</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs p-2.5 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-500 font-mono w-24">Mar 9 09:14</span>
+            <span class="badge badge-info text-[10px]">execution.item_listed</span>
+            <span class="text-slate-300">Size US 11 · eBay</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs p-2.5 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-500 font-mono w-24">Mar 8 18:33</span>
+            <span class="badge badge-success text-[10px]">execution.item_sold</span>
+            <span class="text-slate-300">Size US 10 · StockX · $2,780</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs p-2.5 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-500 font-mono w-24">Mar 8 16:02</span>
+            <span class="badge badge-success text-[10px]">execution.item_sold</span>
+            <span class="text-slate-300">Size US 10 · eBay · $2,620</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs p-2.5 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-500 font-mono w-24">Mar 8 10:15</span>
+            <span class="badge badge-warning text-[10px]">execution.acquired</span>
+            <span class="text-slate-300">All 8 pairs received · inspected</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs p-2.5 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-500 font-mono w-24">Mar 6 09:00</span>
+            <span class="badge badge-info text-[10px]">money.allocated</span>
+            <span class="text-slate-300">$18,500 from 42 capital accounts</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs p-2.5 rounded" style="background: var(--bg-overlay);">
+            <span class="text-slate-500 font-mono w-24">Mar 5 17:32</span>
+            <span class="badge badge-success text-[10px]">opportunity.approved</span>
+            <span class="text-slate-300">Vetting closed · 3/3 approve</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+
+      <!-- Payout preview -->
+      <section class="glass p-6">
+        <h2 class="text-base font-semibold mb-4">Payout Preview</h2>
+        <div class="text-xs text-slate-500 mb-4">Projected at current ROI · if all 8 sold at listed prices</div>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Gross revenue</span>
+            <span class="font-medium">$22,475</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Total costs</span>
+            <span class="font-medium">$18,200</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Platform fee (5%)</span>
+            <span class="font-medium text-rose-400">−$214</span>
+          </div>
+          <div class="flex justify-between pt-3 border-t" style="border-color: var(--border-subtle);">
+            <span class="text-slate-400">Net profit</span>
+            <span class="font-semibold text-gradient-emerald">$4,061</span>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t" style="border-color: var(--border-subtle);">
+          <div class="kpi-label mb-2">Distribution</div>
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between"><span class="text-slate-400">Capital</span><span class="font-medium">$1,867 · 46%</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Signal</span><span class="font-medium">$1,218 · 30%</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Access</span><span class="font-medium">$487 · 12%</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Operations</span><span class="font-medium">$325 · 8%</span></div>
+            <div class="flex justify-between"><span class="text-slate-400">Platform</span><span class="font-medium">$164 · 4%</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Participants -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Participants</h2>
+        <div class="space-y-3 text-sm">
+          <a href="../member-detail/index.html" class="flex items-center gap-3">
+            <div class="avatar" style="background: var(--gradient-amber);">MR</div>
+            <div class="flex-1">
+              <div class="text-sm font-medium">Mike Rivera</div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-500">Signal contributor</div>
+            </div>
+          </a>
+          <a href="../member-detail/index.html" class="flex items-center gap-3">
+            <div class="avatar" style="background: var(--gradient-blue);">SP</div>
+            <div class="flex-1">
+              <div class="text-sm font-medium">Sarah Park</div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-500">Access contributor · Boston</div>
+            </div>
+          </a>
+          <a href="../profile/index.html" class="flex items-center gap-3">
+            <div class="avatar" style="background: var(--gradient-violet);">AC</div>
+            <div class="flex-1">
+              <div class="text-sm font-medium">Alex Chen</div>
+              <div class="text-[10px] uppercase tracking-wider text-slate-500">Operator</div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => toast('Export queued — you\'ll be notified', 'success'));
+    }
+  });
+</script>
+</body>
+</html>

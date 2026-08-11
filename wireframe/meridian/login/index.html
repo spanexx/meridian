@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../kit/theme.css">
+</head>
+<body>
+
+<div class="min-h-screen flex flex-col">
+  <!-- Top bar -->
+  <div class="flex items-center justify-between px-6 py-4">
+    <a href="../index.html" class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--gradient-violet);">
+        <i data-lucide="diamond" class="w-4 h-4 text-white"></i>
+      </div>
+      <div>
+        <div class="text-sm font-semibold tracking-tight">MERIDIAN</div>
+        <div class="text-[10px] uppercase tracking-widest text-slate-500">Collective Arbitrage</div>
+      </div>
+    </a>
+    <button class="icon-btn" data-theme-toggle title="Toggle theme"><i data-lucide="moon" class="w-4 h-4"></i></button>
+  </div>
+
+  <!-- Auth card -->
+  <div class="flex-1 flex items-center justify-center px-4 pb-16">
+    <div class="glass w-full max-w-md p-6 sm:p-8">
+      <h1 class="text-2xl font-semibold tracking-tight mb-1">Welcome back</h1>
+      <p class="text-sm text-slate-500 mb-8">Sign in to your MERIDIAN account.</p>
+
+      <form data-auth-form data-redirect="../dashboard/index.html" data-success="Signed in — welcome back" class="space-y-4">
+        <div>
+          <label>Email</label>
+          <input type="email" class="input" value="alex@meridian.com" required>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label style="margin-bottom: 0;">Password</label>
+            <button type="button" class="text-xs text-violet-400 hover:text-violet-300" id="forgotBtn">Forgot password?</button>
+          </div>
+          <input type="password" class="input" value="demo-password" required>
+          <p class="text-[11px] text-slate-500 mt-1.5">Demo: any credentials work.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="remember" checked>
+          <label for="remember" style="margin-bottom: 0;" class="text-xs">Remember me</label>
+        </div>
+        <button type="submit" class="btn btn-primary w-full justify-center"><i data-lucide="log-in" class="w-4 h-4"></i>Sign in</button>
+      </form>
+
+      <div class="my-6 flex items-center gap-3 text-[11px] text-slate-500 uppercase tracking-wider">
+        <div class="flex-1 h-px" style="background: var(--border-subtle);"></div>
+        or
+        <div class="flex-1 h-px" style="background: var(--border-subtle);"></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <button class="btn btn-secondary justify-center" data-auth-form data-success="Passkey requested"><i data-lucide="fingerprint" class="w-4 h-4"></i>Passkey</button>
+        <button class="btn btn-secondary justify-center" data-auth-form data-success="2FA code sent by email"><i data-lucide="shield-check" class="w-4 h-4"></i>2FA code</button>
+      </div>
+
+      <p class="text-xs text-slate-500 mt-8 text-center">
+        New to MERIDIAN?
+        <a href="../register/index.html" class="text-violet-400 hover:text-violet-300 font-medium">Create an account</a>
+      </p>
+    </div>
+  </div>
+
+  <footer class="text-center pb-6 text-[11px] text-slate-500">
+    MERIDIAN · member-owned · every execution reconstructable from the event stream
+  </footer>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const forgot = document.getElementById('forgotBtn');
+    if (forgot) forgot.addEventListener('click', () => toast('Reset link sent to alex@meridian.com', 'success'));
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Settings — MERIDIAN Alpha — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'communities', base: '../../' };</script>
+<script src="../../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../../kit/theme.css">
+</head>
+<body>
+
+<div id="app-shell"></div>
+
+<main class="main">
+
+  <div class="flex items-center gap-2 text-xs text-slate-500 mb-4">
+    <a href="../../communities/index.html" class="hover:text-slate-300">Communities</a>
+    <i data-lucide="chevron-right" class="w-3 h-3"></i>
+    <a href="../index.html" class="hover:text-slate-300">MERIDIAN Alpha</a>
+    <i data-lucide="chevron-right" class="w-3 h-3"></i>
+    <span class="text-slate-300">Settings</span>
+  </div>
+
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <h1 class="page-title mb-0">Community Settings</h1>
+        <span class="badge badge-premium"><i data-lucide="lock" class="w-3 h-3"></i>Admin</span>
+      </div>
+      <p class="page-subtitle">Configure MERIDIAN Alpha. Governance parameters change through a Governance Vote — never unilaterally.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href="../index.html" class="btn btn-ghost"><i data-lucide="arrow-left" class="w-4 h-4"></i>Back to community</a>
+    </div>
+  </header>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- General -->
+      <section class="card p-6">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold">General</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Identity and scope of this community.</p>
+          </div>
+          <i data-lucide="info" class="w-3 h-3 text-slate-500"></i>
+        </div>
+        <form class="space-y-4" id="generalForm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label>Community name</label>
+              <input type="text" class="input" value="MERIDIAN Alpha">
+            </div>
+            <div>
+              <label>Community ID</label>
+              <input type="text" class="input font-mono" value="C-001" disabled>
+            </div>
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea class="input" rows="3">MERIDIAN Alpha is the founding community, focused on general arbitrage opportunities across multiple categories including electronics, collectibles, and fashion.</textarea>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label>Focus</label>
+              <select class="input">
+                <option selected>General arbitrage</option>
+                <option>Electronics</option>
+                <option>Collectibles</option>
+                <option>Fashion &amp; apparel</option>
+                <option>Regional</option>
+              </select>
+            </div>
+            <div>
+              <label>Region</label>
+              <select class="input">
+                <option selected>Global</option>
+                <option>North America</option>
+                <option>Europe</option>
+                <option>Asia-Pacific</option>
+                <option>Latin America</option>
+              </select>
+            </div>
+            <div>
+              <label>Minimum contribution (USD)</label>
+              <input type="number" class="input" value="1000" min="0" step="100">
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="submit" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i>Save general</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Governance Parameters -->
+      <section class="card p-6">
+        <div class="flex items-start justify-between mb-2">
+          <div>
+            <h2 class="text-base font-semibold">Governance Parameters</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Economic targets decided by the Community, not the platform.</p>
+          </div>
+          <span class="badge badge-warning"><i data-lucide="vote" class="w-3 h-3"></i>Vote required</span>
+        </div>
+        <div class="rounded-lg p-3 mb-5 text-xs flex items-start gap-2" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25);">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5"></i>
+          <span class="text-slate-300">Editing any parameter below starts a Governance Vote. The change only applies to future executions after the vote passes — never retroactively. Safety rails (integrity, no-ponzi, human control) are not votable.</span>
+        </div>
+
+        <div class="space-y-5">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="mb-0">ROI floor</label>
+              <span class="text-xs text-slate-500">Last updated 2mo ago · proposer: @amelia</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <input type="number" class="input" value="15" min="0" max="100" step="0.5">
+              <span class="text-sm text-slate-400">%</span>
+              <button class="btn btn-secondary ml-auto" type="button" data-propose><i data-lucide="vote" class="w-4 h-4"></i>Propose change</button>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Minimum acceptable return per execution. Below this, vetting must reject.</p>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="mb-0">Win-rate target</label>
+              <span class="text-xs text-slate-500">Last updated 1mo ago · proposer: @raj</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <input type="number" class="input" value="75" min="0" max="100" step="1">
+              <span class="text-sm text-slate-400">%</span>
+              <button class="btn btn-secondary ml-auto" type="button" data-propose><i data-lucide="vote" class="w-4 h-4"></i>Propose change</button>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Target share of completed executions that turn a profit.</p>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="mb-0">Distribution shares</label>
+              <span class="text-xs text-slate-500">Last updated 3mo ago · proposer: @sofia</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div>
+                <label>Capital</label>
+                <input type="number" class="input" value="60" min="0" max="100" step="1">
+              </div>
+              <div>
+                <label>Signal</label>
+                <input type="number" class="input" value="25" min="0" max="100" step="1">
+              </div>
+              <div>
+                <label>Access</label>
+                <input type="number" class="input" value="15" min="0" max="100" step="1">
+              </div>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Capital : Signal : Access profit split. Must sum to 100% (validated by the engine).</p>
+            <button class="btn btn-secondary mt-3" type="button" data-propose><i data-lucide="vote" class="w-4 h-4"></i>Propose change</button>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="mb-0">Reserve ratio target</label>
+              <span class="text-xs text-slate-500">Current: 18.2% · safety minimum: 10% warn / 5% critical</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <input type="number" class="input" value="18" min="5" max="50" step="0.5">
+              <span class="text-sm text-slate-400">%</span>
+              <button class="btn btn-secondary ml-auto" type="button" data-propose><i data-lucide="vote" class="w-4 h-4"></i>Propose change</button>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Buffer above the central safety minimums. May not be set below 5% (central safety rail).</p>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="mb-0">Vetting thresholds</label>
+              <span class="text-xs text-slate-500">How many votes &amp; how long</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label>Votes required to approve</label>
+                <input type="number" class="input" value="5" min="1" step="1">
+              </div>
+              <div>
+                <label>Voting window (hours)</label>
+                <input type="number" class="input" value="72" min="1" step="1">
+              </div>
+            </div>
+            <button class="btn btn-secondary mt-3" type="button" data-propose><i data-lucide="vote" class="w-4 h-4"></i>Propose change</button>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="mb-0">Single-execution cap</label>
+              <span class="text-xs text-slate-500">Maximum pool deployment on one execution</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="text-sm text-slate-400">$</span>
+              <input type="number" class="input" value="250000" min="0" step="1000">
+              <button class="btn btn-secondary ml-auto" type="button" data-propose><i data-lucide="vote" class="w-4 h-4"></i>Propose change</button>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Deployment ratio per execution must stay in 20–40%, max 50% (central safety rail).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Members & Roles -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-5">Members &amp; Roles</h2>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Open enrollment</div>
+              <div class="text-xs text-slate-500 mt-0.5">Allow new members to join without admin approval</div>
+            </div>
+            <button class="switch" role="switch" aria-checked="true" data-toggle></button>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Require KYC at join</div>
+              <div class="text-xs text-slate-500 mt-0.5">Members must complete KYC before contributing capital</div>
+            </div>
+            <button class="switch" role="switch" aria-checked="true" data-toggle></button>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Vetter privilege auto-promotion</div>
+              <div class="text-xs text-slate-500 mt-0.5">Auto-promote to VETTER when reputation crosses threshold</div>
+            </div>
+            <button class="switch" role="switch" aria-checked="false" data-toggle></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Danger Zone -->
+      <section class="card p-6" style="border-color: rgba(244, 63, 94, 0.35);">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i>
+          <h2 class="text-base font-semibold text-rose-400">Danger Zone</h2>
+        </div>
+        <p class="text-xs text-slate-500 mb-5">Irreversible actions. Each requires admin confirmation and may require a Governance Vote.</p>
+
+        <div class="space-y-3">
+          <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--bg-overlay);">
+            <div>
+              <div class="text-sm font-medium">Archive community</div>
+              <div class="text-xs text-slate-500 mt-0.5">Stops new signals and capital. Existing executions continue to settle.</div>
+            </div>
+            <button class="btn btn-danger" type="button" data-archive><i data-lucide="archive" class="w-4 h-4"></i>Archive</button>
+          </div>
+          <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--bg-overlay);">
+            <div>
+              <div class="text-sm font-medium">Transfer admin role</div>
+              <div class="text-xs text-slate-500 mt-0.5">Hand over to another member. Requires their acceptance.</div>
+            </div>
+            <button class="btn btn-secondary" type="button" data-transfer><i data-lucide="user-cog" class="w-4 h-4"></i>Transfer</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right column -->
+    <div class="space-y-6">
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">At a glance</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Status</span>
+            <span class="badge badge-success">Active</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Members</span>
+            <span class="font-medium">124</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Total pool</span>
+            <span class="font-medium">$1,423,580</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Founded</span>
+            <span class="font-medium">March 2024</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Active proposals</span>
+            <a href="../../governance/index.html" class="font-medium text-amber-400">2 open</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-3">How changes work</h2>
+        <ol class="space-y-2 text-xs text-slate-400 list-decimal pl-4">
+          <li>Edit a parameter and click <span class="text-slate-200">Propose change</span>.</li>
+          <li>A Governance Vote opens — VETTER+ members cast reputation-weighted votes.</li>
+          <li>On pass, the change is recorded with provenance and applies to future executions only.</li>
+          <li>Integrity safety rails (reconciliation, no-ponzi, human control, KYC) cannot be voted.</li>
+        </ol>
+        <a href="../../governance/index.html" class="btn btn-secondary w-full justify-center mt-4">
+          <i data-lucide="vote" class="w-4 h-4"></i>Open governance
+        </a>
+      </section>
+
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-3">Safety rails</h2>
+        <p class="text-xs text-slate-500 mb-3">Never community-governed. Fixed by design.</p>
+        <div class="space-y-2 text-sm">
+          <div class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span>Integrity verification</span></div>
+          <div class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span>Reconciliation checks</span></div>
+          <div class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span>No-ponzi mechanics</span></div>
+          <div class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span>Human control override</span></div>
+          <div class="flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i><span>KYC &amp; identity rules</span></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('generalForm')?.addEventListener('submit', e => {
+      e.preventDefault();
+      toast('General settings saved', 'success');
+    });
+    document.querySelectorAll('[data-propose]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        toast('Governance proposal opened — VETTER+ members will vote', 'info');
+      });
+    });
+    document.querySelector('[data-archive]')?.addEventListener('click', () => {
+      confirmModal({
+        title: 'Archive MERIDIAN Alpha?',
+        body: 'This stops new signals and capital. Existing executions continue to settle. Reversible only by a new governance vote.',
+        confirmLabel: 'Archive community',
+        danger: true,
+      }).then(ok => { if (ok) toast('Archive proposal opened for vote', 'info'); });
+    });
+    document.querySelector('[data-transfer]')?.addEventListener('click', () => {
+      toast('Transfer flow opens a governance proposal', 'info');
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'settings' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../kit/theme.css">
+</head>
+<body>
+
+<div id="app-shell"></div>
+
+<main class="main">
+
+  <header class="mb-8">
+    <h1 class="page-title">Settings</h1>
+    <p class="page-subtitle">Profile, security, notifications, and appearance.</p>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs mb-6" data-tabs data-panel-group="settings">
+    <button class="tab active" data-tab="profile" aria-selected="true"><i data-lucide="user" class="w-4 h-4"></i>Profile</button>
+    <button class="tab" data-tab="security" aria-selected="false"><i data-lucide="shield" class="w-4 h-4"></i>Security</button>
+    <button class="tab" data-tab="notifications" aria-selected="false"><i data-lucide="bell" class="w-4 h-4"></i>Notifications</button>
+    <button class="tab" data-tab="appearance" aria-selected="false"><i data-lucide="palette" class="w-4 h-4"></i>Appearance</button>
+  </div>
+
+  <!-- Profile -->
+  <section class="card p-6 max-w-2xl" data-panel="profile" data-panel-group="settings">
+    <h2 class="text-base font-semibold mb-5">Profile</h2>
+    <form class="space-y-4" id="profileForm">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="avatar" style="width: 3.5rem; height: 3.5rem; font-size: 1.1rem; background: var(--gradient-violet);">AC</div>
+        <div class="flex gap-2">
+          <button type="button" class="btn btn-secondary text-xs" id="uploadPhotoBtn"><i data-lucide="upload" class="w-3 h-3"></i>Upload photo</button>
+          <button type="button" class="btn btn-ghost text-xs" id="removePhotoBtn">Remove</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label>First name</label>
+          <input type="text" class="input" value="Alex">
+        </div>
+        <div>
+          <label>Last name</label>
+          <input type="text" class="input" value="Chen">
+        </div>
+      </div>
+      <div>
+        <label>Display name</label>
+        <input type="text" class="input" value="Alex Chen">
+      </div>
+      <div>
+        <label>Bio</label>
+        <textarea class="input" rows="3" placeholder="Tell the community what you contribute.">Operator &amp; signal contributor. Based in SF.</textarea>
+      </div>
+      <div class="flex justify-end">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Security -->
+  <section class="card p-6 max-w-2xl" data-panel="security" data-panel-group="settings" hidden>
+    <h2 class="text-base font-semibold mb-5">Security</h2>
+    <div class="space-y-6">
+      <div>
+        <h3 class="text-sm font-medium mb-3">Change password</h3>
+        <form class="space-y-4" id="passwordForm">
+          <div>
+            <label>Current password</label>
+            <input type="password" class="input" placeholder="••••••••">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label>New password</label>
+              <input type="password" class="input" placeholder="••••••••">
+            </div>
+            <div>
+              <label>Confirm new password</label>
+              <input type="password" class="input" placeholder="••••••••">
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="submit" class="btn btn-primary">Update password</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="pt-5 border-t" style="border-color: var(--border-subtle);">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-medium">Two-factor authentication</h3>
+            <p class="text-xs text-slate-500 mt-0.5">TOTP app required for withdrawals &gt; $1,000.</p>
+          </div>
+          <button class="switch" role="switch" aria-checked="true" data-toggle></button>
+        </div>
+      </div>
+
+      <div class="pt-5 border-t" style="border-color: var(--border-subtle);">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-medium">Active sessions</h3>
+            <p class="text-xs text-slate-500 mt-0.5">2 sessions · this browser (SF), Firefox (mobile).</p>
+          </div>
+          <button class="btn btn-ghost text-xs" id="signoutOthersBtn">Sign out others</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Notifications -->
+  <section class="card p-6 max-w-2xl" data-panel="notifications" data-panel-group="settings" hidden>
+    <h2 class="text-base font-semibold mb-5">Notifications</h2>
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm font-medium">In-app notifications</div>
+          <div class="text-xs text-slate-500 mt-0.5">Votes, payouts, execution updates</div>
+        </div>
+        <button class="switch" role="switch" aria-checked="true" data-toggle></button>
+      </div>
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm font-medium">Email digest</div>
+          <div class="text-xs text-slate-500 mt-0.5">Daily summary of pool activity</div>
+        </div>
+        <button class="switch" role="switch" aria-checked="true" data-toggle></button>
+      </div>
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm font-medium">Push notifications</div>
+          <div class="text-xs text-slate-500 mt-0.5">Real-time alerts on your devices</div>
+        </div>
+        <button class="switch" role="switch" aria-checked="false" data-toggle></button>
+      </div>
+      <div>
+        <label>Digest frequency</label>
+        <select class="input max-w-xs">
+          <option>Daily (9:00)</option>
+          <option>Weekly (Mon 9:00)</option>
+          <option>Off</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Appearance -->
+  <section class="card p-6 max-w-2xl" data-panel="appearance" data-panel-group="settings" hidden>
+    <h2 class="text-base font-semibold mb-5">Appearance</h2>
+    <div class="space-y-6">
+      <div>
+        <h3 class="text-sm font-medium mb-3">Theme</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <button class="card card-hover p-5 text-left" data-theme-choice="light">
+            <div class="flex items-center justify-between mb-3">
+              <i data-lucide="sun" class="w-5 h-5 text-amber-400"></i>
+              <i data-lucide="check" class="w-4 h-4 text-emerald-400" style="opacity: 0;" data-choice-check></i>
+            </div>
+            <div class="text-sm font-medium">Light</div>
+            <div class="text-xs text-slate-500 mt-0.5">Clean and bright</div>
+          </button>
+          <button class="card card-hover p-5 text-left" data-theme-choice="dark">
+            <div class="flex items-center justify-between mb-3">
+              <i data-lucide="moon" class="w-5 h-5 text-violet-400"></i>
+              <i data-lucide="check" class="w-4 h-4 text-emerald-400" style="opacity: 0;" data-choice-check></i>
+            </div>
+            <div class="text-sm font-medium">Dark</div>
+            <div class="text-xs text-slate-500 mt-0.5">Premium and focused</div>
+          </button>
+        </div>
+      </div>
+      <div class="pt-5 border-t" style="border-color: var(--border-subtle);">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-medium">Compact tables</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Tighter density on list pages</p>
+          </div>
+          <button class="switch" role="switch" aria-checked="false" data-toggle></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const profileForm = document.getElementById('profileForm');
+    if (profileForm) profileForm.addEventListener('submit', e => { e.preventDefault(); toast('Profile saved', 'success'); });
+    const passwordForm = document.getElementById('passwordForm');
+    if (passwordForm) passwordForm.addEventListener('submit', e => { e.preventDefault(); toast('Password updated', 'success'); });
+    const up = document.getElementById('uploadPhotoBtn');
+    if (up) up.addEventListener('click', () => toast('Photo upload is a placeholder in this prototype', 'info'));
+    const rm = document.getElementById('removePhotoBtn');
+    if (rm) rm.addEventListener('click', () => toast('Avatar removed', 'info'));
+    const so = document.getElementById('signoutOthersBtn');
+    if (so) so.addEventListener('click', () => toast('Other sessions signed out', 'success'));
+  });
+</script>
+</body>
+</html>

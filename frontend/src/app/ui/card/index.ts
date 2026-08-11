@@ -1,0 +1,1 @@
+export { UiCardComponent } from './card.component';

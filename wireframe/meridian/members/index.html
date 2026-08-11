@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Members — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'members' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="../kit/theme.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="app-shell"></div>
+<main class="main">
+<header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+<div>
+<h1 class="page-title">Members</h1>
+<p class="page-subtitle">124 members · 42 capital · 67 signal · 15 access contributors.</p>
+</div>
+<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+<input class="input w-full sm:w-56" data-search="" placeholder="Search members…" type="search"/>
+<button class="btn btn-secondary" data-dropdown="tierMenu"><i class="w-4 h-4" data-lucide="filter"></i>Tier</button>
+</div>
+</header>
+<!-- Tier dropdown -->
+<div class="menu" hidden="" id="tierMenu">
+<div class="menu-head">Tier</div>
+<button class="menu-item active" data-filter-category="all"><i class="w-4 h-4" data-lucide="layout-grid"></i>All tiers</button>
+<button class="menu-item" data-filter-category="t4"><span class="badge badge-premium text-[10px]">T4</span>Top contributors</button>
+<button class="menu-item" data-filter-category="t3"><span class="badge badge-info text-[10px]">T3</span>Vetters</button>
+<button class="menu-item" data-filter-category="t2"><span class="badge badge-neutral text-[10px]">T2</span>Contributors</button>
+<button class="menu-item" data-filter-category="t1"><span class="badge badge-neutral text-[10px]">T1</span>New</button>
+</div>
+<!-- Role tabs -->
+<div class="tabs mb-6" data-filter-tabs="">
+<button aria-selected="true" class="tab active" data-filter-tab="all">All <span class="text-slate-500">124</span></button>
+<button aria-selected="false" class="tab" data-filter-tab="capital">Capital <span class="text-slate-500">42</span></button>
+<button aria-selected="false" class="tab" data-filter-tab="signal">Signal <span class="text-slate-500">67</span></button>
+<button aria-selected="false" class="tab" data-filter-tab="access">Access <span class="text-slate-500">15</span></button>
+</div>
+<div data-list="" data-page-size="8">
+<!-- Skeleton -->
+<section class="card p-0 overflow-hidden" data-skeleton="">
+<div class="p-5 space-y-4">
+<div class="skeleton h-10 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+</div>
+</section>
+<section class="card p-0 overflow-hidden" data-list-body="" hidden="">
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Member</th>
+<th class="hidden md:table-cell">Role</th>
+<th>Tier</th>
+<th class="hidden sm:table-cell">Reputation</th>
+<th class="hidden md:table-cell">Contribution</th>
+<th class="hidden lg:table-cell">Signals</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="table-row" data-category="t4" data-filterable="" data-status="capital">
+<td><a class="flex items-center gap-3" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-violet);">DV</div><div><div class="text-sm font-medium">Dana Voss</div><div class="text-xs text-slate-500">Düsseldorf, DE</div></div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Capital</span></td>
+<td><span class="badge badge-premium">T4</span></td>
+<td class="hidden sm:table-cell"><span class="text-sm font-semibold text-gradient-violet">92</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-300">$284,500</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">4 · +28%</span></td>
+<td><a href="../member-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="t4" data-filterable="" data-status="capital">
+<td><a class="flex items-center gap-3" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-emerald);">RK</div><div><div class="text-sm font-medium">Ravi Kumar</div><div class="text-xs text-slate-500">London, UK</div></div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Capital</span></td>
+<td><span class="badge badge-premium">T4</span></td>
+<td class="hidden sm:table-cell"><span class="text-sm font-semibold text-gradient-violet">88</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-300">$198,200</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">6 · +22%</span></td>
+<td><a href="../member-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="t3" data-filterable="" data-status="signal">
+<td><a class="flex items-center gap-3" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-amber);">MR</div><div><div class="text-sm font-medium">Mike Rivera</div><div class="text-xs text-slate-500">Boston, US</div></div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Signal</span></td>
+<td><span class="badge badge-info">T3</span></td>
+<td class="hidden sm:table-cell"><span class="text-sm font-semibold text-gradient-violet">78</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-300">$3,200</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">14 · +24.6%</span></td>
+<td><a href="../member-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="t3" data-filterable="" data-status="signal">
+<td><a class="flex items-center gap-3" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-violet);">SP</div><div><div class="text-sm font-medium">Sarah Park</div><div class="text-xs text-slate-500">Seoul, KR</div></div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Signal</span></td>
+<td><span class="badge badge-info">T3</span></td>
+<td class="hidden sm:table-cell"><span class="text-sm font-semibold text-gradient-violet">81</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-300">$1,500</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">11 · +31%</span></td>
+<td><a href="../member-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="t3" data-filterable="" data-status="access">
+<td><a class="flex items-center gap-3" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-blue);">JT</div><div><div class="text-sm font-medium">Jules Tan</div><div class="text-xs text-slate-500">Singapore, SG</div></div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Access</span></td>
+<td><span class="badge badge-info">T3</span></td>
+<td class="hidden sm:table-cell"><span class="text-sm font-semibold text-gradient-violet">74</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-300">3 creds</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">7 · +19%</span></td>
+<td><a href="../member-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="t3" data-filterable="" data-status="capital">
+<td><a class="flex items-center gap-3" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-amber);">LM</div><div><div class="text-sm font-medium">Lena Moreau</div><div class="text-xs text-slate-500">Paris, FR</div></div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Capital</span></td>
+<td><span class="badge badge-info">T3</span></td>
+<td class="hidden sm:table-cell"><span class="text-sm font-semibold text-gradient-violet">69</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-300">$142,000</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">3 · +16%</span></td>
+<td><a href="../member-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="t2" data-filterable="" data-status="signal">
+<td><a class="flex items-center gap-3" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-amber);">KH</div><div><div class="text-sm font-medium">Kenji Honda</div><div class="text-xs text-slate-500">Osaka, JP</div></div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Signal</span></td>
+<td><span class="badge badge-neutral">T2</span></td>
+<td class="hidden sm:table-cell"><span class="text-sm font-semibold text-gradient-violet">55</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-300">$800</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">9 · +12%</span></td>
+<td><a href="../member-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="t3" data-filterable="" data-status="capital">
+<td><a class="flex items-center gap-3" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-blue);">TA</div><div><div class="text-sm font-medium">Tomás Alves</div><div class="text-xs text-slate-500">Lisbon, PT</div></div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Capital</span></td>
+<td><span class="badge badge-info">T3</span></td>
+<td class="hidden sm:table-cell"><span class="text-sm font-semibold text-gradient-violet">64</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-300">$96,500</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">5 · +14%</span></td>
+<td><a href="../member-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="t2" data-filterable="" data-status="access">
+<td><a class="flex items-center gap-3" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-violet);">YN</div><div><div class="text-sm font-medium">Yuki Nakamura</div><div class="text-xs text-slate-500">Tokyo, JP</div></div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Access</span></td>
+<td><span class="badge badge-neutral">T2</span></td>
+<td class="hidden sm:table-cell"><span class="text-sm font-semibold text-gradient-violet">48</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-300">1 cred</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">2 · +8%</span></td>
+<td><a href="../member-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="t1" data-filterable="" data-status="signal">
+<td><a class="flex items-center gap-3" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-emerald);">ON</div><div><div class="text-sm font-medium">Omar Nasser</div><div class="text-xs text-slate-500">Cairo, EG</div></div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Signal</span></td>
+<td><span class="badge badge-neutral">T1</span></td>
+<td class="hidden sm:table-cell"><span class="text-sm font-semibold text-gradient-violet">22</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-300">$250</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">1 · —</span></td>
+<td><a href="../member-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+</tbody>
+</table></div>
+<!-- Empty state -->
+<div class="empty" data-empty="" hidden="">
+<i class="w-10 h-10 mx-auto" data-lucide="users"></i>
+<p class="text-sm font-medium text-slate-400 mb-1">No members match</p>
+<p class="text-xs">Try a different tier, role, or search term.</p>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between px-5 py-3 text-xs text-slate-500">
+<span>Showing 8 of 124</span>
+<div class="flex items-center gap-2">
+<button class="btn btn-ghost text-xs px-2 py-1" data-page-prev=""><i class="w-3 h-3" data-lucide="chevron-left"></i></button>
+<span data-page-num="">1 / 16</span>
+<button class="btn btn-ghost text-xs px-2 py-1" data-page-next=""><i class="w-3 h-3" data-lucide="chevron-right"></i></button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body>
+</html>

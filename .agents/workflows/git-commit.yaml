@@ -1,0 +1,88 @@
+name: git-commit
+description: |
+  Standard workflow for committing work on a feature branch and opening a
+  PR against master. Run whenever you have one logical change ready to
+  ship.
+
+triggers:
+  - Finished implementing one logical change (feature, fix, refactor, doc, test, skill, workflow, ci change)
+  - User says "commit this", "ship it", "open a PR"
+  - End of any agent session with uncommitted changes
+
+steps:
+  - name: Confirm clean working tree
+    run: "git status --porcelain"
+    expect: empty output (or only the files you intentionally changed)
+
+  - name: Confirm on a feature branch
+    run: "git branch --show-current"
+    expect: branch matching the type-slug pattern per git-conventions skill
+
+  - name: Confirm scope of change
+    run: |
+      git status --short
+      git diff --stat
+    expect: only files relevant to the current change; no drive-by edits
+
+  - name: Run scope-appropriate verify gates
+    frontend_change:
+      - "cd frontend && npm audit --omit=dev"
+      - "cd frontend && npx ng build"
+      - "cd frontend && npx playwright test"
+    backend_change:
+      - "cd backend && go vet ./..."
+      - "cd backend && go test ./..."
+      - "cd backend && go build ./..."
+    docs_change:
+      - "read files referenced in the change; confirm wording still matches code"
+    skill_or_workflow_change:
+      - "read the file; confirm it triggers correctly per its description"
+
+  - name: Stage changes explicitly
+    rule: |
+      Never use git add . or git add -A. Stage only the files you changed.
+    run: "git add <specific files>"
+
+  - name: Write commit message per Conventional Commits
+    format: |
+      type(scope): subject
+
+      body — why, not what
+
+      Refs: <docs path or decision log line>
+    run: "git commit -m '<subject>' -m '<body>'"
+
+  - name: Confirm commit landed
+    run: |
+      git log --oneline -1
+      git show --stat HEAD
+    expect: one new commit, files match what was staged
+
+  - name: Push branch
+    run: "git push -u origin HEAD"
+    expect: branch pushed; remote URL printed
+
+  - name: Open PR
+    run: |
+      gh pr create --base master --head "$(git branch --show-current)" \
+        --title "<type>(<scope>): <subject>" \
+        --body-file .github/pull_request_template.md
+    fallback: |
+      If gh CLI is not authenticated, instruct the user to run the
+      command manually or run gh auth login first.
+
+verify:
+  - "git log --oneline master..HEAD shows at least one commit on the branch"
+  - "git diff master --stat shows only intended files changed"
+  - "Frontend change: cd frontend && npx playwright test is green"
+  - "Backend change: cd backend && go test ./... is green"
+  - "PR exists with title + body filled from the PR template"
+
+notes:
+  - One commit per logical change. Multiple commits OK if a single change
+    needs them (for example test plus impl plus docs). Multiple unrelated
+    changes belong on separate branches.
+  - Squash fixup commits before opening the PR using git rebase -i --autosquash master.
+  - Do not push red. If a gate fails, fix or revert before pushing.
+  - When the repo is fresh with no remote yet, the push step is a no-op
+    and a follow-up git remote add origin <url> is needed.

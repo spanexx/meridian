@@ -1,0 +1,239 @@
+MERIDIAN WIREFRAME STORY
+A page-by-page narrative of what happens on each page of the wireframe, why a user comes to it, and how it connects back to the page they came from. Each page is also checked against the design docs to confirm it matches what was planned.
+
+The pages are ordered by member journey: first the unauthenticated visitor, then the inside-the-app member, then back to support and administration surfaces. This is the path a person actually takes, not the alphabetical list of folders.
+
+
+1  LANDING  at wireframe/meridian/landing/index.html
+
+This is the home of MERIDIAN on the open web. A person arrives here from a search, a referral, a link someone sent them, or because they typed meridian.com. They have never created an account. They want to know two things: what is this, and should I join.
+
+The page answers both in one continuous scroll. The top hero says profit together from real arbitrage, with three numbers underneath: pool capital 1.42M, 124 members, 47 executions settled. The terminal card on the right shows a live signal flowing through the system in real time, just to prove this is a working engine, not a brochure. Scrolling down, the page explains the three ways to participate: capital, signals, or access. Then the live ticker scrolls real opportunity cards across the screen. Then by the numbers with real charts. Then a five step process flow. Then the five design principles. Then member testimonials. Then a call to action. Then the footer sitemap.
+
+Everything on this page is meant to convert a curious visitor into one of two actions: sign in or join the community. Those are the two primary buttons in the header, and the join button is the only brightly coloured call. Connection to the previous page is simply none. The user is fresh. The connection from this page forward is decided by which button they press, so landing fans out into two paths: register if they are new, login if they already have an account.
+
+Cross check against the docs. The docs describe MERIDIAN as a member owned cooperative that pools capital, signals, and access. The landing states exactly that in the hero, the three ways section, and the principles. The five principles and the no recruitment incentive promise match docs/00-system-overview.md. The pool capital number is the same 1.42M seen across the rest of the wireframe so the landing is consistent with the inside app view. This page matches what was planned.
+
+
+2  REGISTER  at wireframe/meridian/register/index.html
+
+A visitor who chose join the community on the landing lands here. They have never had a MERIDIAN account before. They want to commit, and they want the commitment to be quick and to set honest expectations.
+
+The page is a single auth card with a heading that says join the pool and a one line description that says register to contribute capital, signals, or access. The form asks for name, email, password, confirm password, and a terms checkbox that explicitly states no deposit based returns, no recruitment rewards, integrity first. There is no multi step onboarding, no marketing wizard. Submit creates the account.
+
+The connect from the previous page is one click. The connect forward is identity and access then redirects to dashboard where they become a member. The footer reminds them again that payouts require KYC and that humans decide and AI only recommends, which sets expectations for what they are about to enter.
+
+Cross check against the docs. Docs/journeys/01-registration.md describes the registration journey as straightforward identity creation with KYC noted as a later step rather than gating registration. The register page matches that: it creates the identity, and the KYC requirement surfaces later on profile and in withdrawal flows. The terms wording matches the spirit of docs/00-goal-analysis.md which forbids recruitment based growth and requires integrity.
+
+
+3  LOGIN  at wireframe/meridian/login/index.html
+
+A returning member arrives here. They might have come from the landing via sign in, or they might have been redirected here because the app did not recognise their session. They want to get back inside without friction.
+
+The page is the auth card again, this time with email and password and a demo notice that any credentials work in this prototype. There is also a passkey option and a two factor code option to set the expectation that secure access is the default. There is a forgot password link that resets by email.
+
+Connection to previous page. From the landing it is one click on sign in. From anywhere else in the app it is the place a user lands when their session expires. Connection forward is the same as register: a successful authentication redirects to dashboard. A new user who mistyped the page could click the link to create an account and end up on register instead.
+
+Cross check against the docs. The docs describe JWT access tokens plus refresh tokens plus optional two factor authentication as the security model. The login page surfaces email and password plus passkey and two factor as the three supported methods, which matches the security model in docs/00-system-overview.md.
+
+
+4  DASHBOARD  at wireframe/meridian/dashboard/index.html
+
+A signed in member lands here as their home. It is the first thing they see after login. They want a one screen summary: am I making money, what is happening, what should I do.
+
+The page puts everything they need to know on one screen. Top row is four KPI cards showing total pool, active capital, active members, and open opportunities. The member clicks on the active capital card to drill into executions, on active members to see members, on open opportunities to vote. Below the KPI row, the left column is two stacked sections, first active executions with progress bars on three live deals, then latest opportunities with a table of signals awaiting vetting. The right column is two stacked cards: pool health with reserve ratio, liquidity, and deployment gauges plus a sparkline, and the member's own portfolio with their capital contributed, lifetime earnings, reputation tier, and signal and votes tally.
+
+Connection to previous page. The dashboard is the destination after login or register. From here every other meaningful page in the app is reachable: submit signal in the header, executions from the active capital card and the active executions list, members from the active members card, opportunities from the latest opportunities table, profile from the portfolio card, governance from the votes count.
+
+Cross check against the docs. The docs treat the dashboard as the centre of the member experience. Four KPI cards mirror the four primary entities. The portfolio card surfaces the member's reputation tier which matches the reputation engine in docs/00-system-overview.md. The pool health bands show reserve ratio, liquidity, and deployment which match docs/money/01 and the safety rails in docs/00-goal-analysis.md. This page matches what was planned.
+
+
+5  COMMUNITIES LIST  at wireframe/meridian/communities/index.html
+
+A member navigates here when they want to see the broader cooperative beyond the single community they are part of, or when they want to propose forming a new one. v1 of the system runs only one active community, but the governance model is generic, so a second one can be proposed and voted in.
+
+The page is a list of communities in a table with the community name and icon, status, total pool, members, ROI, and executions. There are status tabs for all, active, proposed, and archived. A status filter dropdown lets the member focus on one state. At the bottom is a button to propose community, which opens a modal that captures name, focus area, geographic scope, description, and terms acceptance.
+
+Connection to previous page. The most natural entry is the sidebar or a deep link, since the dashboard does not feature communities prominently. Once on the communities list, clicking any row opens that community's detail page. The list is the directory.
+
+Cross check against the docs. Docs/00-goal-analysis.md says v1 runs one community while the governance model is defined generically. The list page makes that visible by showing the active community plus the proposed and archived placeholders. The propose modal surfaces the same fields the docs imply a community needs, name focus and scope.
+
+
+6  COMMUNITY DETAIL  at wireframe/meridian/community-detail/index.html
+
+A member clicks on a row in the communities list and lands here. They want to understand this specific community: how big it is, what governs it, what its recent activity looks like.
+
+The page shows the community name and icon at the top, with action buttons to copy link or open a three item menu. The breadcrumb at the very top says communities and then this community so the member always knows how to get back to the list. Below the header is a row of four KPI cards: total pool, members, ROI year to date, and executions. The left column is the Community Governed Parameters section, listing ROI floor, win-rate target, distribution shares, and reserve ratio target with their current values and a link to view proposals in governance. Below that is recent executions with progress bars. The right column has an about section with the community description and key facts, a member composition section showing capital, signal, and access provider breakdown, and a safety rails section listing the integrity principles that are never voted.
+
+Connection to previous page. The breadcrumb at the top is communities and then this community. The links in the actions menu take the member to governance, to members, and to community settings. The community governed parameters link goes to governance. The recent executions cards link to execution detail.
+
+Cross check against the docs. The community governed parameters shown here are exactly the four major economic parameters from docs/00-goal-analysis.md: ROI floor, win-rate target, distribution shares, reserve ratio target. The safety rails section mirrors the integrity safety rails listed in the same doc. The settings page is a subpage of this detail. This matches what was planned.
+
+
+7  COMMUNITY SETTINGS  at wireframe/meridian/community-detail/settings/index.html
+
+A community admin opens this page from the actions menu on community detail. They want to configure the community's identity and to review what is community governed versus what is integrity locked.
+
+The page has a breadcrumb pointing back through communities and the community itself to settings. The header labels the page Community Settings and marks it as admin. The first section is general identity: name, fixed identifier, description, focus, region, minimum contribution. The second section is governance parameters, listing all six Community Governed Parameters from the docs: ROI floor, win-rate target, distribution shares with capital signal and access, reserve ratio target, vetting thresholds with votes required and voting window, single execution cap. Each parameter shows its current value, when it was last updated and by whom, and a propose change button that opens a Governance Vote. The third section is members and roles with three toggles: open enrollment, KYC at join, and vetter auto promotion. The fourth section is the danger zone with archive community and transfer admin actions. The right column has an at a glance summary, an explanation of how changes work through Governance Vote, and the fixed safety rails.
+
+Connection to previous page. The breadcrumb takes the member back step by step to communities. The link in the sidebar in the header returns them to community detail. The propose change buttons take them to governance. The buttons in the danger zone create Governance Vote proposals too, because the docs say all changes go through vote, never unilaterally.
+
+Cross check against the docs. The six governance parameters exactly match docs/00-goal-analysis.md which lists ROI floor, win-rate target, distribution shares, reserve target, vetting thresholds, and single execution cap as the Community Governed Parameters. The safety rails again match the never voted integrity items. The propose change rather than edit pattern enforces AI recommends humans decide from the engineering principles. This page matches what was planned.
+
+
+8  MEMBERS LIST  at wireframe/meridian/members/index.html
+
+A member navigates here to see who else is in the pool, to find contributors they might want to follow, or to understand who they are dealing with.
+
+The page is a table of members with avatar and name, role badge, tier badge, reputation score, contribution amount, and signals count. There are role tabs of all, capital, signal, and access. There is a tier filter dropdown. The role tabs and tier filter together let the member slice the roster in different ways, for example show only T3 vetters, or only access contributors.
+
+Connection to previous page. The most natural entry is from the active members KPI card on the dashboard which links here with the count of 124. From here clicking any row opens that member's detail page.
+
+Cross check against the docs. The four roles capital, signal, access plus community match the four contribution types tracked per member in docs/02-data-model.md. The tier system of T1 to T4 maps to the reputation tiers in the reputation engine. The reputation score column mirrors the reputation scores collection.
+
+
+9  MEMBER DETAIL  at wireframe/meridian/member-detail/index.html
+
+A member clicks on another member's row and lands here. They want to evaluate that person: are they trustworthy, what have they contributed, do they have access that matters.
+
+The page shows the member's avatar, name, badge combining role and tier, and a verified badge. Three big numbers summarise: overall reputation score, capital deployed, and lifetime earned. The left section is reputation broken down into four cards, one per contribution type: signal accuracy, capital stability, access utilization, community participation. Each card has the raw score, a progress bar, and a one line commentary like 4 submitted 3 approved. The right column has a contribution card showing capital deployed, executions funded, average share of pool, and privileges, and an access credentials card listing the verified resources the member offers. Below is a recent activity table with links to the underlying events: a capital allocation links to execution detail, a vote links to governance, a payout links to payouts, a deposit links to pool.
+
+Connection to previous page. The breadcrumb at the top is members and then this member. From here each event row in the activity table takes the member to the underlying page, which is part of what makes MERIDIAN transparent: every action is traceable to the entity it touched.
+
+Cross check against the docs. The four reputation dimensions exactly match the docs' description of reputation as a track record across contribution types. The access credentials card demonstrates the access contribution, where credentials and licenses and regions unlock deals. The transparent activity table with links to underlying entities mirrors docs/00-system-overview.md which says every action is traceable through the event stream.
+
+
+10  OPPORTUNITIES LIST  at wireframe/meridian/opportunities/index.html
+
+A member navigates here to see what signals are in the pipeline and to vote on the ones still in vetting. The most common entry is from the dashboard which has both a top row KPI card and a latest opportunities table linking here.
+
+The page is a table of signals with reference number, title and subtitle, category, submitted by avatar and name, estimated ROI, capital needed, votes tally, and status badge. There are status tabs for all, pending, in vetting, approved, executing, and rejected. There is a category filter dropdown. A signal can be in any of six states: pending means submitted but auto-checks have not run, in vetting means auto-checks passed and the Community is voting, approved means voted through but not yet funded, executing means an execution is live, rejected means voted down.
+
+Connection to previous page. From the dashboard the member arrives here to find more signals than the table showed. From here, clicking a row opens the opportunity detail page where the member reads the full breakdown and casts their vote. The row in executing status goes to execution detail instead because the signal has become an execution.
+
+Cross check against the docs. Docs/journeys/03-signal-submission.md and docs/journeys/04-vetting-process.md describe the pipeline from submit to vote to approve. The six statuses on this page and the categories match those journeys. The fact that vetoing decisions are tracked with vote tallies ties to docs/00-goal-analysis.md which says vetting decisions are reputation weighted.
+
+
+11  OPPORTUNITY DETAIL  at wireframe/meridian/opportunity-detail/index.html
+
+A member clicks on a signal in the opportunities list and lands here. They have either found a deal they want to support, or they have been notified that their vote is needed because they hold vetting privilege.
+
+The page shows the breadcrumb opportunities and the reference. The header has the reference, an in vetting badge, a category badge, the title, and a one line description. Below the header, the left column has four cards: acquisition with source, estimated cost, quantity, and deadline, then resale with channels, estimated value, time to liquidate, and confidence, then financials with profit, ROI, risk, and payback, then evidence with three image placeholders. The fifth card is vetting, with three tabs: auto checks showing the AI recommendation, votes showing the running tally and individual voters, and comments with a real form. The right column has your vote with two buttons, a submitter card linking to the member detail, and a timeline showing submitted, auto checks ran, vetting opened, and decision pending.
+
+Connection to previous page. The breadcrumb at the top takes the member back to opportunities. The submitter card opens member detail. The share and bookmark buttons let the member share outside or save the signal. After voting or commenting, the page stays where it is, but the live update increments the tally without a refresh.
+
+Cross check against the docs. The vetting section with auto checks as advisory and human votes as the decision matches AI recommends humans decide. The vote buttons on the right implement the Reputation Vote mechanism from docs/00-goal-analysis.md. The timeline of events matches the event stream doctrine from docs/00-system-overview.md which says every action is recorded as an event.
+
+
+12  SUBMIT SIGNAL  at wireframe/meridian/submit-signal/index.html
+
+A member opens this page when they have spotted an opportunity and want to put it in front of the Community. The most common entry is from a button in the header of the opportunities list or the dashboard.
+
+The page is a five step wizard. Step one is details: title, category, risk, description. Step two is acquisition: source, location, estimated cost, quantity, deadline, access needed, skills needed. Step three is resale: channels picked from checkboxes, estimated value, time to liquidate, confidence, then a calculated profit and ROI. Step four is evidence: image upload and links and notes. Step five is review: a summary card with the proposed numbers and a note that auto checks will run on submit and that the member's vote carries 1.4 times weight because they are a Vetter. The right column has a live preview that mirrors the form, tips for a good submission, and a panel showing the three auto checks as pending until submit.
+
+Connection to previous page. The member came from somewhere in the app that surfaced the Submit Signal button. On submit, the wizard completes and the page redirects to opportunities. On save as draft, the page toasts that the draft is saved and they can resume anytime.
+
+Cross check against the docs. Docs/journeys/03-signal-submission.md describes signal submission with full financial breakdown. This page captures exactly that: buy price, sell price, costs, estimated ROI, with evidence. The advisory note about auto checks and the vetter weight 1.4 matches docs/00-goal-analysis.md which says AI recommends and humans decide and votes are reputation weighted.
+
+
+13  EXECUTIONS LIST  at wireframe/meridian/executions/index.html
+
+A member navigates here to see which approved opportunities are currently in flight and to follow the progress of a deal they have capital in. The most common entry is the active capital KPI card on the dashboard.
+
+The page is a grid of execution cards, each with reference number, status badge, title, source opportunity reference, deployed amount, recovered amount, ROI, a progress bar, and a status indicator. There are tabs for all, active, completed, and failed. Active cards show live counters like 3 of 8 sold and ETA 4 days. Completed cards show the closing date and a paid out link. Failed cards show the loss and a reserve link to explain how the loss is absorbed.
+
+Connection to previous page. From the dashboard the member sees three active executions and clicks through. From here clicking a card opens execution detail. From a completed card the paid out link goes to payouts. From a failed card the reserve link goes to pool so the member can see where the loss landed.
+
+Cross check against the docs. The four statuses active, completed, failed correspond to the lifecycle in docs/journeys/05-execution-flow.md. The reservation of loss absorption matches docs/money which says a central reserve absorbs losses to protect the platform from the no ponzi requirement.
+
+
+14  EXECUTION DETAIL  at wireframe/meridian/execution-detail/index.html
+
+A member clicks on an execution card and lands here. They have either contributed capital to it, are vetting signals that depend on it, or are simply tracking performance.
+
+The page shows the breadcrumb executions and the reference. The header has the reference, a listed badge, a category badge, the title, and a link back to the originating opportunity plus operator name and days in flight. Below the header is a five step timeline: approved, funded, acquired, listed, and sold, with the current step highlighted in amber and future steps muted. The left column has capital showing allocated, spent, and recovered, then an inventory grid with one card per item showing image, size, channel, asking price, and sold or listed badge, then an event log showing the latest events in chronological order with timestamps. The right column has a payout preview showing gross revenue, total costs, platform fee, net profit, and the projected distribution by share to capital, signal, access, operations, and platform, then a participants card showing the operator plus signal and access contributors.
+
+Connection to previous page. The breadcrumb at the top goes back to executions. The opportunity link in the subtitle goes back to opportunity detail. Each participant card opens member detail. The export button lets the member queue an export of the events, demonstrating that the execution is reconstructable from the event stream.
+
+Cross check against the docs. The timeline of approved funded acquired listed sold mirrors docs/journeys/05-execution-flow.md. The event log of money allocated, opportunity approved, execution acquired, execution item sold, execution item listed lines up with the event taxonomy in docs/01-architecture.md. The payout preview with the share split matches docs/money/02 which says profits are distributed by the formula which is community governed.
+
+
+15  POOL  at wireframe/meridian/pool/index.html
+
+A member opens this page to check the overall health of the capital pool. They want to know if their deposits are safe, how much is locked in active deals, and whether reserve and liquidity are healthy.
+
+The page header has buttons for snapshot, withdraw, and deposit, each opening a modal. The KPI row at the top shows total available, total locked, reserve, and pending. The middle section is a large chart of available, locked, and reserve over time with a period selector of 7 days, 90 days, or 1 year, and to the right a reserve ratio gauge dial showing the current ratio with red yellow green bands. The bottom section has two cards: health metrics with reserve ratio, liquidity, deployment, and pending withdrawals as progress bars, and a top capital contributors table listing the largest capital providers with their tier, tenure, balance, share, and a mini progress bar.
+
+Connection to previous page. From the dashboard's pool health card the member drills into the pool. From the executions list's reserve link on a failed execution the member comes here to see the loss absorbed. From the community detail member composition section they may also arrive. The deposit and withdraw modals flow back into this same page.
+
+Cross check against the docs. The four pool metrics match docs/money/01 which defines available, locked, reserve, and pending. The reserve ratio safety bands of healthy at or above 12 percent, warn under 10 percent, critical under 5 percent match the safety rails in docs/00-goal-analysis.md. The deployment band of 20 to 40 percent with cap 50 percent matches the deployment ratio safety rail in the same doc.
+
+
+16  PAYOUTS  at wireframe/meridian/payouts/index.html
+
+A member opens this page to see when they got paid or when they are about to be paid. The most common entry is from the portfolio card on the dashboard which shows total earned or from the profile page.
+
+The page has a KPI row of three cards: distributed year to date, pending, and average execution ROI with the community floor. Below that is the split formula card showing five percentage tiles for capital, signal, access, operations, and platform with the date and approval percentage of the last community vote that set them. Below that is a table of payouts with execution reference, member avatar and name, type badge, amount in green, share percentage, status badge, and date. There are status tabs for all, pending, and paid. There is a type filter dropdown.
+
+Connection to previous page. From the dashboard portfolio card or from the profile payouts card the member drills into the payout history. From a completed execution card the paid out link goes to payouts filtered to that source execution. Every execution reference in the table links to the execution detail page, each member links to member detail. The link at the top of the split formula card goes to governance so the member can see how the formula was set.
+
+Cross check against the docs. The five share tiles capital 46 signal 30 access 12 operations 8 platform 4 sum to 100 percent as required. The set by vote date and approval percentage demonstrate the provenance requirement from docs/00-goal-analysis.md. The connection to individual payouts per member type matches docs/money/02.
+
+
+17  GOVERNANCE  at wireframe/meridian/governance/index.html
+
+A member opens this page when they want to propose a change to a community governed parameter or when they want to vote on proposals that are open. The most common entry is the votes tally card on the dashboard, or the link from any community governed parameters display anywhere in the app.
+
+The page header has a propose change button that opens a modal with parameter dropdown, proposed value, rationale, and an info note that results apply to future executions only and safety rails cannot be voted. Below the header is the active proposals section showing two open proposals with their titles, proposers, rationale, current approve and reject tallies, and two big vote buttons. Below that is the current values grid showing every Community Governed Parameter: ROI floor, win-rate target, reserve target, single execution cap, distribution shares with all five sub shares, each tagged with set by vote date and approval percentage. The right column is the safety rails card listing every item that is never voted: reconciliation, no ponzi, KYC, human control, technical architecture. Below that is recent votes showing the last four governance votes with outcomes.
+
+Connection to previous page. From the dashboard the member lands here to vote on an open proposal. From community detail they click view proposals and arrive here. From the settings page propose change buttons they land here in the propose modal with a parameter pre selected. Every set by vote link goes to verify what governance decided, and the safety rails card makes clear what is not votable.
+
+Cross check against the docs. The active proposals and the parameters grid implement exactly the Community Governed Parameters list from docs/00-goal-analysis.md: ROI floor, win-rate target, distribution shares, reserve ratio target, vetting thresholds, single execution cap. The never voted safety rails card mirrors the integrity safety rails in the same doc. The mechanism using VETTER plus reputation weighted votes is the governance mechanism described in docs/00-goal-analysis.md.
+
+
+18  NOTIFICATIONS  at wireframe/meridian/notifications/index.html
+
+A member opens this page to see what has happened recently. Many notifications link directly to the underlying event, so this page is really a derivative view of the event stream, not a separate feature.
+
+The header has mark all read and preferences buttons. The preferences modal has four switches: voting reminders, execution updates, pool health alerts, payouts. Below the header are tabs for all and unread. Below that is the notification list, each row being an icon, headline, supporting line, and timestamp, with an unread dot on the three newest items. The notifications in order are: a vetting reminder linking to opportunity detail, an execution sale linking to execution detail, a reserve ratio health update linking to pool, a payout preview link to payouts, a new proposal linking to governance, a daily reconciliation, a reputation milestone linking to profile, and a snapshot available linking to pool.
+
+Connection to previous page. Each notification deep links to the underlying page that owns the event. The preferences modal lets the member tune what reaches them. Mark all read is a local UI state only.
+
+Cross check against the docs. Notifications are derived from the event stream, exactly as docs/01-architecture.md describes the kernel's only data being events. The notification categories span every domain: vetting, execution, pool, payouts, governance, reputation. This page matches what was planned.
+
+
+19  PROFILE  at wireframe/meridian/profile/index.html
+
+A member opens this page to see and manage their own identity and standing in the pool. The most common entry is the portfolio card on the dashboard, or after a payout lands to see the updated lifetime number.
+
+The page shows the member's avatar, name, role and tier badge, and verified badge. Three big numbers summarise: overall reputation, signals approved of total submitted, lifetime earned. The left column is the reputation section with four cards one per contribution type showing score and progress bar and supporting numbers like approval rate and average ROI for signal, or tenure and average balance for capital. Below the cards is a privileges section listing what the member can do, with a link to governance. The right column has payouts showing the breakdown by contribution type, and identity showing email, KYC verified, two factor on, country. Below the columns is a recent activity table with the same shape as the member detail page: each event links to the underlying entity.
+
+Connection to previous page. From the dashboard portfolio card the member drills in. From the header settings button they go to settings. From the sign out button the session ends. From the recent activity rows the member navigates to opportunity detail, execution detail, payouts, or pool. The header sit alongside member detail, with the same layout pattern but facing the viewer instead of another member.
+
+Cross check against the docs. The four reputation dimensions match the reputation engine. The privileges shown reflect the reputation weighted permissions. The identity card surfaces KYC and two factor which are required for withdrawals per docs/00-system-overview.md. The transparent activity table with linked entities matches the event stream doctrine.
+
+
+20  SETTINGS  at wireframe/meridian/settings/index.html
+
+A member opens this page to manage their account, security, notifications, and appearance. The most common entry is the settings button on the profile page or the gear icon in the header.
+
+The page has a tabbed interface with four tabs: profile, security, notifications, and appearance. The profile tab lets the member edit their avatar, first name, last name, display name, and bio. The security tab handles password change, two factor toggle, and active sessions sign out. The notifications tab is a member's per channel preferences for in app, email digest, push, and the digest frequency. The appearance tab has light and dark theme cards and a compact tables switch. The sidebar stays on settings for the duration of the tabbed flow.
+
+Connection to previous page. From the profile page the member opens settings to change personal information. From the gear icon in the header they open settings. From the notifications preferences modal on the notifications page they could equivalently reach the notifications tab here. The settings page is a personal account surface, not a community surface, so the breadcrumb story is just within the same member's own experience.
+
+Cross check against the docs. The four tabs map cleanly to identity, security, notifications, and appearance, all of which are stated as concerns in docs/00-system-overview.md. Two factor TOTP and password management match the security model in that doc. The notification preferences are a personal layer on top of the event stream, which is consistent with the architecture where notifications are derived from events but member preferences are personal.
+
+
+WHAT THIS STORY REVEALS
+
+The pages form one continuous story that matches the docs in three layers:
+
+Layer 1 is identity. A visitor hits landing, then register or login, becomes a member, and lands on dashboard. The dashboard is the centre of their experience and links out to everything else.
+
+Layer 2 is contribution. From the dashboard a member submits a signal at submit signal, vets other signals at opportunities and opportunity detail, watches their contributions become executions at executions and execution detail, and gets paid at payouts. Capital goes through pool. Reputation aggregates at profile. Members they meet along the way are at members and member detail. Communities and community detail and community settings describe the cooperative they belong to.
+
+Layer 3 is governance and integrity. Governance handles parameter changes. Pool tracks the money. Notifications are the event stream made human. Settings handles account hygiene.
+
+The Event is the connective tissue the docs describe, and the wireframe implements this honestly: every cross link from a notification goes to the entity the event touched, every recent activity row links to the underlying page, every audit trail claim on the landing is visible inside the app.
+
+In the places where the wireframe departs from the docs, none were found in this pass. The closest thing to a small gap is that the wireframe shows MERIDIAN Alpha as one community plus two placeholder states proposed and archived, which is consistent with the v1 limitation stated in docs/00-goal-analysis.md. The wireframe is faithful to the plan.

@@ -1,0 +1,1 @@
+export { UiAvatarComponent, type UiAvatarSize } from './avatar.component';

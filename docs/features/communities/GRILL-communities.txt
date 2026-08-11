@@ -1,0 +1,153 @@
+Community Engine - Grill Notes
+
+Status: Locked
+Date: 2026-08-10
+Source: User instruction "complete it" after architecture review found Communities
+       and Governance pages in the wireframe have no backing engine. User
+       chose option A for Communities (add a new engine) and option A for
+       Governance (add a new engine) and option α (GRILL + update docs +
+       write API doc, no implementation).
+
+What this feature is about
+
+- Adds an 11th engine, Community, between Member and Admin in the
+  capability graph. Owns the community entity and the community membership
+  graph. Does not own pool money, signals, executions, or system config.
+- Does NOT handle community governed parameter values, those stay in
+  system_config owned by Admin engine per 02 data model line 876.
+- Does NOT handle proposals or votes on parameters, that is the new
+  Governance engine (see sibling GRILL governance.txt).
+- v1 ships with exactly one Community record seeded at startup.
+  Wireframe pages 5, 6, 7 (communities list, community detail, community
+  settings) all render that single record plus two display stubs the
+  real backend does not need to populate.
+
+Questions and answers locked so far
+
+1. Why does Community exist as a separate engine and not fold into Admin
+Answer:
+- Owns domain entities (community membership, scoped parameters)
+- Admin owns runtime config and system oversight
+Why:
+- Each engine in 01 architecture line 81 to 89 owns one capability
+- Folding Community into Admin would mix the membership graph (Member
+  references it) with system oversight tools
+Source: 01 architecture line 81 to 89
+
+2. What data does the Community engine own
+Answer:
+- communities collection: id, name, focus, geographic_scope, status,
+  founded_at, min_contribution, settings JSON
+- community_members collection: community_id, member_id, contribution_type,
+  joined_at
+Why:
+- 02 data model is silent on community collections because v1 has one
+  community
+- Wireframe pages 5, 6, 7 (communities list, detail, settings) need a
+  backing store the docs do not currently describe
+- Split into two collections to separate the entity from its
+  relationship graph
+Source: wireframe pages 5 6 7; 00 goal analysis line 91; 02 data model line 876
+
+3. What events does the Community engine emit
+Answer:
+- community.created (when a proposal passes)
+- community.archived
+- community.member_joined
+- community.member_left
+- community.settings_updated
+Why:
+- Engines reach each other through the event stream, not by reading
+  collections
+- The proposal to community lifecycle is owned by Governance, Community
+  consumes governance.proposal.passed to mark a community active
+Source: 01 architecture line 228 to 253 (event taxonomy)
+
+4. How does Community relate to Member
+Answer:
+- Does not read members or member_kyc collections
+- Owns community_members which references member_id
+- Calls Member contract IsKYCVerified when needed, never the collection
+- Subscribes to member.kyc_verified to update local projections
+Why:
+- The architectural rule from 02 data model line 22 says no engine reads
+  another engine's collections
+Source: 02 data model line 22
+
+5. How does Community relate to Money Execution Opportunity
+Answer:
+- Does not own pool money or signal data
+- Pool belongs to Money per 02 data model line 12
+- Executions read their community scope via Money pool contract
+- Opportunities are community scoped via the submission form
+- Community owns the directory entries and membership graph only
+Why:
+- Separation of concerns, adding or removing a community should not
+  require touching pool accounting
+Source: 01 architecture line 83
+
+6. Should community proposals create a Community or Governance event
+Answer:
+- Community is the entity, Governance owns the proposal lifecycle
+- A new community proposal is published as governance.proposal.submitted
+  with target_type COMMUNITY_CREATION
+- Community only hears about it via the eventual governance.proposal.passed
+  event
+Why:
+- Keeps Governance as the single capability for community decided changes
+Source: 00 goal analysis line 43 to 56
+
+7. Can v1 actually run with this engine
+Answer:
+- Yes, with exactly one Community record seeded at startup, id
+  community.default
+- Wireframe pages 5 6 7 collapse to view and edit that one community
+- The placeholder rows (Active Proposed Archived) the wireframe shows
+  are display stubs the real backend does not populate
+Why:
+- Honors 00 goal analysis line 91 (v1 one community one pool)
+- Does not break the wireframes future facing UI
+Source: 00 goal analysis line 91
+
+8. What is the contract surface
+Answer:
+Queries:
+- GetCommunity(id) returns Community
+- ListCommunitiesForMember(member_id) returns []Community
+- ListCommunities() returns []Community (admin scope)
+- GetCommunityParameters(community_id) returns []ParameterDescriptor
+  (delegates to Admin for values)
+Mutations:
+- JoinCommunity(community_id, member_id) returns the membership row
+- LeaveCommunity(community_id, member_id) returns bool
+- UpdateCommunitySettings(community_id, settings) returns Community
+Why:
+- Contracts are stable and replaceable per the engineering philosophy
+Source: 01 architecture line 36
+
+9. Can safety rails be parameterized per community
+Answer:
+- No. Safety rails stay central per 00 goal analysis line 58 to 63
+- Community engine cannot override them
+- If community settings page has a UI for them, that UI is display only
+Why:
+- Integrity is non negotiable per 00 goal analysis line 13
+Source: 00 goal analysis line 13 and 58 to 63
+
+10. Is KYC required to join a community
+Answer:
+- Yes. Community calls Member IsKYCVerified before any JoinCommunity
+- The wireframe community settings page has a KYC at join toggle (default
+  true matches v1 hard requirement)
+Why:
+- Money cannot flow without KYC, community membership enables capital
+  contributions through that community's pool
+Source: 00 system overview (KYC required for capital flows)
+
+No remaining open questions
+
+Locked on 2026-08-10 by AUTO mode agent under user instruction.
+Proceed to PRD TRD and IMPL via feature pipeline.
+Wireframe pages 5 6 7 will need a check after contracts are written to
+ensure every data field on those pages has a home in the new collection
+definitions above.

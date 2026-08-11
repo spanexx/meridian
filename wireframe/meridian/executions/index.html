@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Executions — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'executions' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../kit/theme.css">
+</head>
+<body>
+
+<div id="app-shell"></div>
+
+<main class="main">
+
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+    <div>
+      <h1 class="page-title">Executions</h1>
+      <p class="page-subtitle">Active and completed arbitrage operations.</p>
+    </div>
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <input type="search" class="input w-full sm:w-56" data-search placeholder="Search executions…">
+      <a href="../pool/index.html" class="btn btn-secondary"><i data-lucide="banknote" class="w-4 h-4"></i>Pool</a>
+    </div>
+  </header>
+
+  <!-- Status tabs -->
+  <div class="tabs mb-6" data-filter-tabs>
+    <button class="tab active" data-filter-tab="all" aria-selected="true">All <span class="text-slate-500">16</span></button>
+    <button class="tab" data-filter-tab="active" aria-selected="false">Active <span class="text-slate-500">3</span></button>
+    <button class="tab" data-filter-tab="completed" aria-selected="false">Completed <span class="text-slate-500">12</span></button>
+    <button class="tab" data-filter-tab="failed" aria-selected="false">Failed <span class="text-slate-500">1</span></button>
+  </div>
+
+  <div data-list data-page-size="12">
+
+    <!-- Skeleton -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-skeleton>
+      <div class="card p-6"><div class="skeleton h-5 w-2/3 mb-4"></div><div class="skeleton h-12 w-full mb-3"></div><div class="skeleton h-3 w-full"></div></div>
+      <div class="card p-6"><div class="skeleton h-5 w-2/3 mb-4"></div><div class="skeleton h-12 w-full mb-3"></div><div class="skeleton h-3 w-full"></div></div>
+      <div class="card p-6"><div class="skeleton h-5 w-2/3 mb-4"></div><div class="skeleton h-12 w-full mb-3"></div><div class="skeleton h-3 w-full"></div></div>
+      <div class="card p-6"><div class="skeleton h-5 w-2/3 mb-4"></div><div class="skeleton h-12 w-full mb-3"></div><div class="skeleton h-3 w-full"></div></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-list-body hidden>
+
+      <!-- E-1042 -->
+      <a href="../execution-detail/index.html" class="card card-hover p-6 block" data-filterable data-status="active">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs text-slate-500 font-mono">E-1042</span>
+              <span class="badge badge-warning">Listed</span>
+            </div>
+            <div class="text-base font-semibold">Limited Edition Sneaker Resale</div>
+            <div class="text-xs text-slate-500 mt-1">O-2037 · Travis Scott × Nike</div>
+          </div>
+          <img src="https://picsum.photos/seed/sneaker-thumb/120/120" class="w-14 h-14 rounded-lg object-cover" style="border: 1px solid var(--border-subtle);" loading="lazy">
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+          <div><div class="kpi-label">Deployed</div><div class="text-sm font-semibold">$18,500</div></div>
+          <div><div class="kpi-label">Recovered</div><div class="text-sm font-semibold text-emerald-400">$4,280</div></div>
+          <div><div class="kpi-label">ROI</div><div class="text-sm font-semibold text-emerald-400">+12.4%</div></div>
+        </div>
+        <div class="progress-track mb-2">
+          <div class="progress-fill progress-fill-emerald" style="width: 37%;"></div>
+        </div>
+        <div class="flex items-center justify-between text-xs text-slate-500">
+          <span>3 of 8 sold</span>
+          <span class="flex items-center gap-1"><span class="pulse-dot bg-emerald-400"></span>Live · 4d 12h</span>
+        </div>
+      </a>
+
+      <!-- E-1039 -->
+      <a href="../execution-detail/index.html" class="card card-hover p-6 block" data-filterable data-status="active">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs text-slate-500 font-mono">E-1039</span>
+              <span class="badge badge-success">All Sold</span>
+            </div>
+            <div class="text-base font-semibold">Vintage Watch Liquidation</div>
+            <div class="text-xs text-slate-500 mt-1">O-2021 · Estate lot</div>
+          </div>
+          <img src="https://picsum.photos/seed/watch-thumb/120/120" class="w-14 h-14 rounded-lg object-cover" style="border: 1px solid var(--border-subtle);" loading="lazy">
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+          <div><div class="kpi-label">Deployed</div><div class="text-sm font-semibold">$32,000</div></div>
+          <div><div class="kpi-label">Recovered</div><div class="text-sm font-semibold text-emerald-400">$37,985</div></div>
+          <div><div class="kpi-label">ROI</div><div class="text-sm font-semibold text-emerald-400">+18.7%</div></div>
+        </div>
+        <div class="progress-track mb-2">
+          <div class="progress-fill progress-fill-emerald" style="width: 100%;"></div>
+        </div>
+        <div class="flex items-center justify-between text-xs text-slate-500">
+          <span>5 of 5 sold</span>
+          <a href="../payouts/index.html" class="text-violet-400 hover:text-violet-300">Payout pending →</a>
+        </div>
+      </a>
+
+      <!-- E-1036 -->
+      <a href="../execution-detail/index.html" class="card card-hover p-6 block" data-filterable data-status="active">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs text-slate-500 font-mono">E-1036</span>
+              <span class="badge badge-info">Acquiring</span>
+            </div>
+            <div class="text-base font-semibold">Wholesale Electronics</div>
+            <div class="text-xs text-slate-500 mt-1">O-2018 · Shenzhen bulk</div>
+          </div>
+          <img src="https://picsum.photos/seed/electronics-thumb/120/120" class="w-14 h-14 rounded-lg object-cover" style="border: 1px solid var(--border-subtle);" loading="lazy">
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+          <div><div class="kpi-label">Deployed</div><div class="text-sm font-semibold">$45,000</div></div>
+          <div><div class="kpi-label">Recovered</div><div class="text-sm font-semibold text-slate-500">$0</div></div>
+          <div><div class="kpi-label">ROI</div><div class="text-sm font-semibold text-slate-500">—</div></div>
+        </div>
+        <div class="progress-track mb-2">
+          <div class="progress-fill progress-fill-blue" style="width: 25%;"></div>
+        </div>
+        <div class="flex items-center justify-between text-xs text-slate-500">
+          <span>0 of 12 acquired</span>
+          <span class="flex items-center gap-1"><span class="pulse-dot bg-blue-400"></span>ETA 4 days</span>
+        </div>
+      </a>
+
+      <!-- Completed -->
+      <a href="../execution-detail/index.html" class="card card-hover p-6 block opacity-80" data-filterable data-status="completed">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs text-slate-500 font-mono">E-1030</span>
+              <span class="badge badge-success">Completed</span>
+            </div>
+            <div class="text-base font-semibold">Vinyl Record Collection</div>
+            <div class="text-xs text-slate-500 mt-1">O-1995 · First pressings</div>
+          </div>
+          <img src="https://picsum.photos/seed/vinyl-thumb/120/120" class="w-14 h-14 rounded-lg object-cover" style="border: 1px solid var(--border-subtle);" loading="lazy">
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+          <div><div class="kpi-label">Deployed</div><div class="text-sm font-semibold">$3,200</div></div>
+          <div><div class="kpi-label">Recovered</div><div class="text-sm font-semibold text-emerald-400">$4,115</div></div>
+          <div><div class="kpi-label">ROI</div><div class="text-sm font-semibold text-emerald-400">+28.6%</div></div>
+        </div>
+        <div class="flex items-center justify-between text-xs text-slate-500">
+          <span>Closed Mar 4 · 14 days</span>
+          <a href="../payouts/index.html" class="text-emerald-400 hover:text-emerald-300">Paid out →</a>
+        </div>
+      </a>
+
+      <!-- Failed -->
+      <a href="../execution-detail/index.html" class="card card-hover p-6 block opacity-80" data-filterable data-status="failed">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs text-slate-500 font-mono">E-1024</span>
+              <span class="badge badge-danger">Failed</span>
+            </div>
+            <div class="text-base font-semibold">Antique Mirror Lot</div>
+            <div class="text-xs text-slate-500 mt-1">O-1988 · Shipping damage</div>
+          </div>
+          <img src="https://picsum.photos/seed/mirror-thumb/120/120" class="w-14 h-14 rounded-lg object-cover" style="border: 1px solid var(--border-subtle);" loading="lazy">
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+          <div><div class="kpi-label">Deployed</div><div class="text-sm font-semibold">$2,400</div></div>
+          <div><div class="kpi-label">Recovered</div><div class="text-sm font-semibold text-rose-400">$800</div></div>
+          <div><div class="kpi-label">ROI</div><div class="text-sm font-semibold text-rose-400">−66.7%</div></div>
+        </div>
+        <div class="flex items-center justify-between text-xs text-slate-500">
+          <span>Loss absorbed by reserve</span>
+          <a href="../pool/index.html" class="text-amber-400 hover:text-amber-300">Reserve →</a>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Empty state -->
+    <div class="card empty" data-empty hidden>
+      <i data-lucide="zap-off" class="w-10 h-10 mx-auto"></i>
+      <p class="text-sm font-medium text-slate-400 mb-1">No executions match</p>
+      <p class="text-xs">Try a different status or search term.</p>
+    </div>
+
+  </div>
+
+</main>
+
+</body>
+</html>

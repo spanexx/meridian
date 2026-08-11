@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Payouts — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'payouts' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="../kit/theme.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="app-shell"></div>
+<main class="main">
+<header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+<div>
+<h1 class="page-title">Payouts</h1>
+<p class="page-subtitle">Profit distribution across the pool — the split formula is community-governed.</p>
+</div>
+<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+<input class="input w-full sm:w-56" data-search="" placeholder="Search payouts…" type="search"/>
+<button class="btn btn-secondary" data-dropdown="payMenu"><i class="w-4 h-4" data-lucide="filter"></i>Type</button>
+</div>
+</header>
+<!-- Type dropdown -->
+<div class="menu" hidden="" id="payMenu">
+<div class="menu-head">Contribution type</div>
+<button class="menu-item active" data-filter-category="all"><i class="w-4 h-4" data-lucide="layout-grid"></i>All types</button>
+<button class="menu-item" data-filter-category="capital"><i class="w-4 h-4" data-lucide="banknote"></i>Capital</button>
+<button class="menu-item" data-filter-category="signal"><i class="w-4 h-4" data-lucide="lightbulb"></i>Signal</button>
+<button class="menu-item" data-filter-category="access"><i class="w-4 h-4" data-lucide="key"></i>Access</button>
+</div>
+<!-- Status tabs -->
+<div class="tabs mb-6" data-filter-tabs="">
+<button aria-selected="true" class="tab active" data-filter-tab="all">All <span class="text-slate-500">48</span></button>
+<button aria-selected="false" class="tab" data-filter-tab="pending">Pending <span class="text-slate-500">3</span></button>
+<button aria-selected="false" class="tab" data-filter-tab="paid">Paid <span class="text-slate-500">45</span></button>
+</div>
+<!-- KPI row -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+<div class="card p-5">
+<div class="kpi-label mb-2">Distributed YTD</div>
+<div class="kpi-number text-gradient-emerald">$84,290</div>
+<div class="text-xs text-slate-500 mt-2">12 executions closed</div>
+</div>
+<div class="card p-5">
+<div class="kpi-label mb-2">Pending</div>
+<div class="kpi-number text-gradient-violet">$5,982</div>
+<div class="text-xs text-slate-500 mt-2">E-1039 closing this week</div>
+</div>
+<div class="card p-5">
+<div class="kpi-label mb-2">Avg. execution ROI</div>
+<div class="kpi-number">+21.4%</div>
+<div class="text-xs text-emerald-400 mt-2">Above community floor of 15%</div>
+</div>
+</section>
+<!-- Distribution formula -->
+<section class="card p-6 mb-6">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h2 class="text-base font-semibold">Split Formula</h2>
+<p class="text-xs text-slate-500 mt-0.5">Set by Governance Vote · Feb 14 · 87% approval</p>
+</div>
+<a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" href="../governance/index.html">Governance<i class="w-3 h-3" data-lucide="arrow-right"></i></a>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+<div class="card p-3 text-center">
+<div class="text-lg font-semibold text-gradient-emerald">46%</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Capital</div>
+</div>
+<div class="card p-3 text-center">
+<div class="text-lg font-semibold text-gradient-violet">30%</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Signal</div>
+</div>
+<div class="card p-3 text-center">
+<div class="text-lg font-semibold text-gradient-blue">12%</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Access</div>
+</div>
+<div class="card p-3 text-center">
+<div class="text-lg font-semibold text-amber-400">8%</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Operations</div>
+</div>
+<div class="card p-3 text-center">
+<div class="text-lg font-semibold">4%</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Platform</div>
+</div>
+</div>
+</section>
+<div data-list="" data-page-size="8">
+<!-- Skeleton -->
+<section class="card p-0 overflow-hidden" data-skeleton="">
+<div class="p-5 space-y-4">
+<div class="skeleton h-10 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+</div>
+</section>
+<section class="card p-0 overflow-hidden" data-list-body="" hidden="">
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th class="hidden md:table-cell">Execution</th>
+<th>Member</th>
+<th class="hidden sm:table-cell">Type</th>
+<th>Amount</th>
+<th class="hidden lg:table-cell">Share</th>
+<th>Status</th>
+<th class="hidden md:table-cell">Date</th>
+</tr>
+</thead>
+<tbody>
+<tr class="table-row" data-category="capital" data-filterable="" data-status="pending">
+<td class="hidden md:table-cell"><a class="font-mono text-xs text-slate-500" href="../execution-detail/index.html">E-1039</a></td>
+<td><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-violet);">DV</div><span class="text-sm truncate min-w-0">Dana Voss</span></a></td>
+<td class="hidden sm:table-cell"><span class="badge badge-neutral">Capital</span></td>
+<td><span class="text-sm font-semibold text-emerald-400">+$2,340.80</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">46%</span></td>
+<td><span class="badge badge-warning">Pending</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-500">est. Mar 18</span></td>
+</tr>
+<tr class="table-row" data-category="signal" data-filterable="" data-status="pending">
+<td class="hidden md:table-cell"><a class="font-mono text-xs text-slate-500" href="../execution-detail/index.html">E-1039</a></td>
+<td><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-amber);">MR</div><span class="text-sm truncate min-w-0">Mike Rivera</span></a></td>
+<td class="hidden sm:table-cell"><span class="badge badge-neutral">Signal</span></td>
+<td><span class="text-sm font-semibold text-emerald-400">+$1,526.61</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">30%</span></td>
+<td><span class="badge badge-warning">Pending</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-500">est. Mar 18</span></td>
+</tr>
+<tr class="table-row" data-category="access" data-filterable="" data-status="pending">
+<td class="hidden md:table-cell"><a class="font-mono text-xs text-slate-500" href="../execution-detail/index.html">E-1039</a></td>
+<td><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-blue);">JT</div><span class="text-sm truncate min-w-0">Jules Tan</span></a></td>
+<td class="hidden sm:table-cell"><span class="badge badge-neutral">Access</span></td>
+<td><span class="text-sm font-semibold text-emerald-400">+$610.64</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">12%</span></td>
+<td><span class="badge badge-warning">Pending</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-500">est. Mar 18</span></td>
+</tr>
+<tr class="table-row" data-category="capital" data-filterable="" data-status="paid">
+<td class="hidden md:table-cell"><a class="font-mono text-xs text-slate-500" href="../execution-detail/index.html">E-1030</a></td>
+<td><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-violet);">DV</div><span class="text-sm truncate min-w-0">Dana Voss</span></a></td>
+<td class="hidden sm:table-cell"><span class="badge badge-neutral">Capital</span></td>
+<td><span class="text-sm font-semibold text-emerald-400">+$1,890.20</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">46%</span></td>
+<td><span class="badge badge-success">Paid</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-500">Mar 4</span></td>
+</tr>
+<tr class="table-row" data-category="signal" data-filterable="" data-status="paid">
+<td class="hidden md:table-cell"><a class="font-mono text-xs text-slate-500" href="../execution-detail/index.html">E-1030</a></td>
+<td><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-amber);">MR</div><span class="text-sm truncate min-w-0">Mike Rivera</span></a></td>
+<td class="hidden sm:table-cell"><span class="badge badge-neutral">Signal</span></td>
+<td><span class="text-sm font-semibold text-emerald-400">+$1,232.74</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">30%</span></td>
+<td><span class="badge badge-success">Paid</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-500">Mar 4</span></td>
+</tr>
+<tr class="table-row" data-category="access" data-filterable="" data-status="paid">
+<td class="hidden md:table-cell"><a class="font-mono text-xs text-slate-500" href="../execution-detail/index.html">E-1030</a></td>
+<td><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-blue);">JT</div><span class="text-sm truncate min-w-0">Jules Tan</span></a></td>
+<td class="hidden sm:table-cell"><span class="badge badge-neutral">Access</span></td>
+<td><span class="text-sm font-semibold text-emerald-400">+$493.10</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">12%</span></td>
+<td><span class="badge badge-success">Paid</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-500">Mar 4</span></td>
+</tr>
+<tr class="table-row" data-category="capital" data-filterable="" data-status="paid">
+<td class="hidden md:table-cell"><a class="font-mono text-xs text-slate-500" href="../execution-detail/index.html">E-1028</a></td>
+<td><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-emerald);">RK</div><span class="text-sm truncate min-w-0">Ravi Kumar</span></a></td>
+<td class="hidden sm:table-cell"><span class="badge badge-neutral">Capital</span></td>
+<td><span class="text-sm font-semibold text-emerald-400">+$1,204.55</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">46%</span></td>
+<td><span class="badge badge-success">Paid</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-500">Feb 21</span></td>
+</tr>
+<tr class="table-row" data-category="signal" data-filterable="" data-status="paid">
+<td class="hidden md:table-cell"><a class="font-mono text-xs text-slate-500" href="../execution-detail/index.html">E-1028</a></td>
+<td><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-violet);">SP</div><span class="text-sm truncate min-w-0">Sarah Park</span></a></td>
+<td class="hidden sm:table-cell"><span class="badge badge-neutral">Signal</span></td>
+<td><span class="text-sm font-semibold text-emerald-400">+$785.58</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-400">30%</span></td>
+<td><span class="badge badge-success">Paid</span></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-500">Feb 21</span></td>
+</tr>
+</tbody>
+</table></div>
+<!-- Empty state -->
+<div class="empty" data-empty="" hidden="">
+<i class="w-10 h-10 mx-auto" data-lucide="circle-dollar-sign"></i>
+<p class="text-sm font-medium text-slate-400 mb-1">No payouts match</p>
+<p class="text-xs">Try a different status, type, or search term.</p>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between px-5 py-3 text-xs text-slate-500">
+<span>Showing 8 of 48</span>
+<div class="flex items-center gap-2">
+<button class="btn btn-ghost text-xs px-2 py-1" data-page-prev=""><i class="w-3 h-3" data-lucide="chevron-left"></i></button>
+<span data-page-num="">1 / 6</span>
+<button class="btn btn-ghost text-xs px-2 py-1" data-page-next=""><i class="w-3 h-3" data-lucide="chevron-right"></i></button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,76 @@
+Kernel - Grill Notes
+
+Status: Locked
+Date: 2026-08-10
+Source: docs/01-architecture.md (System Components, Event-Driven Communication, Code Layout), docs/02-data-model.md (events collection), docs/00-goal-analysis.md (O1, AUTO compass)
+
+What this feature is about
+
+- The Kernel: the tiny, domain-blind core that receives events, persists them append-only, dispatches them to subscribers, and coordinates sagas
+- Serves O1 (integrity): every execution reconstructable from the event stream; audit trail derives from events
+- First pack in the repo: nothing else depends on it; every later engine/provider pack builds on its contract
+
+What it does NOT do
+
+- No domain logic (vetting, allocation, profit splits, scoring)
+- No provider knowledge (Stripe, eBay, S3, LLM)
+- No member data, no HTTP, no gateway
+- No MongoDB adapter in this pack (storage provider deferred)
+
+Questions and answers locked so far
+
+1. "Where does the code live?" (session exploration)
+Answer:
+- Go module at backend/ (docs/01-architecture.md Code Layout: backend/ with cmd/server/main.go composition root)
+- Kernel package at backend/internal/kernel/ — imports nothing but its own store and dispatch contracts
+Why:
+- docs/01-architecture.md L321-354: code layout is locked; Go is the locked implementation language (00-system-overview.md Technology Stack)
+- Rules out: TypeScript heritage from the generic pipeline template; single root package
+
+2. "Which store backs the event stream in this pack — MongoDB or in-memory?" (session exploration)
+Answer:
+- EventStore contract + in-memory implementation. MongoDB adapter is a later provider pack.
+Why:
+- docs/01-architecture.md: "In v1 the dispatcher may run in-process; the contract keeps that decision reversible" — same deferral applies to storage
+- "Delay Complexity: Monolith First" (Deployment section) + "providers behind contracts" (engineering philosophy, CONTEXT.md)
+- The kernel depends on an interface, so swapping Mongo in later touches nothing in the kernel
+
+3. "How do events get from the store to the engines?" (session exploration)
+Answer:
+- In-process Dispatcher: publish appends to store, enqueues to outbox, worker goroutines fan out to subscribers
+- DispatchProvider contract is the seam for Redis later (docs list DispatchProvider behind Redis queue, in-process first)
+Why:
+- docs/01-architecture.md: kernel box = Event Store + Outbox (transactional writes) + Dispatcher (fan-out to subscribers)
+- Outbox pattern: "Events are written transactionally with the state change they describe — no fact is ever lost" (Event-Driven Communication rules)
+
+4. "Is the saga Coordinator in scope for the first pack?" (session exploration)
+Answer:
+- Yes, minimal: RegisterSaga(def) + per-aggregate state machines advanced by matching events, with engine-supplied step actions
+- Domain-blind: the coordinator knows event types and steps, not what they mean
+Why:
+- docs/01-architecture.md kernel diagram includes "Coordinator (sagas: state machines over event flow)" and kernel responsibility #3 "Coordinates execution"
+- Keep it minimal — full saga flows arrive with the first engine that needs them (Execution funding flow)
+
+5. "What is the event envelope and the kernel's entire surface?" (session exploration)
+Answer:
+- Event{Type, Version, Aggregate{type,id}, Payload, Actor{type,id}, RequestID, OccurredAt}
+- Kernel interface: Publish(ctx, ev) error; Subscribe(handler func(ctx, ev))
+- Recorded events carry sequence per aggregate (events collection: aggregate.type + aggregate.id + sequence unique index)
+Why:
+- docs/01-architecture.md L54-71: exact Go types locked; docs/02-data-model.md events collection + indexes
+
+6. "How does replay/audit work?" (session exploration)
+Answer:
+- Store exposes replay: stream all events (chronological), by aggregate, by type, by request_id
+- Matches the events collection indexes in docs/02-data-model.md
+Why:
+- O1: "Every execution reconstructable from the event stream"; events collection index list includes aggregate.type+aggregate.id+sequence, type+occurred_at, request_id
+
+7. "What happens to events when a subscriber's handler fails?" (session exploration)
+Answer:
+- Event is already durably appended to the store before dispatch (outbox pattern — no fact is ever lost)
+- Dispatch failure is counted (observability) and the event is not lost; retry policy is a later pack concern (DispatchProvider/Redis)
+Why:
+- "no fact is ever lost" is a locked integrity rule; docs/01-architecture.md Logging & Observability: events_published_total + outbox_lag_seconds are first-class metrics
+
+No remaining open questions

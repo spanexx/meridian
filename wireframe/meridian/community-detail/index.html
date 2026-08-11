@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Community Detail — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'communities' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="../kit/theme.css">
+</head>
+<body>
+
+<div id="app-shell"></div>
+
+<main class="main">
+
+  <div class="flex items-center gap-2 text-xs text-slate-500 mb-4">
+    <a href="../communities/index.html" class="hover:text-slate-300">Communities</a>
+    <i data-lucide="chevron-right" class="w-3 h-3"></i>
+    <span class="text-slate-300">MERIDIAN Alpha</span>
+  </div>
+
+  <!-- Header -->
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
+    <div class="flex items-start gap-4">
+      <div class="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0" style="background: var(--gradient-violet);">
+        <i data-lucide="users" class="w-8 h-8 text-white"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <h1 class="page-title mb-0">MERIDIAN Alpha</h1>
+          <span class="badge badge-success">Active</span>
+        </div>
+        <p class="page-subtitle">General arbitrage · Global scope · Founded 2024</p>
+        <div class="flex items-center gap-4 mt-2 text-xs text-slate-500">
+          <span><i data-lucide="map-pin" class="w-3 h-3 inline mr-1"></i>Global</span>
+          <span><i data-lucide="calendar" class="w-3 h-3 inline mr-1"></i>Est. March 2024</span>
+          <span><i data-lucide="hash" class="w-3 h-3 inline mr-1"></i>ID: C-001</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="btn btn-ghost" data-copy><i data-lucide="share-2" class="w-4 h-4"></i></button>
+      <button class="btn btn-secondary" data-dropdown="actionsMenu"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+    </div>
+  </header>
+
+  <!-- Actions dropdown -->
+  <div class="menu" id="actionsMenu" hidden>
+    <div class="menu-head">Actions</div>
+    <a href="../governance/index.html" class="menu-item"><i data-lucide="vote" class="w-4 h-4"></i>View governance</a>
+    <a href="../members/index.html" class="menu-item"><i data-lucide="users" class="w-4 h-4"></i>View members</a>
+    <a href="settings/index.html" class="menu-item"><i data-lucide="settings" class="w-4 h-4"></i>Community settings</a>
+    <div class="menu-sep"></div>
+    <button class="menu-item menu-danger"><i data-lucide="alert-triangle" class="w-4 h-4"></i>Report issue</button>
+  </div>
+
+  <!-- KPI Cards -->
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="kpi-label">Total Pool</div>
+        <i data-lucide="banknote" class="w-4 h-4 text-slate-500"></i>
+      </div>
+      <div class="kpi-number text-gradient-emerald">$1,423,580</div>
+      <div class="mt-3 flex items-center gap-2 text-xs">
+        <span class="text-emerald-400 flex items-center gap-1"><i data-lucide="trending-up" class="w-3 h-3"></i>+12.4%</span>
+        <span class="text-slate-500">vs last month</span>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="kpi-label">Members</div>
+        <i data-lucide="users" class="w-4 h-4 text-slate-500"></i>
+      </div>
+      <div class="kpi-number">124</div>
+      <div class="mt-3 flex items-center gap-2 text-xs">
+        <span class="text-emerald-400 flex items-center gap-1"><i data-lucide="trending-up" class="w-3 h-3"></i>+8</span>
+        <span class="text-slate-500">this month</span>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="kpi-label">ROI (YTD)</div>
+        <i data-lucide="percent" class="w-4 h-4 text-slate-500"></i>
+      </div>
+      <div class="kpi-number text-gradient-violet">+18.4%</div>
+      <div class="mt-3 flex items-center gap-2 text-xs">
+        <span class="text-emerald-400 flex items-center gap-1"><i data-lucide="check-circle" class="w-3 h-3"></i>Target: 15%</span>
+      </div>
+    </div>
+
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="kpi-label">Executions</div>
+        <i data-lucide="zap" class="w-4 h-4 text-slate-500"></i>
+      </div>
+      <div class="kpi-number">47</div>
+      <div class="mt-3 flex items-center gap-2 text-xs">
+        <span class="text-slate-400">3 active · 44 completed</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left column -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Community Governance Parameters -->
+      <section class="card p-6">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold">Community-Governed Parameters</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Economic targets set by community vote</p>
+          </div>
+          <a href="../governance/index.html" class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1">View proposals<i data-lucide="arrow-right" class="w-3 h-3"></i></a>
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--bg-overlay);">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+                <i data-lucide="target" class="w-4 h-4 text-emerald-400"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium">ROI floor</div>
+                <div class="text-xs text-slate-500">Minimum acceptable return</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-semibold text-emerald-400">15%</div>
+              <div class="text-xs text-slate-500">Last updated: 2mo ago</div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--bg-overlay);">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+                <i data-lucide="crosshair" class="w-4 h-4 text-violet-400"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium">Win-rate target</div>
+                <div class="text-xs text-slate-500">Success rate threshold</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-semibold text-violet-400">75%</div>
+              <div class="text-xs text-slate-500">Last updated: 1mo ago</div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--bg-overlay);">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(245,158,11,0.12);">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-amber-400"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium">Distribution shares</div>
+                <div class="text-xs text-slate-500">Capital:Signal:Access split</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-semibold text-amber-400">60:25:15</div>
+              <div class="text-xs text-slate-500">Last updated: 3mo ago</div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-3 rounded-lg" style="background: var(--bg-overlay);">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: rgba(96,165,250,0.12);">
+                <i data-lucide="shield" class="w-4 h-4 text-blue-400"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium">Reserve ratio target</div>
+                <div class="text-xs text-slate-500">Safety buffer percentage</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-semibold text-blue-400">18%</div>
+              <div class="text-xs text-slate-500">Current: 18.2%</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent Executions -->
+      <section class="card p-6">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold">Recent Executions</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Latest arbitrage operations</p>
+          </div>
+          <a href="../executions/index.html" class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1">View all<i data-lucide="arrow-right" class="w-3 h-3"></i></a>
+        </div>
+        <div class="space-y-3">
+          <a href="../execution-detail/index.html" class="block card card-hover p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+                  <i data-lucide="package" class="w-4 h-4 text-emerald-400"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-medium">E-1042 · Limited Edition Sneaker Resale</div>
+                  <div class="text-xs text-slate-500">Acquired 8 pairs · Listed on StockX, GOAT</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-semibold text-emerald-400">+12.4% ROI</div>
+                <div class="text-xs text-slate-500">$18,500 deployed</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="progress-track flex-1">
+                <div class="progress-fill progress-fill-emerald" style="width: 37%;"></div>
+              </div>
+              <span class="text-xs text-slate-400 whitespace-nowrap">3 of 8 sold</span>
+            </div>
+          </a>
+
+          <a href="../execution-detail/index.html" class="block card card-hover p-4">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+                  <i data-lucide="watch" class="w-4 h-4 text-violet-400"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-medium">E-1039 · Vintage Watch Liquidation</div>
+                  <div class="text-xs text-slate-500">5 items · all sold</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-semibold text-emerald-400">+18.7% ROI</div>
+                <div class="text-xs text-slate-500">$32,000 deployed</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="progress-track flex-1">
+                <div class="progress-fill progress-fill-violet" style="width: 100%;"></div>
+              </div>
+              <span class="text-xs text-emerald-400 whitespace-nowrap">Closing</span>
+            </div>
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right column -->
+    <div class="space-y-6">
+      <!-- Community Info -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">About</h2>
+        <p class="text-sm text-slate-400 leading-relaxed mb-4">
+          MERIDIAN Alpha is the founding community, focused on general arbitrage opportunities across multiple categories including electronics, collectibles, and fashion. The community operates globally and welcomes members from all regions.
+        </p>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-500">Focus</span>
+            <span class="font-medium">General arbitrage</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-500">Region</span>
+            <span class="font-medium">Global</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-500">Founded</span>
+            <span class="font-medium">March 2024</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-500">Min. contribution</span>
+            <span class="font-medium">$1,000</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Member Composition -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Member Composition</h2>
+        <div class="space-y-3">
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-slate-500">Capital providers</span>
+              <span class="font-medium">42 (34%)</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill progress-fill-emerald" style="width: 34%;"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-slate-500">Signal providers</span>
+              <span class="font-medium">67 (54%)</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill progress-fill-violet" style="width: 54%;"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-slate-500">Access providers</span>
+              <span class="font-medium">15 (12%)</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill progress-fill-amber" style="width: 12%;"></div>
+            </div>
+          </div>
+        </div>
+        <a href="../members/index.html" class="btn btn-secondary w-full justify-center mt-4">
+          <i data-lucide="users" class="w-4 h-4"></i>View all members
+        </a>
+      </section>
+
+      <!-- Safety Rails -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Safety Rails</h2>
+        <p class="text-xs text-slate-500 mb-3">Never community-governed. Fixed by design.</p>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-sm">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span>Integrity verification</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span>Reconciliation checks</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span>No-ponzi mechanics</span>
+          </div>
+          <div class="flex items-center gap-2 text-sm">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span>Human control override</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

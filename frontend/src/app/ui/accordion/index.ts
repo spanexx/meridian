@@ -1,0 +1,1 @@
+export { UiAccordionItemComponent } from './accordion.component';

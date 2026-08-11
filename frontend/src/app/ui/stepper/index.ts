@@ -1,0 +1,1 @@
+export { UiStepperComponent, type UiStep } from './stepper.component';

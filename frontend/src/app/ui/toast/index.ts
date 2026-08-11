@@ -1,0 +1,1 @@
+export { UiToastComponent, type UiToastVariant } from './toast.component';

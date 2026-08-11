@@ -1,0 +1,63 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets / env files — never commit
+.env
+.env.*
+*.pem
+*.key
+id_rsa*
+secrets.yaml
+secrets.yml
+
+# Node / Angular / Vite (frontend has its own .gitignore for finer control)
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+*.tgz
+
+# Go
+backend/bin/
+backend/dist/
+backend/tmp/
+*.exe
+*.test
+*.out
+
+# Build outputs
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Test artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+e2e/screenshots/*-actual.png
+e2e/screenshots/*-diff.png
+coverage/
+*.lcov
+
+# Cache
+.angular/
+.cache/
+.parcel-cache/
+.rpt2_cache/
+.eslintcache
+
+# Logs
+*.log
+
+# Misc
+*.bak
+*.tmp

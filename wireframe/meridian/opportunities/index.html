@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Opportunities — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'opportunities' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="../kit/theme.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="app-shell"></div>
+<main class="main">
+<header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+<div>
+<h1 class="page-title">Opportunities</h1>
+<p class="page-subtitle">The signal pipeline — 24 active across all stages.</p>
+</div>
+<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+<input class="input w-full sm:w-56" data-search="" placeholder="Search signals…" type="search"/>
+<div class="flex items-center gap-2 flex-wrap">
+<button class="btn btn-secondary" data-dropdown="catMenu"><i class="w-4 h-4" data-lucide="filter"></i>Category</button>
+<a class="btn btn-primary" href="../submit-signal/index.html"><i class="w-4 h-4" data-lucide="plus"></i>Submit Signal</a>
+</div>
+</div>
+</header>
+<!-- Category dropdown -->
+<div class="menu" hidden="" id="catMenu">
+<div class="menu-head">Category</div>
+<button class="menu-item active" data-filter-category="all"><i class="w-4 h-4" data-lucide="layout-grid"></i>All categories</button>
+<button class="menu-item" data-filter-category="apparel"><i class="w-4 h-4" data-lucide="shirt"></i>Apparel</button>
+<button class="menu-item" data-filter-category="collectibles"><i class="w-4 h-4" data-lucide="package"></i>Collectibles</button>
+<button class="menu-item" data-filter-category="electronics"><i class="w-4 h-4" data-lucide="cpu"></i>Electronics</button>
+<button class="menu-item" data-filter-category="equipment"><i class="w-4 h-4" data-lucide="wrench"></i>Equipment</button>
+<button class="menu-item" data-filter-category="furniture"><i class="w-4 h-4" data-lucide="armchair"></i>Furniture</button>
+</div>
+<!-- Status tabs -->
+<div class="tabs mb-6" data-filter-tabs="">
+<button aria-selected="true" class="tab active" data-filter-tab="all">All <span class="text-slate-500">24</span></button>
+<button aria-selected="false" class="tab" data-filter-tab="pending">Pending <span class="text-slate-500">8</span></button>
+<button aria-selected="false" class="tab" data-filter-tab="vetting">In Vetting <span class="text-slate-500">5</span></button>
+<button aria-selected="false" class="tab" data-filter-tab="approved">Approved <span class="text-slate-500">3</span></button>
+<button aria-selected="false" class="tab" data-filter-tab="executing">Executing <span class="text-slate-500">2</span></button>
+<button aria-selected="false" class="tab" data-filter-tab="rejected">Rejected <span class="text-slate-500">6</span></button>
+</div>
+<!-- List -->
+<div data-list="" data-page-size="8">
+<!-- Skeleton -->
+<section class="card p-0 overflow-hidden" data-skeleton="">
+<div class="p-5 space-y-4">
+<div class="skeleton h-10 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+<div class="skeleton h-14 w-full"></div>
+</div>
+</section>
+<section class="card p-0 overflow-hidden" data-list-body="" hidden="">
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th class="hidden md:table-cell">Ref</th>
+<th>Title</th>
+<th class="hidden md:table-cell">Category</th>
+<th class="hidden lg:table-cell">Submitted by</th>
+<th class="hidden sm:table-cell">Est. ROI</th>
+<th class="hidden lg:table-cell">Capital</th>
+<th class="hidden lg:table-cell">Votes</th>
+<th>Status</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr class="table-row" data-category="collectibles" data-filterable="" data-status="vetting">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2051</span></a></td>
+<td><a href="../opportunity-detail/index.html"><div class="font-medium">Bulk Lego Set Resale</div><div class="text-xs text-slate-500 mt-0.5">Retired Star Wars sets · 6 lots</div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Collectibles</span></td>
+<td class="hidden lg:table-cell"><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-violet);">SP</div><span class="text-xs truncate min-w-0">Sarah Park</span></a></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-semibold">+34.2%</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-300">$8,200</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs"><span class="text-emerald-400">4↑</span><span class="text-slate-500">/</span><span class="text-rose-400">0↓</span></div></td>
+<td><span class="badge badge-warning">In Vetting</span></td>
+<td><a href="../opportunity-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="equipment" data-filterable="" data-status="vetting">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2050</span></a></td>
+<td><a href="../opportunity-detail/index.html"><div class="font-medium">Restaurant Equipment Resale</div><div class="text-xs text-slate-500 mt-0.5">Commercial espresso machine · local close</div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Equipment</span></td>
+<td class="hidden lg:table-cell"><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-emerald);">MR</div><span class="text-xs truncate min-w-0">Marcus Rivera</span></a></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-semibold">+22.8%</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-300">$4,500</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs"><span class="text-emerald-400">2↑</span><span class="text-slate-500">/</span><span class="text-rose-400">1↓</span></div></td>
+<td><span class="badge badge-warning">In Vetting</span></td>
+<td><a href="../opportunity-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="apparel" data-filterable="" data-status="vetting">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2049</span></a></td>
+<td><a href="../opportunity-detail/index.html"><div class="font-medium">Travis Scott × Nike Sneakers</div><div class="text-xs text-slate-500 mt-0.5">Limited drop · Wholesale from boutique</div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Apparel</span></td>
+<td class="hidden lg:table-cell"><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-amber);">MR</div><span class="text-xs truncate min-w-0">Mike Rivera</span></a></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-semibold">+51.4%</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-300">$14,200</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs"><span class="text-emerald-400">3↑</span><span class="text-slate-500">/</span><span class="text-rose-400">1↓</span></div></td>
+<td><span class="badge badge-warning">In Vetting</span></td>
+<td><a href="../opportunity-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="furniture" data-filterable="" data-status="pending">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2048</span></a></td>
+<td><a href="../opportunity-detail/index.html"><div class="font-medium">Designer Furniture Resale</div><div class="text-xs text-slate-500 mt-0.5">Herman Miller · 12 chairs from office clearance</div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Furniture</span></td>
+<td class="hidden lg:table-cell"><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-blue);">JT</div><span class="text-xs truncate min-w-0">Jules Tan</span></a></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-semibold">+18.5%</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-300">$7,800</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs text-slate-500">—</div></td>
+<td><span class="badge badge-info">Pending</span></td>
+<td><a href="../opportunity-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="collectibles" data-filterable="" data-status="pending">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2047</span></a></td>
+<td><a href="../opportunity-detail/index.html"><div class="font-medium">Vintage Camera Lot</div><div class="text-xs text-slate-500 mt-0.5">Leica M3 · 2 units from estate</div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Collectibles</span></td>
+<td class="hidden lg:table-cell"><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-violet);">KH</div><span class="text-xs truncate min-w-0">Kenji Honda</span></a></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-semibold">+41.0%</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-300">$5,400</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs text-slate-500">—</div></td>
+<td><span class="badge badge-info">Pending</span></td>
+<td><a href="../opportunity-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="collectibles" data-filterable="" data-status="approved">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2045</span></a></td>
+<td><a href="../opportunity-detail/index.html"><div class="font-medium">Vinyl Record Collection</div><div class="text-xs text-slate-500 mt-0.5">First pressings · 320 records</div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Collectibles</span></td>
+<td class="hidden lg:table-cell"><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-violet);">AC</div><span class="text-xs truncate min-w-0">Alex Chen</span></a></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-semibold">+28.6%</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-300">$3,200</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs"><span class="text-emerald-400">5↑</span><span class="text-slate-500">/</span><span class="text-rose-400">0↓</span></div></td>
+<td><span class="badge badge-success">Approved</span></td>
+<td><a href="../opportunity-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="electronics" data-filterable="" data-status="approved">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2043</span></a></td>
+<td><a href="../opportunity-detail/index.html"><div class="font-medium">PS5 Bundle Bulk</div><div class="text-xs text-slate-500 mt-0.5">8 bundles · wholesale</div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Electronics</span></td>
+<td class="hidden lg:table-cell"><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-violet);">SP</div><span class="text-xs truncate min-w-0">Sarah Park</span></a></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-semibold">+15.2%</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-300">$22,000</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs"><span class="text-emerald-400">4↑</span><span class="text-slate-500">/</span><span class="text-rose-400">1↓</span></div></td>
+<td><span class="badge badge-success">Approved</span></td>
+<td><a href="../opportunity-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="apparel" data-filterable="" data-status="executing">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2037</span></a></td>
+<td><a href="../opportunity-detail/index.html"><div class="font-medium">Travis Scott × Nike (E-1042)</div><div class="text-xs text-slate-500 mt-0.5">8 pairs · listed on StockX, GOAT</div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Apparel</span></td>
+<td class="hidden lg:table-cell"><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-amber);">MR</div><span class="text-xs truncate min-w-0">Mike Rivera</span></a></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-semibold">+51.4%</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-300">$18,500</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs"><span class="text-emerald-400">3↑</span><span class="text-slate-500">/</span><span class="text-rose-400">0↓</span></div></td>
+<td><span class="badge badge-info">Executing</span></td>
+<td><a href="../execution-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+<tr class="table-row" data-category="electronics" data-filterable="" data-status="rejected">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2041</span></a></td>
+<td><a href="../opportunity-detail/index.html"><div class="font-medium">Used DJ Equipment</div><div class="text-xs text-slate-500 mt-0.5">Pioneer set · 2 turntables + mixer</div></a></td>
+<td class="hidden md:table-cell"><span class="badge badge-neutral">Electronics</span></td>
+<td class="hidden lg:table-cell"><a class="flex items-center gap-2" href="../member-detail/index.html"><div class="avatar" style="background: var(--gradient-blue);">JT</div><span class="text-xs truncate min-w-0">Jules Tan</span></a></td>
+<td class="hidden sm:table-cell"><span class="text-rose-400 font-semibold">−2.4%</span></td>
+<td class="hidden lg:table-cell"><span class="text-xs text-slate-300">$1,800</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs"><span class="text-emerald-400">1↑</span><span class="text-slate-500">/</span><span class="text-rose-400">4↓</span></div></td>
+<td><span class="badge badge-danger">Rejected</span></td>
+<td><a href="../opportunity-detail/index.html"><i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i></a></td>
+</tr>
+</tbody>
+</table></div>
+<!-- Empty state -->
+<div class="empty" data-empty="" hidden="">
+<i class="w-10 h-10 mx-auto" data-lucide="search-x"></i>
+<p class="text-sm font-medium text-slate-400 mb-1">No opportunities match</p>
+<p class="text-xs">Try a different status, category, or search term.</p>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between px-5 py-3 text-xs text-slate-500">
+<span>Showing 8 of 24</span>
+<div class="flex items-center gap-2">
+<button class="btn btn-ghost text-xs px-2 py-1" data-page-prev=""><i class="w-3 h-3" data-lucide="chevron-left"></i></button>
+<span data-page-num="">1 / 3</span>
+<button class="btn btn-ghost text-xs px-2 py-1" data-page-next=""><i class="w-3 h-3" data-lucide="chevron-right"></i></button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body>
+</html>

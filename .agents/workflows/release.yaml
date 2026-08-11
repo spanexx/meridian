@@ -1,0 +1,107 @@
+name: release
+description: |
+  Standard workflow for cutting a semver release. Creates a git tag with
+  release notes, pushes the tag, and (when CI/CD is configured) triggers
+  the production deploy. Deferred trigger — only used after the staging
+  deploy proves reliable.
+
+triggers:
+  - User says "cut a release", "tag a release", "ship v1.2.3"
+  - End of a milestone where one or more PRs are ready to bundle into a release
+  - Calendar-driven (optional): every Friday or every other week
+
+preconditions:
+  - All PRs intended for the release are merged to master
+  - master is green: CI passes, no merge conflicts, audit clean
+  - The next semver version is agreed (MAJOR.MINOR.PATCH)
+
+steps:
+  - name: Confirm master is green
+    run: |
+      git log --oneline master -10
+      git status --porcelain
+    expect: only intended commits, no WIP or revert markers; status empty
+
+  - name: Confirm tests pass on a fresh checkout
+    frontend_change:
+      - "cd frontend && npm ci && npm audit --omit=dev"
+      - "cd frontend && npx ng build"
+      - "cd frontend && npx playwright test"
+    backend_change:
+      - "cd backend && go mod download && go vet ./... && go test ./..."
+
+  - name: Determine version
+    rule: |
+      Semver rules.
+        MAJOR — breaking change (API contract, data model, or repo structure)
+        MINOR — new user-facing capability
+        PATCH — bug fix, docs, perf, non-functional
+      v0.x.y is acceptable while the project is pre-production. v1.0.0 is
+      cut when the project ships to real members (community vote per
+      docs/00-goal-analysis.md).
+
+  - name: Aggregate release notes
+    run: |
+      List every PR merged to master since the last tag.
+        git log --oneline <last-tag>..master
+      For each, extract the PR title (Conventional Commits format).
+    format: |
+      Release notes template.
+
+      # vVERSION — DATE
+
+      ## Highlights
+      - one bullet per MINOR or FEAT change
+
+      ## Fixes
+      - one bullet per FIX change
+
+      ## Maintenance
+      - one bullet per CHORE, DOCS, REFACTOR, TEST, or CI change
+
+      ## Contributors
+      - @handle per PR author (pulled from gh pr list)
+
+  - name: Create annotated tag
+    run: "git tag -a v<VERSION> -m '<release notes>'"
+    rule: |
+      Annotated tag via git tag -a, not lightweight. Tag message is the
+      release notes. These become the GitHub release description.
+
+  - name: Push tag
+    run: "git push origin v<VERSION>"
+    expect: tag visible at github.com/owner/meridian/releases
+
+  - name: Create GitHub release (optional but recommended)
+    run: "gh release create v<VERSION> --notes-file <release-notes.md> --title 'v<VERSION>'"
+    expect: release page exists; binaries attached if CI uploaded them
+
+  - name: Trigger production deploy (when CI/CD is wired)
+    mechanism: |
+      A github-actions workflow listening on push of tags matching v*.
+      It builds the backend binary, deploys to the production target,
+      builds the frontend, and triggers the vercel production deploy.
+    follow_up: "Confirm the deploy workflow ran green in the Actions tab."
+
+verify:
+  - "git tag --list vVERSION shows the tag"
+  - "git ls-remote --tags origin shows the remote tag"
+  - "gh release list shows the new release at the top"
+  - "Actions tab shows the release workflow run with green status"
+  - "Production URL responds with a health check"
+
+rollback:
+  - command: "git tag -d v<VERSION> && git push origin :refs/tags/v<VERSION>"
+    when: tag was created in error
+  - command: "gh release delete v<VERSION> --yes"
+    when: release was published in error
+  - command: "git revert <merge-sha> && git push"
+    when: a shipped change is broken; cut a PATCH release that includes the revert
+
+notes:
+  - Tags are immutable. Never move or delete a tag once pushed, except
+    via the rollback flow above, immediately after creation.
+  - The v0.x.y phase means breaking changes are cheap. Bump MINOR not
+    MAJOR while pre-1.0.
+  - Hotfixes bypass the normal cadence. Branch from the production tag,
+    fix, tag as PATCH, deploy. Same workflow, different source.

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard — MERIDIAN</title>
+<script>document.documentElement.dataset.theme = localStorage.getItem('meridian-theme') || 'dark';</script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>tailwind.config={theme:{extend:{colors:{violet:{50:"#fdf6ee",100:"#f8e8d3",200:"#f0d0a8",300:"#e3ae6d",400:"#c98a42",500:"#a86a2d",600:"#8a5322",700:"#6b3f1a",800:"#4d2d13",900:"#33200e"}}}}};</script>
+<script>window.MERIDIAN_SHELL = { active: 'dashboard' };</script>
+<script src="../kit/app.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="../kit/theme.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="app-shell"></div>
+<main class="main">
+<header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+<div>
+<h1 class="page-title">Good evening, Alex</h1>
+<p class="page-subtitle">Here's what's moving across the pool today.</p>
+</div>
+<div class="flex items-center gap-2 flex-wrap">
+<button class="btn btn-ghost" data-copy="../opportunity-detail/index.html"><i class="w-4 h-4" data-lucide="share-2"></i></button>
+<button class="btn btn-secondary" data-dropdown="kpiMenu"><i class="w-4 h-4" data-lucide="filter"></i>Period</button>
+<a class="btn btn-primary" href="../submit-signal/index.html"><i class="w-4 h-4" data-lucide="plus"></i>Submit Signal</a>
+</div>
+</header>
+<!-- Period dropdown -->
+<div class="menu" data-chart-tabs="" hidden="" id="kpiMenu">
+<div class="menu-head">Pool chart period</div>
+<button class="menu-item" data-chart="7d">Last 7 days</button>
+<button class="menu-item active" data-chart="30d">Last 30 days</button>
+<button class="menu-item" data-chart="90d">Last 90 days</button>
+</div>
+<!-- KPI Row -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="card p-5">
+<div class="flex items-center justify-between mb-3">
+<div class="kpi-label">Total Pool</div>
+<i class="w-4 h-4 text-slate-500" data-lucide="banknote"></i>
+</div>
+<div class="kpi-number text-gradient-emerald">$1,423,580</div>
+<div class="mt-3 flex items-center gap-2 text-xs">
+<span class="text-emerald-400 flex items-center gap-1"><i class="w-3 h-3" data-lucide="trending-up"></i>+2.4%</span>
+<span class="text-slate-500">vs last week</span>
+</div>
+</div>
+<a class="card card-hover p-5 block" href="../executions/index.html">
+<div class="flex items-center justify-between mb-3">
+<div class="kpi-label">Active Capital</div>
+<i class="w-4 h-4 text-slate-500" data-lucide="zap"></i>
+</div>
+<div class="kpi-number">$487,230</div>
+<div class="mt-3 flex items-center gap-2 text-xs">
+<span class="text-slate-400">3 executions in flight</span>
+</div>
+<div class="progress-track mt-3">
+<div class="progress-fill progress-fill-emerald" style="width: 34%;"></div>
+</div>
+</a>
+<a class="card card-hover p-5 block" href="../members/index.html">
+<div class="flex items-center justify-between mb-3">
+<div class="kpi-label">Active Members</div>
+<i class="w-4 h-4 text-slate-500" data-lucide="users"></i>
+</div>
+<div class="kpi-number">124</div>
+<div class="mt-3 flex items-center gap-2 text-xs">
+<span class="text-emerald-400 flex items-center gap-1"><i class="w-3 h-3" data-lucide="trending-up"></i>+8</span>
+<span class="text-slate-500">this week</span>
+</div>
+</a>
+<a class="card card-hover p-5 block" href="../opportunities/index.html">
+<div class="flex items-center justify-between mb-3">
+<div class="kpi-label">Open Opportunities</div>
+<i class="w-4 h-4 text-slate-500" data-lucide="lightbulb"></i>
+</div>
+<div class="kpi-number text-gradient-violet">12</div>
+<div class="mt-3 flex items-center gap-2 text-xs">
+<span class="text-amber-400 flex items-center gap-1"><i class="w-3 h-3" data-lucide="clock"></i>8</span>
+<span class="text-slate-500">awaiting your vote</span>
+</div>
+</a>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left column -->
+<div class="lg:col-span-2 space-y-6">
+<!-- Active Executions -->
+<section class="card p-6">
+<div class="flex items-center justify-between mb-5">
+<div>
+<h2 class="text-base font-semibold">Active Executions</h2>
+<p class="text-xs text-slate-500 mt-0.5">Live operations with deployed capital</p>
+</div>
+<a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" href="../executions/index.html">View all<i class="w-3 h-3" data-lucide="arrow-right"></i></a>
+</div>
+<div class="space-y-3">
+<a class="block card card-hover p-4" href="../execution-detail/index.html">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(16,185,129,0.12);">
+<i class="w-4 h-4 text-emerald-400" data-lucide="package"></i>
+</div>
+<div>
+<div class="text-sm font-medium">E-1042 · Limited Edition Sneaker Resale</div>
+<div class="text-xs text-slate-500">Acquired 8 pairs · Listed on StockX, GOAT</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-semibold text-emerald-400">+12.4% ROI</div>
+<div class="text-xs text-slate-500">$18,500 deployed</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="progress-track flex-1">
+<div class="progress-fill progress-fill-emerald" style="width: 37%;"></div>
+</div>
+<span class="text-xs text-slate-400 whitespace-nowrap">3 of 8 sold</span>
+</div>
+</a>
+<a class="block card card-hover p-4" href="../execution-detail/index.html">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(201,138,66,0.12);">
+<i class="w-4 h-4 text-violet-400" data-lucide="watch"></i>
+</div>
+<div>
+<div class="text-sm font-medium">E-1039 · Vintage Watch Liquidation</div>
+<div class="text-xs text-slate-500">5 items · all sold</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-semibold text-emerald-400">+18.7% ROI</div>
+<div class="text-xs text-slate-500">$32,000 deployed</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="progress-track flex-1">
+<div class="progress-fill progress-fill-violet" style="width: 100%;"></div>
+</div>
+<span class="text-xs text-emerald-400 whitespace-nowrap">Closing</span>
+</div>
+</a>
+<a class="block card card-hover p-4" href="../execution-detail/index.html">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: rgba(96,165,250,0.12);">
+<i class="w-4 h-4 text-blue-400" data-lucide="cpu"></i>
+</div>
+<div>
+<div class="text-sm font-medium">E-1036 · Wholesale Electronics</div>
+<div class="text-xs text-slate-500">Acquiring 12 units from Shenzhen</div>
+</div>
+</div>
+<div class="text-right">
+<div class="text-sm font-semibold text-blue-400">In transit</div>
+<div class="text-xs text-slate-500">$45,000 deployed</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="progress-track flex-1">
+<div class="progress-fill progress-fill-blue" style="width: 25%;"></div>
+</div>
+<span class="text-xs text-slate-400 whitespace-nowrap">ETA 4 days</span>
+</div>
+</a>
+</div>
+</section>
+<!-- Latest Opportunities -->
+<section class="card p-6">
+<div class="flex items-center justify-between mb-5">
+<div>
+<h2 class="text-base font-semibold">Latest Opportunities</h2>
+<p class="text-xs text-slate-500 mt-0.5">Signals awaiting vetting</p>
+</div>
+<a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" href="../opportunities/index.html">View all<i class="w-3 h-3" data-lucide="arrow-right"></i></a>
+</div>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th class="hidden md:table-cell">Ref</th>
+<th>Title</th>
+<th class="hidden md:table-cell">Category</th>
+<th class="hidden sm:table-cell">Est. ROI</th>
+<th>Status</th>
+<th class="hidden lg:table-cell">Votes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="table-row">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2051</span></a></td>
+<td><a class="font-medium" href="../opportunity-detail/index.html">Bulk Lego Set Resale</a></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-400">Collectibles</span></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-medium">+34.2%</span></td>
+<td><span class="badge badge-warning">In Vetting</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs"><span class="text-emerald-400">4↑</span><span class="text-slate-500">/</span><span class="text-rose-400">0↓</span></div></td>
+</tr>
+<tr class="table-row">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2050</span></a></td>
+<td><a class="font-medium" href="../opportunity-detail/index.html">Restaurant Equipment Resale</a></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-400">Equipment</span></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-medium">+22.8%</span></td>
+<td><span class="badge badge-warning">In Vetting</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs"><span class="text-emerald-400">2↑</span><span class="text-slate-500">/</span><span class="text-rose-400">1↓</span></div></td>
+</tr>
+<tr class="table-row">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2049</span></a></td>
+<td><a class="font-medium" href="../opportunity-detail/index.html">Travis Scott × Nike Sneakers</a></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-400">Apparel</span></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-medium">+51.4%</span></td>
+<td><span class="badge badge-warning">In Vetting</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs"><span class="text-emerald-400">3↑</span><span class="text-slate-500">/</span><span class="text-rose-400">1↓</span></div></td>
+</tr>
+<tr class="table-row">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2048</span></a></td>
+<td><a class="font-medium" href="../opportunity-detail/index.html">Designer Furniture Resale</a></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-400">Furniture</span></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-medium">+18.5%</span></td>
+<td><span class="badge badge-info">Pending</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs text-slate-500">—</div></td>
+</tr>
+<tr class="table-row">
+<td class="hidden md:table-cell"><a href="../opportunity-detail/index.html"><span class="text-xs text-slate-500 font-mono">O-2047</span></a></td>
+<td><a class="font-medium" href="../opportunity-detail/index.html">Vintage Camera Lot</a></td>
+<td class="hidden md:table-cell"><span class="text-xs text-slate-400">Collectibles</span></td>
+<td class="hidden sm:table-cell"><span class="text-emerald-400 font-medium">+41.0%</span></td>
+<td><span class="badge badge-info">Pending</span></td>
+<td class="hidden lg:table-cell"><div class="flex items-center gap-2 text-xs text-slate-500">—</div></td>
+</tr>
+</tbody>
+</table></div>
+</section>
+</div>
+<!-- Right column -->
+<div class="space-y-6">
+<!-- Pool Health -->
+<section class="card p-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-base font-semibold">Pool Health</h2>
+<a href="../pool/index.html"><span class="badge badge-success">Healthy</span></a>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between items-baseline mb-2">
+<span class="text-xs text-slate-400">Reserve ratio</span>
+<span class="text-sm font-semibold text-emerald-400">18.2%</span>
+</div>
+<div class="progress-track">
+<div class="progress-fill progress-fill-emerald" style="width: 72%;"></div>
+</div>
+<div class="text-[10px] text-slate-500 mt-1.5">Target 12% · Warn &lt;10% · Critical &lt;5%</div>
+</div>
+<div>
+<div class="flex justify-between items-baseline mb-2">
+<span class="text-slate-400 text-xs">Liquidity</span>
+<span class="text-sm font-semibold">62.4%</span>
+</div>
+<div class="progress-track">
+<div class="progress-fill progress-fill-violet" style="width: 62%;"></div>
+</div>
+<div class="text-[10px] text-slate-500 mt-1.5">Healthy ≥50% · Warn &lt;30%</div>
+</div>
+<div>
+<div class="flex justify-between items-baseline mb-2">
+<span class="text-slate-400 text-xs">Deployment</span>
+<span class="text-sm font-semibold">34.2%</span>
+</div>
+<div class="progress-track">
+<div class="progress-fill progress-fill-blue" style="width: 34%;"></div>
+</div>
+<div class="text-[10px] text-slate-500 mt-1.5">Band 20–40% · Cap 50%</div>
+</div>
+</div>
+<!-- Sparkline (period switchable) -->
+<div class="mt-6 pt-4 border-t" style="border-color: var(--border-subtle);">
+<div class="flex items-center justify-between mb-3">
+<span class="text-xs text-slate-400">Pool · <span data-chart-label="">30 days</span></span>
+<span class="text-xs text-emerald-400">+2.4%</span>
+</div>
+<svg class="w-full h-12" preserveaspectratio="none" viewbox="0 0 200 50">
+<defs>
+<lineargradient id="spark" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#10b981" stop-opacity="0.4"></stop>
+<stop offset="100%" stop-color="#10b981" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<g data-chart-set="7d" hidden="">
+<path d="M0,38 L30,36 L60,30 L90,33 L120,24 L150,20 L180,16 L200,12 L200,50 L0,50 Z" fill="url(#spark)"></path>
+<path d="M0,38 L30,36 L60,30 L90,33 L120,24 L150,20 L180,16 L200,12" fill="none" stroke="#10b981" stroke-width="1.5"></path>
+</g>
+<g data-chart-set="30d">
+<path d="M0,40 L20,35 L40,38 L60,30 L80,32 L100,22 L120,26 L140,18 L160,20 L180,12 L200,15 L200,50 L0,50 Z" fill="url(#spark)"></path>
+<path d="M0,40 L20,35 L40,38 L60,30 L80,32 L100,22 L120,26 L140,18 L160,20 L180,12 L200,15" fill="none" stroke="#10b981" stroke-width="1.5"></path>
+</g>
+<g data-chart-set="90d" hidden="">
+<path d="M0,45 L15,40 L30,42 L45,36 L60,38 L75,30 L90,33 L105,26 L120,28 L135,20 L150,24 L165,16 L180,18 L200,10 L200,50 L0,50 Z" fill="url(#spark)"></path>
+<path d="M0,45 L15,40 L30,42 L45,36 L60,38 L75,30 L90,33 L105,26 L120,28 L135,20 L150,24 L165,16 L180,18 L200,10" fill="none" stroke="#10b981" stroke-width="1.5"></path>
+</g>
+</svg>
+</div>
+</section>
+<!-- Your Portfolio -->
+<section class="glass p-6">
+<div class="flex items-center gap-3 mb-5">
+<div class="avatar" style="width: 2.5rem; height: 2.5rem; background: var(--gradient-violet);">AC</div>
+<div>
+<div class="text-sm font-semibold">Your Portfolio</div>
+<div class="text-xs text-slate-500">Alex Chen</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-baseline">
+<span class="text-xs text-slate-400">Capital contributed</span>
+<span class="text-sm font-semibold">$12,500.00</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="text-xs text-slate-400">Lifetime earnings</span>
+<span class="text-sm font-semibold text-emerald-400">+$1,847.23</span>
+</div>
+<div class="flex justify-between items-baseline">
+<span class="text-xs text-slate-400">Reputation tier</span>
+<span class="badge badge-premium">Vetter · T3</span>
+</div>
+</div>
+<div class="mt-5 pt-4 border-t" style="border-color: var(--border-subtle);">
+<div class="grid grid-cols-2 gap-3 text-center">
+<a href="../profile/index.html">
+<div class="text-lg font-semibold text-gradient-emerald">8</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Signals</div>
+</a>
+<a href="../governance/index.html">
+<div class="text-lg font-semibold text-gradient-violet">14</div>
+<div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Votes Cast</div>
+</a>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-chart]').forEach(b => {
+      b.addEventListener('click', () => {
+        const label = { '7d': '7 days', '30d': '30 days', '90d': '90 days' }[b.dataset.chart];
+        const el = document.querySelector('[data-chart-label]');
+        if (el) el.textContent = label;
+      });
+    });
+  });
+</script>
+</body>
+</html>

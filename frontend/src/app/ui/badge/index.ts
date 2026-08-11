@@ -1,0 +1,1 @@
+export { UiBadgeComponent, type UiBadgeVariant } from './badge.component';

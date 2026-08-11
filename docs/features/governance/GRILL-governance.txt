@@ -1,0 +1,157 @@
+Governance Engine - Grill Notes
+
+Status: Locked
+Date: 2026-08-10
+Source: User instruction "complete it" after architecture review found
+       Governance has no engine. User chose option A (add a new engine)
+       and option α (GRILL + update docs + write API doc, no
+       implementation yet).
+
+What this feature is about
+
+- Adds a 12th engine, Governance, parallel to Opportunity in the
+  capability graph. Owns the proposal-and-vote lifecycle for community
+  decided changes.
+- Owns proposals on the six Community Governed Parameters listed in 00
+  goal analysis line 44 to 49, plus a meta proposal type for community
+  creation.
+- Does NOT own the parameter values themselves, they stay in
+  system_config owned by Admin per 02 data model line 876. Governance
+  reaches Admin only via the event stream.
+- Does NOT create communities, that is Community engine. Governance
+  publishes governance.proposal.passed and Community subscribes.
+- Safety rails are explicitly NOT votable per 00 goal analysis line 58
+  to 63.
+
+Questions and answers locked so far
+
+1. Why does Governance exist as a separate engine
+Answer:
+- Single capability for community decided changes per 00 goal analysis
+  line 43 to 56
+- Owns proposal lifecycle (propose vote pass reject apply)
+- Admin owns runtime config, Opportunity owns signal vetting
+Why:
+- Different lifecycles, different invariants, different states
+Source: 00 goal analysis line 43 to 56
+
+2. What data does the Governance engine own
+Answer:
+- governance_proposals: id, target (parameter or community_creation),
+  parameter_key (for parameter proposals), current_value, proposed_value,
+  rationale, proposer_id, status (VOTING PASSED REJECTED EXPIRED
+  WITHDRAWN), required_weighted_votes, expires_at, applied_at (nullable),
+  created_at
+- governance_votes: proposal_id, voter_id, vote (APPROVE REJECT), weight
+  (snapshot of vetting_weight at vote time), comment, voted_at. Unique
+  on (proposal_id voter_id)
+- governance_actions (audit log): proposal_id, action_type (PASSED
+  REJECTED APPLIED WITHDRAWN), actor_id, occurred_at. Append only.
+Why:
+- Three collections keep proposal state, vote record, and audit trail
+  separate
+- Unique index on (proposal_id voter_id) enforces one vote per member
+  at the storage layer
+Source: 01 architecture line 36; 02 data model line 23 (outbox); 00 goal
+analysis line 51 to 56
+
+3. What parameters are votable
+Answer:
+- The six Community Governed Parameters from 00 goal analysis line 44
+  to 49: ROI floor, win rate target, distribution shares (capital
+  signal access plus ops plus platform), reserve ratio target, vetting
+  thresholds (votes required, voting window), single execution cap
+- Plus a meta proposal type COMMUNITY_CREATION for new communities
+- Safety rails are never votable per 00 goal analysis line 58 to 63
+Why:
+- Direct mirror of the canonical list in the goals doc
+- Meta proposal handles wireframe Propose community modal without a
+  second engine
+Source: 00 goal analysis line 43 to 49 and 58 to 63
+
+4. How does Governance get the reputation weight for a voter
+Answer:
+- Calls Reputation contract GetVettingWeight(member_id) at vote cast
+  time
+- Snapshots the value into governance_votes.weight
+- Future reputation changes do not retroactively change a past vote
+Why:
+- Per 00 goal analysis line 53 to 56 the decision is recorded with
+  provenance including the tally at the time of decision
+- Snapshotting weight is the implementation of that provenance
+Source: 00 goal analysis line 53 to 56
+
+5. When does a proposal pass
+Answer:
+- Two ways: threshold reached (approve weighted count reaches
+  required_weighted_votes within window) OR deadline reached with reject
+  weighted count at required (closes as rejected)
+- On pass status flips to PASSED and governance.proposal.passed fires
+- Admin subscribes for parameter proposals and writes to system_config
+- Community subscribes for community creation proposals and creates the
+  community
+Why:
+- 00 goal analysis line 53 to 55 says vote tally recorded with
+  provenance
+- The apply step is owned by the recipient engine, not Governance
+Source: 00 goal analysis line 51 to 56
+
+6. Are changes applied retroactively
+Answer:
+- No, hard rule. On pass, Admin reads proposal.applied_at and
+  current_value and writes the new value going forward. Past executions
+  remain untouched.
+Why:
+- Direct restatement of 00 goal analysis line 56: Results apply to
+  future executions only, never retroactively
+Source: 00 goal analysis line 56
+
+7. Can a proposer withdraw their proposal
+Answer:
+- Yes, while still VOTING. Any proposer can PATCH
+  /governance/proposals/{id} with status WITHDRAWN. Closed proposals
+  are immutable.
+Why:
+- Standard proposal ergonomics, mirrors the Opportunity draft pattern
+  already in place
+Source: 04 opportunity api; wireframe Opportunity patterns
+
+8. Who can propose and who can vote
+Answer:
+- Any member may propose (per 00 goal analysis line 52)
+- Members with vetting_weight greater than zero (VETTER+ and above) vote
+Why:
+- Direct quotes from the goals doc
+Source: 00 goal analysis line 51 to 56
+
+9. How does Governance relate to Admin and Community
+Answer:
+- Does NOT write to system_config directly, publishes
+  governance.proposal.passed and Admin subscribes to do the write
+- Does NOT create communities, publishes governance.proposal.passed with
+  target_type COMMUNITY_CREATION and Community subscribes to do the
+  create
+Why:
+- Engines own their resources per 02 data model line 7 to 21
+Source: 02 data model line 7 to 21
+
+10. What are the quorum defaults
+Answer:
+- required_weighted_votes is per proposal field
+- Parameter proposal default 5 weighted votes, window 72 hours
+- Community creation proposal default 10 weighted votes, window 72
+  hours
+- Both defaults are themselves governance votable (meta loop)
+Why:
+- Mirrors existing 04 opportunity vetting model
+- Per proposal quorum avoids one size fits all
+Source: 04 opportunity api line 217 to 225; 00 goal analysis line 48
+
+No remaining open questions
+
+Locked on 2026-08-10 by AUTO mode agent under user instruction.
+Proceed to PRD TRD and IMPL via feature pipeline.
+Wireframe page 17 (governance) will need a check after contracts are
+written to ensure every active proposal card, vote tally, split formula
+card, and safety rails card has a corresponding contract or
+system_config value.

@@ -1,0 +1,1 @@
+export { UiStatBarComponent, type UiStatBarVariant } from './stat-bar.component';

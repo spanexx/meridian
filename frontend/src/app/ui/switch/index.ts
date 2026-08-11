@@ -1,0 +1,1 @@
+export { UiSwitchComponent } from './switch.component';

@@ -1,0 +1,1 @@
+export { UiProgressComponent, type UiProgressVariant } from './progress.component';
