@@ -1,0 +1,91 @@
+name: deploy-local
+
+description: |
+  Step-by-step workflow for pulling a production artifact from CI and
+  deploying it to the developer's local machine. Used for both
+  frontend (vercel CLI from the local machine) and backend (Go binary
+  pulled from Actions artifact + systemd / launchd restart).
+
+triggers:
+  - User says "deploy the latest", "ship it", "promote to staging"
+  - After cutting a release tag and wanting it live on the local host
+  - After a hotfix lands on master and the dev wants the running
+    service to pick it up
+
+preconditions:
+  - The vercel login has been run on this machine at least once
+    (see .agents/skills/vercel-cli-deploy/SKILL.md)
+  - The gh auth login has been run on this machine
+  - Backend service is registered with systemd (Linux) or launchd
+    (macOS); restart commands below assume this
+
+steps:
+  - name: Pull latest from master
+    run: |
+      git checkout master
+      git pull origin master
+    expect: clean working tree, no local commits ahead of origin
+
+  - name: Note the commit SHA we are deploying
+    run: |
+      SHA=$(git rev-parse --short HEAD)
+      echo "Deploying commit $SHA"
+
+  - name: Frontend — download the CI artifact
+    run: "gh run download --name meridian-frontend-$SHA"
+    expect: artifact directory exists; size greater than 1MB
+
+  - name: Frontend — deploy to vercel
+    run: |
+      cd meridian-frontend-$SHA
+      vercel deploy --prebuilt --prod
+    expect: URL printed; visit it in browser, confirm the page renders
+
+  - name: Backend — download the CI artifact (when backend exists)
+    run: "gh run download --name meridian-backend-$SHA"
+    when: backend exists in the repo
+
+  - name: Backend — replace the running binary
+    run: |
+      INSTALL_PATH=/usr/local/bin/meridian-backend
+      sudo systemctl stop meridian-backend
+      sudo install -m 0755 meridian-backend-$SHA/meridian-backend $INSTALL_PATH
+      sudo systemctl start meridian-backend
+    when: backend exists in the repo
+    expect: service is running
+
+  - name: Backend — smoke test the running service
+    run: "curl -sf http://127.0.0.1:8080/healthz || echo service not responding"
+    expect: ok or equivalent health-check response
+    note: "Adjust the port to match the backend's actual listen address."
+
+  - name: Log the deploy in sessions/decisions.md
+    run: |
+      echo "$(date +%Y-%m-%d) | Local deploy of $SHA | frontend + backend (or frontend-only) | CI artifact pulled and applied" >> sessions/decisions.md
+
+verify:
+  - "git status -sb shows master in sync with origin"
+  - "Frontend URL returns HTTP 200 and the page renders (verify visually)"
+  - "Backend health endpoint returns ok (when backend exists)"
+  - "Deploy entry appended to sessions/decisions.md"
+
+rollback:
+  - name: Frontend rollback via vercel
+    run: "vercel rollback <previous-deployment-url>"
+  - name: Backend rollback to previous artifact
+    run: |
+      sudo systemctl stop meridian-backend
+      sudo install -m 0755 /usr/local/bin/meridian-backend.previous /usr/local/bin/meridian-backend
+      sudo systemctl start meridian-backend
+
+notes:
+  - "This workflow assumes the developer's machine is the deployment
+    target. When the project graduates past v0.x.y, replace this with
+    a cloud-hosted backend (Fly.io or Render) and a CI-driven
+    frontend deploy via VERCEL_TOKEN."
+  - "Always verify visually after a frontend deploy. vercel deploy
+    returning success does not prove the SPA shell renders. Per the
+    visual-fidelity-check skill, automated green checks do not equal
+    visual fidelity."
+  - "For backend, the smoke test is mandatory. A binary that builds
+    and exits 0 does not prove it serves traffic correctly."

@@ -152,7 +152,14 @@ If any of those fail, fix before opening the PR. Do not push red.
 - Default branch: `master` (note: not `main`)
 - Visibility: public
 - CI: GitHub Actions (workflows at `.github/workflows/`)
-- Frontend deploy: Vercel (via GitHub Actions deploy hook)
-- Backend deploy: Fly.io primary, Render fallback, your computer for
-  dev/staging if neither is available. Production deferred until
-  staging proves reliable.
+- Frontend deploy: Vercel CLI invoked from GitHub Actions — no
+  secrets required. `vercel login` on the developer's machine stores
+  the token locally; the same CLI is used by CI via `npx vercel`.
+- Backend deploy: local machine. CI builds the Go binary as a
+  downloadable workflow artifact; the developer pulls it via
+  `gh run download` or the Actions UI and restarts the service. No
+  cloud bill, no cloud account needed.
+- Why this model: avoids paying for cloud tiers while the project is
+  pre-production. Promotion to a cloud host (Fly.io, Render, etc.)
+  happens when staging proves reliable and the project moves past
+  v0.x.y per the release workflow.
