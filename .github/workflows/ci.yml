@@ -14,6 +14,29 @@ concurrency:
 
 jobs:
   # ─────────────────────────────────────────────────────────────────
+  # Detect whether backend/ exists. Outputs a boolean that downstream
+  # jobs use to decide whether to run. We can't use hashFiles() in a
+  # job-level `if:` (github actions rejects it — see
+  # https://github.com/orgs/community/discussions/25790), so we
+  # capture the file existence in a step's GITHUB_OUTPUT and consume
+  # the output from `needs`.
+  # ─────────────────────────────────────────────────────────────────
+  detect:
+    name: Detect repo layout
+    runs-on: ubuntu-latest
+    outputs:
+      has_backend: ${{ steps.detect.outputs.has_backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: detect
+        run: |
+          if [ -f backend/go.mod ]; then
+            echo "has_backend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_backend=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ─────────────────────────────────────────────────────────────────
   # Server-side re-run of the local pre-commit hook.
   # Catches commits that bypassed the local hook (--no-verify).
   # ─────────────────────────────────────────────────────────────────
@@ -102,10 +125,12 @@ jobs:
   backend:
     name: Backend (vet + test + build)
     runs-on: ubuntu-latest
-    needs: precommit
+    needs: [precommit, detect]
     # Skip the entire backend job when backend/ doesn't exist yet.
-    # The job lights up automatically once the first backend file lands.
-    if: hashFiles('backend/go.mod') != ''
+    # We check the detect job's output rather than using hashFiles()
+    # directly because hashFiles() is not allowed in job-level `if:`
+    # (see https://github.com/orgs/community/discussions/25790).
+    if: needs.detect.outputs.has_backend == 'true'
     defaults:
       run:
         working-directory: backend
@@ -197,17 +222,20 @@ jobs:
   aggregate:
     name: All gates green
     runs-on: ubuntu-latest
-    needs: [precommit, frontend, backend, docs]
+    needs: [detect, precommit, frontend, backend, docs]
     if: always()
     steps:
       - name: Check job results
         run: |
+          # detect is a pure sensor; treat it as success regardless of result.
           # backend is conditional on backend/go.mod existing; treat
           # 'skipped' as success so this gate passes for frontend-only repos.
+          DETECT="${{ needs.detect.result }}"
           PRECOMMIT="${{ needs.precommit.result }}"
           FRONTEND="${{ needs.frontend.result }}"
           BACKEND="${{ needs.backend.result }}"
           DOCS="${{ needs.docs.result }}"
+          [ "$DETECT" = "success" ] || [ "$DETECT" = "skipped" ] || { echo "detect failed"; exit 1; }
           [ "$PRECOMMIT" = "success" ] || { echo "precommit failed"; exit 1; }
           [ "$BACKEND" = "success" ] || [ "$BACKEND" = "skipped" ] || { echo "backend failed"; exit 1; }
           [ "$FRONTEND" = "success" ] || { echo "frontend failed"; exit 1; }
