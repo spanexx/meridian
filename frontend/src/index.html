@@ -8,6 +8,19 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
+  <!--
+    Vite 7.x's bundled dev client (served by @angular/build@20) reads
+    `__SERVER_FORWARD_CONSOLE__` at startup to decide whether to
+    forward browser console.log to the terminal. The placeholder is
+    supposed to be substituted by the dev server, but the angular
+    builder skips the substitution, so the symbol is undefined and
+    vite logs an uncaught error. We pre-define it here as a no-op
+    so the SPA boots clean. Production builds don't include the
+    @vite/client bundle, so this has no effect on prod.
+
+    See .agents/lessons/ for the full story.
+  -->
+  <script>window.__SERVER_FORWARD_CONSOLE__ = { enabled: false };</script>
   <app-root></app-root>
 </body>
 </html>
