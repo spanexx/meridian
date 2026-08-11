@@ -57,7 +57,7 @@ interface OpportunityRow {
   imports: [UiTableComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <main class="p-6 lg:p-8 max-w-7xl mx-auto">
+    <section class="p-6 lg:p-8 max-w-7xl mx-auto">
       <header class="mb-6">
         <h1 class="text-2xl font-bold">Opportunities</h1>
         <p class="text-sm text-slate-400 mt-1">
@@ -110,7 +110,7 @@ interface OpportunityRow {
       <section>
         <ui-table [columns]="columns" [rows]="visibleRows()" />
       </section>
-    </main>
+    </section>
   `,
 })
 export class OpportunitiesPageComponent {

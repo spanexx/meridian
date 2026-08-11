@@ -62,7 +62,8 @@ interface OpportunityRow {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <main class="main">
+
+    <section class="page">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
           <h1 class="page-title">Good evening, Alex</h1>
@@ -298,7 +299,7 @@ interface OpportunityRow {
           </div>
         </div>
       </section>
-    </main>
+    </section>
   `,
   // No :host override — let the global `.main .main { margin-left: 260px; padding: 2rem 2.5rem; }`
   // from theme.css apply directly, including the sidebar reservation. Once the
