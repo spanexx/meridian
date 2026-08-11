@@ -1,3 +1,9 @@
+/**
+ * ShowcaseComponent — primitives-pack visual-coverage harness (formerly DashboardComponent)
+ *
+ * @owner   spanexx
+ * @reviewed 2026-08-11
+ */
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import {
   UiButtonComponent,
@@ -29,7 +35,7 @@ interface Row {
 }
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-showcase',
   standalone: true,
   imports: [
     UiButtonComponent,
@@ -197,7 +203,7 @@ interface Row {
   styles: [':host { display: block; padding: 2rem; max-width: 1100px; margin: 0 auto; }'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent {
+export class ShowcaseComponent {
   toastOpen = signal(false);
   modalOpen = signal(false);
   activeTab = signal('pool');

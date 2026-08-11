@@ -1,17 +1,26 @@
-// Routes registered for the meridian Angular app. New pages mount
-// here as `loadComponent` lazy entries so initial bundle stays small
-// and each route ships its own primitives.
-//
-// @owner   spanexx
-// @reviewed 2026-08-11
+/**
+ * Routes registered for the meridian Angular app
+ *
+ * @owner   spanexx
+ * @reviewed 2026-08-11
+ */
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: '', pathMatch: 'full', redirectTo: 'showcase' },
+  {
+    path: 'showcase',
+    loadComponent: () =>
+      import('./pages/showcase/showcase.page').then(
+        (m) => m.ShowcaseComponent,
+      ),
+  },
   {
     path: 'dashboard',
     loadComponent: () =>
-      import('./pages/dashboard/dashboard.component').then((m) => m.DashboardComponent),
+      import('./pages/dashboard/dashboard.page').then(
+        (m) => m.DashboardPageComponent,
+      ),
   },
   {
     path: 'opportunities',

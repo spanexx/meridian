@@ -1,3 +1,12 @@
+/**
+ * E2E coverage for the /showcase route — visual + theme.css token
+ * verification harness for the 19 primitives. Renamed from
+ * `dashboard.spec.ts` on 2026-08-11 when /dashboard got re-routed
+ * to the real product placeholder.
+ *
+ * @owner   spanexx
+ * @reviewed 2026-08-11
+ */
 import { test, expect } from '@playwright/test';
 
 /**
@@ -6,9 +15,9 @@ import { test, expect } from '@playwright/test';
  * wireframe/meridian/kit/theme.css — if any of these fail, the
  * scaffold's theme bridge is broken.
  */
-test.describe('dashboard theme fidelity', () => {
+test.describe('showcase primitive-coverage', () => {
   test('page-title typography matches theme.css .page-title', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
 
     const title = page.locator('h1.page-title');
     await expect(title).toBeVisible();
@@ -29,7 +38,7 @@ test.describe('dashboard theme fidelity', () => {
   });
 
   test('page-subtitle color matches theme.css .page-subtitle', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
     const subtitle = page.locator('p.page-subtitle');
     await expect(subtitle).toBeVisible();
     const color = await subtitle.evaluate((el) => getComputedStyle(el).color);
@@ -38,7 +47,7 @@ test.describe('dashboard theme fidelity', () => {
   });
 
   test('btn-primary background matches .btn-primary', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
     const btn = page.locator('button.btn-primary').first();
     await expect(btn).toBeVisible();
     // .btn-primary { background: var(--gradient-primary) } which is #14b8a6 in dark, #0d9488 in light
@@ -48,7 +57,7 @@ test.describe('dashboard theme fidelity', () => {
   });
 
   test('card border-radius matches .card definition (0.875rem = 14px)', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
     const card = page.locator('.card.p-5').first();
     await expect(card).toBeVisible();
     const radius = await card.evaluate((el) => getComputedStyle(el).borderRadius);
@@ -56,7 +65,7 @@ test.describe('dashboard theme fidelity', () => {
   });
 
   test('kpi-number font-weight matches .kpi-number (300)', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
     const kpiNumber = page.locator('.kpi-number').first();
     await expect(kpiNumber).toBeVisible();
     const weight = await kpiNumber.evaluate((el) => getComputedStyle(el).fontWeight);
@@ -64,7 +73,7 @@ test.describe('dashboard theme fidelity', () => {
   });
 
   test('body has dark theme background by default', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     // .html[data-theme=dark]: body background = var(--gradient-bg) which contains #07070b
     // The actual computed value depends on browser handling of the gradient;
@@ -72,10 +81,10 @@ test.describe('dashboard theme fidelity', () => {
     expect(bg).not.toBe('rgb(246, 247, 251)');
   });
 
-  test('dashboard smoke screenshot saved for visual review', async ({ page }) => {
-    await page.goto('/dashboard');
+  test('showcase screenshot saved for visual review', async ({ page }) => {
+    await page.goto('/showcase');
     await page.waitForTimeout(500); // give the SPA a beat to settle
-    await page.screenshot({ path: 'e2e/screenshots/dashboard.png', fullPage: true });
+    await page.screenshot({ path: 'e2e/screenshots/showcase.png', fullPage: true });
     // Note: a real visual diff against the wireframe would use
     // toHaveScreenshot with a checked-in baseline. For the smoke
     // test we just capture a PNG for human inspection.

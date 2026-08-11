@@ -1,8 +1,15 @@
+/**
+ * E2E coverage for the card primitive — verifies that the
+ * primitive renders correctly under the theme.css tokens it depends on.
+ *
+ * @owner   spanexx
+ * @reviewed 2026-08-11
+ */
 import { test, expect } from '@playwright/test';
 
 test.describe('ui-card primitive', () => {
   test('card border-radius matches .card (14px)', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
     const card = page.locator('ui-card .card').first();
     await expect(card).toBeVisible();
     const radius = await card.evaluate((el) => getComputedStyle(el).borderRadius);
@@ -10,7 +17,7 @@ test.describe('ui-card primitive', () => {
   });
 
   test('card-hover variant applies :hover transition', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
     const card = page.locator('ui-card .card.card-hover').first();
     await expect(card).toBeVisible();
     const transition = await card.evaluate((el) => getComputedStyle(el).transitionProperty);

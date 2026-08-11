@@ -1,8 +1,15 @@
+/**
+ * E2E coverage for the kpi-card primitive — verifies that the
+ * primitive renders correctly under the theme.css tokens it depends on.
+ *
+ * @owner   spanexx
+ * @reviewed 2026-08-11
+ */
 import { test, expect } from '@playwright/test';
 
 test.describe('ui-kpi-card primitive', () => {
   test('kpi-label is uppercase with letter-spacing', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
     const label = page.locator('ui-kpi-card .kpi-label').first();
     await expect(label).toBeVisible();
     const style = await label.evaluate((el) => {
@@ -15,7 +22,7 @@ test.describe('ui-kpi-card primitive', () => {
   });
 
   test('kpi-number has weight 300 and tabular numerals', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
     const num = page.locator('ui-kpi-card .kpi-number').first();
     await expect(num).toBeVisible();
     const style = await num.evaluate((el) => {
@@ -27,7 +34,7 @@ test.describe('ui-kpi-card primitive', () => {
   });
 
   test('gradient variant applies text-gradient-emerald background-clip', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/showcase');
     const num = page.locator('ui-kpi-card .kpi-number.text-gradient-emerald').first();
     await expect(num).toBeVisible();
     const clip = await num.evaluate((el) => getComputedStyle(el).webkitBackgroundClip);
