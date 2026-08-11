@@ -33,14 +33,18 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
+    "@analogjs/vite-plugin-angular": "^2.6.4",
+    "@analogjs/vitest-angular": "^2.6.4",
     "@angular/build": "^20.3.33",
     "@angular/cli": "^20.3.33",
     "@angular/compiler-cli": "^20.3.0",
+    "@angular/platform-browser-dynamic": "^20.3.27",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/jasmine": "~5.1.0",
     "autoprefixer": "^10.5.4",
     "jasmine-core": "~5.9.0",
+    "jsdom": "^30.0.1",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
@@ -48,6 +52,8 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "vite": "^8.2.1",
+    "vitest": "^3.2.7"
   }
 }
