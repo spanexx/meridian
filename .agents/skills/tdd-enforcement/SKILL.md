@@ -81,6 +81,25 @@ Bypass options (use sparingly):
 - Add a comment header `// TEST-COUPLED:` on the function with a
   pointer to its single matching test — exempts it from the scan.
 
+DISCOVERY 2026-08-11: the current implementation in scripts/pre-commit.py
+treats one `// TEST-COUPLED:` marker as a coarse "exempt all symbols in
+this file" flag — multiple exports need markers >= count to be exempt.
+Per-symbol exemption is not yet implemented. Workaround when a class
+has one export plus one untested public helper: prefer writing the
+unit test over adding the marker. Markers are useful for genuinely-
+coupled helpers (Angular lifecycle hooks) but should NOT substitute
+for test coverage of helper methods.
+
+DISCOVERY 2026-08-11: page-level specs against existing primitives
+must read the primitive's template first. UiButtonComponent (and
+similar) project content via `<ng-content>` — the `<ui-button>` host
+element and the inner native `<button>` are TWO different elements in
+the DOM. The native `<button>` is where click handlers, aria-pressed,
+and visible text live. When a page needs behavior the primitive
+doesn't expose (e.g. aria-pressed on a filter toggle), prefer raw
+`<button class="btn btn-primary">` markup in the page over extending
+the primitive's API.
+
 ## Retrofit Mode (Existing Code)
 
 Pre-TDD code that exists in the repo (e.g. the 19 primitives shipped
