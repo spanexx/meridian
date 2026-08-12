@@ -1,5 +1,9 @@
 <!--
-  CommunitySettingsPageComponent template (chunk 1/4 of wireframe).
+  CommunitySettingsPageComponent template (chunk 1/4 + chunk 2/4 of wireframe).
+
+  chunk 1: breadcrumb, header, General card, At a glance, Safety rails
+  chunk 2: Governance Parameters, Members & Roles, Danger Zone, How changes work,
+           archive-confirm modal
 
   @owner   spanexx
   @reviewed 2026-08-12
@@ -38,7 +42,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 space-y-6">
 
-      <!-- General -->
+      <!-- General (chunk 1) -->
       <section class="card p-6" data-testid="general-card">
         <div class="flex items-center justify-between mb-5">
           <div>
@@ -93,17 +97,116 @@
         </form>
       </section>
 
+      <!-- Governance Parameters (chunk 2) -->
+      <section class="card p-6" data-testid="governance-card">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold">Governance Parameters</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Community-wide configuration. Each value can only be changed by a Governance Vote.</p>
+          </div>
+          <ui-icon name="alert-triangle" class="w-4 h-4 text-amber-400"></ui-icon>
+        </div>
+        <div class="rounded-md bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-xs text-amber-200 mb-4">
+          Changes to these values open a public vote. Member reputation determines vote weight.
+        </div>
+        <ul class="space-y-3">
+          @for (p of governanceParameters(); track p.label) {
+            <li class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-700/30 pb-3 last:border-none">
+              <div>
+                <div class="font-medium text-sm">{{ p.label }}</div>
+                <div class="text-xs text-slate-500">Current value: <span class="font-mono text-slate-300">{{ p.value }}</span></div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="badge badge-amber" data-testid="vote-required-badge">
+                  <ui-icon name="vote" class="w-3 h-3"></ui-icon>
+                  Vote required
+                </span>
+                <button type="button" class="btn btn-sm btn-ghost" data-action="propose" (click)="onPropose(p.label)">
+                  Propose change
+                </button>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <!-- Members & Roles (chunk 2) -->
+      <section class="card p-6" data-testid="members-roles-card">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold">Members & Roles</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Set defaults for joining and ranking.</p>
+          </div>
+          <ui-icon name="user-cog" class="w-4 h-4 text-slate-400"></ui-icon>
+        </div>
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Open enrollment</div>
+              <div class="text-xs text-slate-500">Allow new members to join without an invite.</div>
+            </div>
+            <ui-switch [checked]="roleOpenEnrollment" (checkedChange)="setRoleOpenEnrollment($event)"></ui-switch>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Require KYC at join</div>
+              <div class="text-xs text-slate-500">New members must verify identity before contributing.</div>
+            </div>
+            <ui-switch [checked]="roleRequireKyc" (checkedChange)="setRoleRequireKyc($event)"></ui-switch>
+          </div>
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">Vetter privilege auto-promotion</div>
+              <div class="text-xs text-slate-500">Reputation-based automatic Vetter promotion after 90 days.</div>
+            </div>
+            <ui-switch [checked]="roleVetterAutoPromote" (checkedChange)="setRoleVetterAutoPromote($event)"></ui-switch>
+          </div>
+        </div>
+      </section>
+
+      <!-- Danger Zone (chunk 2) -->
+      <section class="card p-6 border-red-500/40" data-testid="danger-zone-card">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold text-red-300">Danger Zone</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Irreversible community-level actions.</p>
+          </div>
+          <ui-icon name="alert-triangle" class="w-4 h-4 text-red-400"></ui-icon>
+        </div>
+        <div class="space-y-3">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-md border border-red-500/30 bg-red-500/5 p-3">
+            <div>
+              <div class="text-sm font-medium">Archive community</div>
+              <div class="text-xs text-slate-500">Read-only state. Stops new opportunities, pools, and executions. Permanent.</div>
+            </div>
+            <button type="button" class="btn btn-sm btn-danger" data-action="archive" (click)="onArchive()">
+              <ui-icon name="archive" class="w-4 h-4"></ui-icon>
+              Archive community
+            </button>
+          </div>
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+            <div>
+              <div class="text-sm font-medium">Transfer admin role</div>
+              <div class="text-xs text-slate-500">Hand admin control to a vetted member. Requires a new Vetter-3+ recipient.</div>
+            </div>
+            <button type="button" class="btn btn-sm btn-warning" data-action="transfer-admin" (click)="onTransferAdmin()">
+              <ui-icon name="user-cog" class="w-4 h-4"></ui-icon>
+              Transfer admin role
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- sidebar -->
     <div class="space-y-6">
-      <!-- At a glance -->
+      <!-- At a glance (chunk 1) -->
       <section class="card p-6" data-testid="at-a-glance-card">
         <h2 class="text-base font-semibold mb-4">At a glance</h2>
         <div class="space-y-3 text-sm">
           <div class="flex items-center justify-between">
             <span class="text-slate-500">Status</span>
-            <span class="badge badge-success">{{ community?.status }}</span>
+            <span class="badge badge-success">{{ communityStatus }}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-slate-500">Members</span>
@@ -124,7 +227,7 @@
         </div>
       </section>
 
-      <!-- Safety rails -->
+      <!-- Safety rails (chunk 1) -->
       <section class="card p-6" data-testid="safety-rails-card">
         <h2 class="text-base font-semibold mb-3">Safety rails</h2>
         <p class="text-xs text-slate-500 mb-3">Never community-governed. Fixed by design.</p>
@@ -137,6 +240,52 @@
           }
         </div>
       </section>
+
+      <!-- How changes work (chunk 2) -->
+      <section class="card p-6" data-testid="how-changes-card">
+        <h2 class="text-base font-semibold mb-3">How changes work</h2>
+        <p class="text-xs text-slate-500 mb-4">Governance parameters go through a structured four-step process before any value changes.</p>
+        <ol class="space-y-3">
+          @for (step of howChangesSteps(); track step; let i = $index) {
+            <li class="flex items-start gap-3" data-testid="how-changes-step">
+              <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-200 text-xs flex items-center justify-center flex-shrink-0">{{ i + 1 }}</span>
+              <div>
+                <div class="text-sm font-medium">{{ step }}</div>
+                @switch (step) {
+                  @case ('Propose') { <div class="text-xs text-slate-500">Any member files a governance proposal.</div> }
+                  @case ('Debate')  { <div class="text-xs text-slate-500">5-day comment window with weighted debate.</div> }
+                  @case ('Vote')    { <div class="text-xs text-slate-500">Vetters cast weighted ballots. Majority required.</div> }
+                  @case ('Enact')   { <div class="text-xs text-slate-500">Approved proposal changes the parameter on a 24h delay.</div> }
+                }
+              </div>
+            </li>
+          }
+        </ol>
+        <a [routerLink]="['/governance']" class="btn btn-ghost w-full mt-4">
+          <ui-icon name="vote" class="w-4 h-4"></ui-icon>
+          Open governance
+        </a>
+      </section>
     </div>
   </div>
+
+  <!-- Archive confirm modal -->
+  <ui-modal [open]="archiveModalOpen" title="Archive MERIDIAN Alpha?" [closeOnOverlay]="false">
+    <div class="space-y-3" data-testid="archive-confirm-modal">
+      <p class="text-sm text-slate-300">Archiving a community is permanent. Members will no longer be able to submit signals or join executions. Existing positions will run to completion.</p>
+      <ul class="text-xs text-slate-500 list-disc pl-5 space-y-1">
+        <li>No new opportunities or signals will be accepted.</li>
+        <li>Capital remains withdrawable by member request.</li>
+        <li>Archived communities are listed but not editable.</li>
+      </ul>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button type="button" class="btn btn-ghost flex-1" (click)="closeArchiveModal()">Cancel</button>
+      <button type="button" class="btn btn-danger flex-1" (click)="confirmArchive()">
+        <ui-icon name="archive" class="w-4 h-4"></ui-icon>
+        Archive permanently
+      </button>
+    </div>
+  </ui-modal>
+
 </section>

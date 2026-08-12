@@ -75,6 +75,7 @@ const ICON_PATHS: Readonly<Record<string, string>> = Object.freeze({
   'share-2':      '<circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>',
   'trending-up':  '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline>',
   'user':         '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>',
+  'user-cog':     '<circle cx="18" cy="15" r="3"></circle><path d="M19.4 12.4 21 14l-1.6 1.6"></path><path d="m17.4 14.4-1.6-1.6 1.6-1.6"></path><circle cx="6" cy="6" r="3"></circle><path d="M7.4 9.4 6 11 4.6 9.4"></path><path d="m4.6 5.6 1.4 1.4"></path><circle cx="6" cy="18" r="3"></circle><path d="m5.5 14.5 1.5-1.5"></path><path d="M7.4 21.4 6 23 4.6 21.4"></path><path d="m4.6 17.5 1.4 1.4"></path>',
   'users':        '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>',
   'vote':         '<path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>',
   'watch':        '<circle cx="12" cy="12" r="6"></circle><polyline points="12 10 12 12 13 13"></polyline><polyline points="16.13 2.5 16.13 5.5 19.13 5.5"></polyline><polyline points="7.87 2.5 7.87 5.5 4.87 5.5"></polyline>',
