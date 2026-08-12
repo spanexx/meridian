@@ -305,6 +305,7 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   // Re-mount a fresh component so we have access to componentInstance for
   // method-level assertions.
   it('formatCapital() renders with thousands separator', async () => {
+    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
     const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
@@ -314,6 +315,7 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   });
 
   it('formatRoi() renders "+X.X%" with one decimal', async () => {
+    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
     const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
@@ -322,6 +324,7 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   });
 
   it('categoryLabel() capitalizes the category slug', async () => {
+    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
     const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
@@ -330,6 +333,7 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   });
 
   it('statusLabel() returns the wireframe label for each status', async () => {
+    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
     const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
@@ -341,6 +345,7 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   });
 
   it('statusVariant() maps each status to a badge color variant', async () => {
+    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
     const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
