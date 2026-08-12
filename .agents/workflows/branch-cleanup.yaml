@@ -1,0 +1,68 @@
+name: branch-cleanup
+description: |
+  Delete feature branches once their PR has been merged or closed, and
+  sweep stale branches periodically. The rule of thumb: a branch that
+  has done its work (PR merged) should not linger. Run at the end of
+  every session and after every merge.
+
+triggers:
+  - A PR was just merged or closed (delete its branch in the same session)
+  - Start or end of a session with leftover local/remote branches
+  - User says "clean up branches" or "why are there so many branches"
+
+steps:
+  - name: Confirm nothing has an open PR
+    run: "gh pr list --state open --json number,headRefName"
+    expect: no branch you are about to delete appears here
+
+  - name: List merged and closed PR head branches
+    run: |
+      gh pr list --state merged --json headRefName --limit 100
+      gh pr list --state closed --json headRefName --limit 100
+    expect: |
+      the set of branches whose work is already on master (or was
+      superseded); a CLOSED branch is still deletable — its work
+      never landed, but the branch is dead
+
+  - name: List remote branches
+    run: "git branch -r"
+    expect: compare against the merged/closed set above
+
+  - name: Delete stale remote branches
+    run: "git push origin --delete <branch1> <branch2> ..."
+    expect: only master remains on the remote (or branches with open PRs)
+
+  - name: Prune remote-tracking refs
+    run: "git remote prune origin"
+    expect: local refs/remotes/origin/* matches the actual remote
+
+  - name: Delete stale local branches
+    rule: |
+      Only delete a local branch when its PR is merged/closed AND it
+      contains no unmerged work: `git log --oneline origin/master..<b>`
+      must be empty (squash merges do not create ancestry, so check
+      content with `git cherry` if in doubt). Never `git branch -D` a
+      branch with unmerged commits unless the user confirms.
+    run: "git branch -D <branch>"
+    expect: only master (and any branch with open PR) remains locally
+
+  - name: Record the sweep
+    run: |
+      append one line to sessions/decisions.md or the handoff:
+      branches deleted this session
+    expect: the next session knows the tree was already cleaned
+
+verify:
+  - "git branch -a shows only master plus branches with open PRs"
+  - "git ls-remote --heads origin matches the local picture"
+  - "no branch whose PR merged more than one session ago still exists"
+
+notes:
+  - "Prefer `gh pr merge --squash --delete-branch` when merging — it
+    deletes the remote branch as part of the merge, so cleanup happens
+    at the moment of completion, not later."
+  - "Squash merges do not create a merge commit, so `git branch --merged`
+    is NOT a reliable way to find dead branches in this repo. Use the
+    PR head list instead."
+  - "A closed-but-unmerged branch (superseded PR) is still dead weight —
+    delete it; its commits live on in the PR conversation if ever needed."
