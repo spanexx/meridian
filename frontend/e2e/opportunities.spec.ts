@@ -129,4 +129,19 @@ test.describe('opportunities page (wireframe-aligned)', () => {
     await page.goto('/opportunities');
     await page.screenshot({ path: 'e2e/screenshots/opportunities.png', fullPage: true });
   });
+
+  test('mobile: status tabs collapse into a dropdown with all 6 options', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 800 });
+    await page.goto('/opportunities');
+    const select = page.locator('[data-testid="status-select"]');
+    await expect(select).toBeVisible();
+    await expect(page.locator('[data-testid="status-filter"]')).toBeHidden();
+    for (const opt of ['All 24', 'Pending 8', 'In Vetting 5', 'Approved 3', 'Executing 2', 'Rejected 6']) {
+      await expect(select.locator('option', { hasText: opt })).toHaveCount(1);
+    }
+    // filtering via the dropdown mirrors the tab behavior
+    await select.selectOption({ label: 'Pending 8' });
+    await expect(page.locator('tbody tr').first()).toBeVisible();
+    await expect(page.locator('tbody tr').first()).toHaveAttribute('data-status', 'pending');
+  });
 });

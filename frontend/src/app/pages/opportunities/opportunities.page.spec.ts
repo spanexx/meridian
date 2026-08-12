@@ -91,12 +91,58 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
     }
   });
 
+  // ─── onStatusChange (TDD coverage) ────────────────────────────
+  it('onStatusChange(event) updates the status signal and resets the page', async () => {
+    const fixture = await renderStandalone();
+    const c = fixture.componentInstance;
+    // move to page 2 first so we can prove the reset
+    c.status.set('pending');
+    c.page.set(2);
+    fixture.detectChanges();
+    const fakeSelect = { value: 'vetting' } as unknown as HTMLSelectElement;
+    c.onStatusChange({ target: fakeSelect } as unknown as Event);
+    expect(c.status()).toBe('vetting');
+    expect(c.page()).toBe(1);
+  });
+
   it('default status tab is "All" with aria-selected=true', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
     const allBtn = Array.from(root.querySelectorAll('[data-testid="status-filter"] button'))
       .find((b) => b.textContent?.startsWith('All')) as HTMLElement | undefined;
     expect(allBtn?.getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('renders a mobile status dropdown with every tab option + count', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const select = root.querySelector('[data-testid="status-select"]') as HTMLSelectElement | null;
+    expect(select).toBeTruthy();
+    expect(select?.options.length).toBe(STATUSES.length);
+    for (const stat of STATUSES) {
+      const opt = Array.from(select?.options ?? []).find((o) => o.textContent?.includes(stat));
+      expect(opt, `missing dropdown option: ${stat}`).toBeTruthy();
+    }
+  });
+
+  it('mobile dropdown mirrors the active status and filters on change', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const select = root.querySelector('[data-testid="status-select"]') as HTMLSelectElement;
+    // default: All → 8 rows (page 1)
+    expect(select.value).toBe('all');
+    // switch to Pending via the dropdown
+    select.value = 'pending';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    const rows = Array.from(root.querySelectorAll('tbody tr'));
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      expect(row.getAttribute('data-status')).toBe('pending');
+    }
+    const pendingTab = Array.from(root.querySelectorAll('[data-testid="status-filter"] button'))
+      .find((b) => b.textContent?.startsWith('Pending')) as HTMLElement;
+    expect(pendingTab?.getAttribute('aria-selected')).toBe('true');
   });
 
   it('renders a table with 9 columns including an arrow column', async () => {

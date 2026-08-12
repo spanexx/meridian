@@ -25,6 +25,10 @@ import { UiIconComponent } from './icon.component';
 
 const SUPPORTED_NAMES = [
   'arrow-right',
+  'arrow-down-to-line',
+  'camera',
+  'info',
+  'x',
   'banknote',
   'bell',
   'circle-dollar-sign',

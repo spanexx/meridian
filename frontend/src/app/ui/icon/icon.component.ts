@@ -23,6 +23,9 @@ import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 /** SVG path data for each supported icon, sourced from lucide v0.x. */
 const ICON_PATHS: Readonly<Record<string, string>> = Object.freeze({
   'arrow-right':  '<line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>',
+  'arrow-down-to-line': '<path d="M12 17V3"></path><path d="m6 11 6 6 6-6"></path><path d="M19 21H5"></path>',
+  'camera':       '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path><circle cx="12" cy="13" r="3"></circle>',
+  'info':         '<circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path>',
   'banknote':     '<rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>',
   'bell':         '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>',
   'circle-dollar-sign': '<circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><path d="M12 18V6"></path>',
@@ -47,6 +50,7 @@ const ICON_PATHS: Readonly<Record<string, string>> = Object.freeze({
   'users':        '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>',
   'vote':         '<path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>',
   'watch':        '<circle cx="12" cy="12" r="6"></circle><polyline points="12 10 12 12 13 13"></polyline><polyline points="16.13 2.5 16.13 5.5 19.13 5.5"></polyline><polyline points="7.87 2.5 7.87 5.5 4.87 5.5"></polyline>',
+  'x':            '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>',
   'zap':          '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>',
 });
 
