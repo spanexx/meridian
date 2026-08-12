@@ -124,7 +124,7 @@ def is_header_exempt(path: Path) -> bool:
 
 
 def check_yaml(files: list[Path]) -> int:
-    header("[1/6] YAML validity")
+    header("[1/8] YAML validity")
     errors = 0
     yaml_files = [f for f in files if f.suffix in {".yml", ".yaml"} and f.exists()]
     if not yaml_files:
@@ -147,7 +147,7 @@ def check_yaml(files: list[Path]) -> int:
 
 
 def check_secrets(files: list[Path]) -> int:
-    header("[2/6] Secrets scan")
+    header("[2/8] Secrets scan")
     errors = 0
     candidates = [f for f in files if f.exists() and f.suffix not in {".png", ".jpg", ".gif", ".ico"}]
     for f in candidates:
@@ -165,7 +165,7 @@ def check_secrets(files: list[Path]) -> int:
 
 
 def check_comments(files: list[Path]) -> int:
-    header("[3/6] Comment policy")
+    header("[3/8] Comment policy")
     errors = 0
 
     source_files = [
@@ -207,7 +207,7 @@ def check_comments(files: list[Path]) -> int:
 
 
 def check_types(files: list[Path]) -> int:
-    header("[4/6] Type check (tsc)")
+    header("[4/8] Type check (tsc)")
     ts_files = [f for f in files if f.exists() and f.suffix in {".ts", ".tsx"}]
     if not ts_files:
         ok("no TS files staged")
@@ -232,7 +232,7 @@ def check_types(files: list[Path]) -> int:
 
 
 def check_unit_tests(files: list[Path]) -> int:
-    header("[5/6] Unit tests (vitest)")
+    header("[5/8] Unit tests (vitest)")
     ts_files = [f for f in files if f.exists() and f.suffix in {".ts", ".tsx"}]
     if not ts_files:
         ok("no TS files staged")
@@ -268,7 +268,7 @@ def check_icons(files: list[Path]) -> int:
     the dictionary renders an invisible (0-child) SVG — the bug class
     that shipped twice in PR #19/#20 (sun/cog paths never committed).
     """
-    header("[6/6] Icon cross-check")
+    header("[6/8] Icon cross-check")
     errors = 0
     icon_ts = REPO_ROOT / "frontend/src/app/ui/icon/icon.component.ts"
     if not icon_ts.exists():
@@ -300,6 +300,55 @@ def check_icons(files: list[Path]) -> int:
     return errors
 
 
+def check_new_page(files: list[Path]) -> int:
+    """
+    New-page pack enforcement: every staged page component (under
+    frontend/src/app/pages/<slug>/) must have a matching spec, a
+    barrel file (index.ts), and must be wired into app.routes.ts.
+
+    The pack is documented in .agents/features/new-page/. Cost of
+    shipping a page without these: the spec is "stale" (nothing
+    fails when the page regresses), the barrel is missing (other
+    packages can't import the component), and the route is
+    unreachable.
+    """
+    header("[7/8] New-page pack")
+    errors = 0
+    page_files = [
+        f for f in files
+        if f.exists()
+        and f.suffix == ".ts"
+        and f.name.endswith(".page.ts")
+        and "spec" not in f.name
+        and "frontend/src/app/pages" in str(f)
+    ]
+    if not page_files:
+        ok("no page components staged")
+        return 0
+    routes_ts = REPO_ROOT / "frontend/src/app/app.routes.ts"
+    routes_src = routes_ts.read_text() if routes_ts.exists() else ""
+    for page in page_files:
+        page_dir = page.parent
+        slug = page_dir.name
+        spec = page_dir / f"{slug}.page.spec.ts"
+        barrel = page_dir / "index.ts"
+        if not spec.exists():
+            fail(f"{page.relative_to(REPO_ROOT)}: missing {spec.relative_to(REPO_ROOT)}. "
+                 f"Per .agents/features/new-page/, every page ships with a spec.")
+            errors += 1
+        if not barrel.exists():
+            fail(f"{page.relative_to(REPO_ROOT)}: missing {barrel.relative_to(REPO_ROOT)}. "
+                 f"Per .agents/features/new-page/, every page exports through a barrel.")
+            errors += 1
+        if routes_src and f"pages/{slug}/{slug}.page" not in routes_src and slug not in routes_src:
+            fail(f"{page.relative_to(REPO_ROOT)}: not wired into app.routes.ts. "
+                 f"Add a loadComponent entry for 'pages/{slug}/{slug}.page'.")
+            errors += 1
+    if errors == 0:
+        ok(f"all {len(page_files)} page(s) have spec + barrel + route")
+    return errors
+
+
 def check_tdd(files: list[Path]) -> int:
     """
     TDD enforcement: every exported function/class/method declared in a
@@ -315,7 +364,7 @@ def check_tdd(files: list[Path]) -> int:
       - The file is in a test directory itself (src/__tests__, *.spec.ts)
       - The file is auto-generated (has `// AUTO-GENERATED`)
     """
-    header("[7/7] TDD enforcement")
+    header("[8/8] TDD enforcement")
     errors = 0
     source_files = [
         f for f in files
@@ -443,6 +492,7 @@ def main() -> int:
     total_errors += check_types(files)
     total_errors += check_unit_tests(files)
     total_errors += check_icons(files)
+    total_errors += check_new_page(files)
     total_errors += check_tdd(files)
 
     print()

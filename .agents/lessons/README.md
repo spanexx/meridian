@@ -42,6 +42,7 @@ the same way if I didn't write it down?"
 | shells | critical | [gh-from-non-interactive-hang.md](./gh-from-non-interactive-hang.md) | `gh` in a non-TTY subprocess blocks forever on auth prompt, leaking zombies. |
 | workflow | critical | [take-the-smallest-interpretation.md](./take-the-smallest-interpretation.md) | "use Y" means USE Y, not "write a Y-shaped local script." |
 | tooling | low | [pre-commit-py-modification-patterns.md](./pre-commit-py-modification-patterns.md) | orphan imports + cross-function refs break pre-commit.py silently. |
+| ui-pages | high | [new-page-standards.md](./new-page-standards.md) | every new routed page follows the new-page pack recipe — TDD, wireframe-faithful but more minimal, public-method tests, icon guard, responsive probe. |
 
 ## Naming convention
 
