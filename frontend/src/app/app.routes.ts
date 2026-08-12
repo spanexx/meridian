@@ -99,16 +99,9 @@ export const routes: Routes = [
   {
     path: 'governance',
     loadComponent: () =>
-      import('./pages/_placeholder/_placeholder.page').then(
-        (m) => m.PlaceholderPageComponent,
+      import('./pages/governance/governance.page').then(
+        (m) => m.GovernancePageComponent,
       ),
-    data: {
-      title: 'Governance',
-      subtitle:
-        'Proposals, votes, and Community-Governed Parameters. The governance model supports multiple communities for future expansion.',
-      iconName: 'vote',
-      packName: 'governance-pack',
-    },
   },
   {
     path: 'payouts',
