@@ -83,6 +83,18 @@ export class CommunityMembersPageComponent {
     return this.communityName;
   }
 
+  /** Display label for the currently-active role (used by the mobile dropdown trigger). */
+  activeRoleLabel(): string {
+    const r = this.roles.find((x) => x.value === this._activeRole);
+    return r?.label ?? 'All';
+  }
+
+  /** Count next to the active role label. */
+  activeRoleCount(): number {
+    const r = this.roles.find((x) => x.value === this._activeRole);
+    return r?.count ?? this.counts.total;
+  }
+
 
   private _activeTier: 'all' | Tier = 'all';
   private _activeRole: 'all' | Role = 'all';
@@ -96,6 +108,9 @@ export class CommunityMembersPageComponent {
 
   private _tierMenuOpen = false;
   get tierMenuOpen(): boolean { return this._tierMenuOpen; }
+
+  private _roleMenuOpen = false;
+  get roleMenuOpen(): boolean { return this._roleMenuOpen; }
 
   // Role counts (displayed in tabs; mock-only; could come from the data layer later).
   readonly counts = {
@@ -111,6 +126,14 @@ export class CommunityMembersPageComponent {
     { value: 't3',  label: 'Vetters' },
     { value: 't2',  label: 'Contributors' },
     { value: 't1',  label: 'New' },
+  ];
+
+  /** Role options for the mobile dropdown (matches the inline tabs). */
+  readonly roles: ReadonlyArray<{ value: 'all' | Role; label: string; count: number }> = [
+    { value: 'all',     label: 'All',     count: this.counts.total },
+    { value: 'capital', label: 'Capital', count: this.counts.capital },
+    { value: 'signal',  label: 'Signal',  count: this.counts.signal },
+    { value: 'access',  label: 'Access',  count: this.counts.access },
   ];
 
   // ─── Core data accessors ──────────────────────────────────────────────
@@ -216,7 +239,22 @@ export class CommunityMembersPageComponent {
   // ─── Role tabs handler ──────────────────────────────────────────────
   selectRole(role: 'all' | Role): void {
     this._activeRole = role;
+    this._roleMenuOpen = false;
     this._page = 1;
+    this.cdr.markForCheck();
+  }
+
+  // ─── Role dropdown handlers (mobile < sm) ────────────────────────────
+  openRoleMenu(): void {
+    this._roleMenuOpen = true;
+    this.cdr.markForCheck();
+  }
+  closeRoleMenu(): void {
+    this._roleMenuOpen = false;
+    this.cdr.markForCheck();
+  }
+  toggleRoleMenu(): void {
+    this._roleMenuOpen = !this._roleMenuOpen;
     this.cdr.markForCheck();
   }
 

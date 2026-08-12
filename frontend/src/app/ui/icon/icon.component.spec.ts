@@ -37,6 +37,7 @@ const SUPPORTED_NAMES = [
   'check-circle-2',
   'chevron-left',
   'chevron-right',
+  'chevron-down',
   'crosshair',
   'download',
   'hash',
