@@ -22,6 +22,7 @@
  * @reviewed 2026-08-11
  */
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { UiBadgeComponent } from '../../ui/badge/badge.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
 
@@ -52,7 +53,7 @@ interface OpportunityRow {
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [UiBadgeComponent, UiIconComponent],
+  imports: [UiBadgeComponent, UiIconComponent, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
 
@@ -70,7 +71,7 @@ interface OpportunityRow {
             <ui-icon name="filter"></ui-icon>
             <span class="ml-2">Period</span>
           </button>
-          <a class="btn btn-primary" href="/submit-signal">
+          <a class="btn btn-primary" [routerLink]="['/submit-signal']">
             <ui-icon name="plus"></ui-icon>
             <span class="ml-2">Submit Signal</span>
           </a>
@@ -93,7 +94,7 @@ interface OpportunityRow {
           </div>
         </div>
 
-        <a class="card card-hover p-5 block" href="/executions">
+        <a class="card card-hover p-5 block" [routerLink]="['/executions']">
           <div class="flex items-center justify-between mb-3">
             <div class="kpi-label">Active Capital</div>
             <ui-icon name="zap" class="text-slate-500"></ui-icon>
@@ -105,7 +106,7 @@ interface OpportunityRow {
           <div class="progress-track mt-3"><div class="progress-fill progress-fill-emerald" style="width: 34%;"></div></div>
         </a>
 
-        <a class="card card-hover p-5 block" href="/members">
+        <a class="card card-hover p-5 block" [routerLink]="['/community/alpha/members']">
           <div class="flex items-center justify-between mb-3">
             <div class="kpi-label">Active Members</div>
             <ui-icon name="users" class="text-slate-500"></ui-icon>
@@ -119,7 +120,7 @@ interface OpportunityRow {
           </div>
         </a>
 
-        <a class="card card-hover p-5 block" href="/opportunities">
+        <a class="card card-hover p-5 block" [routerLink]="['/opportunities']">
           <div class="flex items-center justify-between mb-3">
             <div class="kpi-label">Open Opportunities</div>
             <ui-icon name="lightbulb" class="text-slate-500"></ui-icon>
@@ -146,13 +147,13 @@ interface OpportunityRow {
                 <h2 class="text-base font-semibold">Active Executions</h2>
                 <p class="text-xs text-slate-500 mt-0.5">Live operations with deployed capital</p>
               </div>
-              <a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" href="/executions">
+              <a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" [routerLink]="['/executions']">
                 View all<ui-icon name="arrow-right"></ui-icon>
               </a>
             </div>
             <div class="space-y-3">
               @for (ex of executions; track ex.ref) {
-                <a class="block card card-hover p-4" [attr.href]="'/execution-detail/' + ex.ref">
+                <a class="block card card-hover p-4" [routerLink]="['/executions', ex.ref]">
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-3">
                       <div class="w-9 h-9 rounded-lg flex items-center justify-center" [style.background]="ex.iconBg">
@@ -191,7 +192,7 @@ interface OpportunityRow {
                 <h2 class="text-base font-semibold">Latest Opportunities</h2>
                 <p class="text-xs text-slate-500 mt-0.5">Signals awaiting vetting</p>
               </div>
-              <a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" href="/opportunities">
+              <a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" [routerLink]="['/opportunities']">
                 View all<ui-icon name="arrow-right"></ui-icon>
               </a>
             </div>
@@ -211,12 +212,12 @@ interface OpportunityRow {
                   @for (opp of opportunities; track opp.ref) {
                     <tr class="table-row">
                       <td class="hidden md:table-cell">
-                        <a [attr.href]="'/opportunity-detail/' + opp.ref">
+                        <a [routerLink]="['/opportunities', opp.ref]">
                           <span class="text-xs text-slate-500 font-mono">{{ opp.ref }}</span>
                         </a>
                       </td>
                       <td>
-                        <a class="font-medium" [attr.href]="'/opportunity-detail/' + opp.ref">{{ opp.title }}</a>
+                        <a class="font-medium" [routerLink]="['/opportunities', opp.ref]">{{ opp.title }}</a>
                       </td>
                       <td class="hidden md:table-cell"><span class="text-xs text-slate-400">{{ opp.category }}</span></td>
                       <td class="hidden sm:table-cell"><span class="text-emerald-400 font-medium">{{ opp.roi }}</span></td>
@@ -354,11 +355,11 @@ interface OpportunityRow {
             </div>
             <div class="mt-5 pt-4 border-t" style="border-color: var(--border-subtle);">
               <div class="grid grid-cols-2 gap-3 text-center">
-                <a href="/profile">
+                <a [routerLink]="['/profile']">
                   <div class="text-lg font-semibold text-gradient-emerald">8</div>
                   <div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Signals</div>
                 </a>
-                <a href="/governance">
+                <a [routerLink]="['/governance']">
                   <div class="text-lg font-semibold text-gradient-violet">14</div>
                   <div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Votes Cast</div>
                 </a>

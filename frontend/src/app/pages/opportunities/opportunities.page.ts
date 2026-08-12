@@ -83,7 +83,7 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
             >
               <i class="w-4 h-4" data-lucide="filter"></i>Category
             </button>
-            <a class="btn btn-primary" href="/submit-signal">
+            <a class="btn btn-primary" [routerLink]="['/submit-signal']">
               <i class="w-4 h-4" data-lucide="plus"></i>Submit Signal
             </a>
           </div>

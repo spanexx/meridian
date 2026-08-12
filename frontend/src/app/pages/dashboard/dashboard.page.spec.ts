@@ -14,7 +14,7 @@
  *      .kpi-number values matching the wireframe demo data.
  *   3. Renders an "Active Executions" section (h2 + a list of
  *      execution rows, each with ref prefix E-#### and a route to
- *      /execution-detail).
+ *      /executions/:ref).
  *   4. Renders a "Latest Opportunities" section (h2 + rows with
  *      opportunity refs O-####).
  *   5. Renders a "Pool Health" section (h2) that includes an SVG
@@ -71,7 +71,7 @@ describe('DashboardPage (wireframe-driven)', () => {
     const root = fixture.nativeElement as HTMLElement;
     const h2s = Array.from(root.querySelectorAll('h2')).map((h) => h.textContent?.trim());
     expect(h2s).toContain('Active Executions');
-    const rows = Array.from(root.querySelectorAll('a[href*="/execution-detail"]'));
+    const rows = Array.from(root.querySelectorAll('a[href*="/executions/"]'));
     expect(rows.length).toBeGreaterThan(0);
     // first row's text contains an E-#### ref
     const combined = rows.map((r) => r.textContent ?? '').join(' ');

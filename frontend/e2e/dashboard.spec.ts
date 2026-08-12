@@ -30,7 +30,7 @@ test.describe('dashboard page (wireframe-driven)', () => {
   test('renders Active Executions section with rows linking to detail', async ({ page }) => {
     await page.goto('/dashboard');
     await expect(page.locator('h2', { hasText: 'Active Executions' })).toBeVisible();
-    const rows = page.locator('a[href*="/execution-detail/"]');
+    const rows = page.locator('a[href*="/executions/"]');
     expect(await rows.count()).toBeGreaterThan(0);
   });
 

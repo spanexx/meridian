@@ -1,0 +1,277 @@
+<!--
+  CommunityDetailPageComponent template.
+
+  @owner   spanexx
+  @reviewed 2026-08-12
+-->
+<section class="page">
+  <!-- breadcrumb -->
+  <div class="flex items-center gap-2 text-xs text-slate-500 mb-4" data-testid="community-breadcrumb">
+    <a [routerLink]="['/communities']" class="hover:text-slate-300">Communities</a>
+    <ui-icon name="chevron-right" [size]="12" class="w-3 h-3 flex-shrink-0"></ui-icon>
+    <span class="text-slate-300">{{ community()?.name }}</span>
+  </div>
+
+  <!-- header -->
+  <header class="mb-8">
+    <!-- status badge + actions row (so action buttons float to the right) -->
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      @if (community(); as c) {
+        <span
+          class="badge"
+          [class.badge-success]="c.status === 'active'"
+          [class.badge-warning]="c.status === 'proposed'"
+          [class.badge-neutral]="c.status === 'archived'"
+        >
+          {{ c.status === 'active' ? 'Active' : c.status === 'proposed' ? 'Proposed' : 'Archived' }}
+        </span>
+      }
+      <span class="badge badge-neutral">{{ community()?.focus }}</span>
+      <!-- actions float to the right -->
+      <div class="ml-auto flex items-center gap-2">
+        <button class="btn btn-ghost" type="button" data-copy aria-label="Share link">
+          <ui-icon name="share-2" class="w-4 h-4"></ui-icon>
+        </button>
+        <button
+          class="btn btn-secondary"
+          type="button"
+          data-dropdown="actionsMenu"
+          (click)="toggleActionsMenu($event)"
+          aria-label="Actions"
+        >
+          <ui-icon name="more-horizontal" class="w-4 h-4"></ui-icon>
+        </button>
+      </div>
+    </div>
+    <!-- avatar + title block -->
+    <div class="flex items-start gap-4">
+      <div
+        class="w-16 h-16 rounded-xl flex items-center justify-center flex-shrink-0"
+        [style.background]="gradientAvatar()"
+      >
+        <ui-icon name="users" class="w-8 h-8 text-white"></ui-icon>
+      </div>
+      <div class="min-w-0">
+        <h1 class="page-title text-2xl sm:text-3xl mb-1">{{ community()?.name }}</h1>
+        <p class="page-subtitle max-w-2xl text-sm leading-relaxed">
+          {{ community()?.focus }} · {{ community()?.scope }} · Founded {{ community()?.foundedYear }}
+        </p>
+        <div class="flex items-center gap-4 mt-2 text-xs text-slate-500 flex-wrap">
+          <span class="inline-flex items-center gap-1.5">
+            <ui-icon name="map-pin" [size]="12" class="w-3 h-3"></ui-icon>
+            <span>{{ community()?.region }}</span>
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <ui-icon name="calendar" [size]="12" class="w-3 h-3"></ui-icon>
+            <span>Est. {{ community()?.founded }}</span>
+          </span>
+          <span class="inline-flex items-center gap-1.5">
+            <ui-icon name="hash" [size]="12" class="w-3 h-3"></ui-icon>
+            <span>ID: {{ community()?.id }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- actions dropdown -->
+  <div
+    class="menu"
+    id="actionsMenu"
+    [hidden]="!actionsOpen()"
+    [style.top.px]="actionsPos().top"
+    [style.left.px]="actionsPos().left"
+  >
+    <div class="menu-head">Actions</div>
+    <a [routerLink]="['/governance']" class="menu-item">
+      <ui-icon name="vote" class="w-4 h-4"></ui-icon>
+      <span>View governance</span>
+    </a>
+    <a [routerLink]="['/community', community()?.ref, 'members']" class="menu-item">
+      <ui-icon name="users" class="w-4 h-4"></ui-icon>
+      <span>View members</span>
+    </a>
+    <a [routerLink]="['/community', community()?.ref, 'settings']" class="menu-item">
+      <ui-icon name="settings" class="w-4 h-4"></ui-icon>
+      <span>Community settings</span>
+    </a>
+    <div class="menu-sep"></div>
+    <button type="button" class="menu-item menu-danger">
+      <ui-icon name="alert-triangle" class="w-4 h-4"></ui-icon>
+      <span>Report issue</span>
+    </button>
+  </div>
+
+  <!-- 4 KPI cards -->
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    @for (kpi of kpis(); track kpi.key) {
+      <div class="card p-5" [attr.data-testid]="'kpi-card-' + kpi.key">
+        <div class="flex items-center justify-between mb-3">
+          <div class="kpi-label">{{ kpi.label }}</div>
+          <ui-icon [name]="kpi.iconName" class="w-4 h-4 text-slate-500"></ui-icon>
+        </div>
+        <div class="kpi-number" [class]="kpi.valueClass">{{ kpi.value }}</div>
+        <div class="mt-3 flex items-center gap-2 text-xs">
+          <span [class]="kpi.deltaClass" class="flex items-center gap-1">
+            @if (kpi.deltaIcon) {
+              <ui-icon [name]="kpi.deltaIcon" class="w-3 h-3"></ui-icon>
+            }
+            {{ kpi.delta }}
+          </span>
+          @if (kpi.key !== 'roi' && kpi.key !== 'executions') {
+            <span class="text-slate-500">vs last month</span>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- left column -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Community-Governed Parameters -->
+      <section class="card p-6" data-testid="card-governed-params">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold">Community-Governed Parameters</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Economic targets set by community vote</p>
+          </div>
+          <a [routerLink]="['/governance']" class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1">
+            View proposals
+            <ui-icon name="arrow-right" class="w-3 h-3"></ui-icon>
+          </a>
+        </div>
+        <div class="space-y-4">
+          @for (p of governedParams(); track p.key) {
+            <div class="flex items-center justify-between p-3 rounded-lg" [attr.data-param-row]="p.key" style="background: var(--bg-overlay);">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center" [style.background]="p.iconBg">
+                  <ui-icon [name]="p.iconName" [class]="'w-4 h-4 ' + p.iconClass"></ui-icon>
+                </div>
+                <div>
+                  <div class="text-sm font-medium">{{ p.key }}</div>
+                  <div class="text-xs text-slate-500">{{ p.description }}</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-semibold" [class]="p.valueClass">{{ p.value }}</div>
+                <div class="text-xs text-slate-500">{{ p.updated }}</div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Recent Executions -->
+      <section class="card p-6" data-testid="card-recent-executions">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold">Recent Executions</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Latest arbitrage operations</p>
+          </div>
+          <a [routerLink]="['/executions']" class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1">
+            View all
+            <ui-icon name="arrow-right" class="w-3 h-3"></ui-icon>
+          </a>
+        </div>
+        <div class="space-y-3">
+          @for (e of recentExecutions(); track e.ref) {
+            <a
+              [routerLink]="['/executions', e.ref]"
+              [attr.data-row-link]="e.ref"
+              [attr.data-exec-row]="e.ref"
+              class="block card card-hover p-4"
+            >
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg flex items-center justify-center" [style.background]="e.iconBg">
+                    <ui-icon [name]="e.iconName" [class]="'w-4 h-4 ' + e.iconClass"></ui-icon>
+                  </div>
+                  <div>
+                    <div class="text-sm font-medium">{{ e.ref }} · {{ e.title }}</div>
+                    <div class="text-xs text-slate-500">{{ e.statusLine }}</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-semibold text-emerald-400">{{ e.roi }}</div>
+                  <div class="text-xs text-slate-500">{{ e.deployed }}</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="progress-track flex-1">
+                  <div class="progress-fill" [class]="e.progressClass" [style.width.%]="e.progressPct"></div>
+                </div>
+                <span class="text-xs whitespace-nowrap" [class]="e.progressLabelClass">{{ e.progressLabel }}</span>
+              </div>
+            </a>
+          }
+        </div>
+      </section>
+    </div>
+
+    <!-- right column -->
+    <div class="space-y-6">
+      <!-- About -->
+      <section class="card p-6" data-testid="card-about">
+        <h2 class="text-base font-semibold mb-4">About</h2>
+        <p class="text-sm text-slate-400 leading-relaxed mb-4">
+          {{ community()?.aboutParagraph }}
+        </p>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-500">Focus</span>
+            <span class="font-medium">{{ community()?.focus }}</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-500">Region</span>
+            <span class="font-medium">{{ community()?.region }}</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-500">Founded</span>
+            <span class="font-medium">{{ community()?.founded }}</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-slate-500">Min. contribution</span>
+            <span class="font-medium">{{ community()?.minContribution }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Member Composition -->
+      <section class="card p-6" data-testid="card-member-composition">
+        <h2 class="text-base font-semibold mb-4">Member Composition</h2>
+        <div class="space-y-3">
+          @for (m of memberComposition(); track m.key) {
+            <div>
+              <div class="flex items-center justify-between text-sm mb-1">
+                <span class="text-slate-500">{{ m.key }}</span>
+                <span class="font-medium">{{ m.count }} ({{ m.pct }}%)</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" [class]="m.progressClass" [style.width.%]="m.pct"></div>
+              </div>
+            </div>
+          }
+        </div>
+        <a [routerLink]="['/community', community()?.ref, 'members']" class="btn btn-secondary w-full justify-center mt-4">
+          <ui-icon name="users" class="w-4 h-4"></ui-icon>
+          <span>View all members</span>
+        </a>
+      </section>
+
+      <!-- Safety Rails -->
+      <section class="card p-6" data-testid="card-safety-rails">
+        <h2 class="text-base font-semibold mb-4">Safety Rails</h2>
+        <p class="text-xs text-slate-500 mb-3">Never community-governed. Fixed by design.</p>
+        <div class="space-y-2">
+          @for (rail of safetyRails(); track rail) {
+            <div class="flex items-center gap-2 text-sm">
+              <ui-icon name="check-circle" class="w-4 h-4 text-emerald-400"></ui-icon>
+              <span>{{ rail }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

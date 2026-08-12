@@ -48,7 +48,7 @@ interface Execution {
         </div>
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
           <input type="search" class="input w-full sm:w-56" placeholder="Search executions…">
-          <a href="/pool" class="btn btn-secondary">
+          <a [routerLink]="['/pool']" class="btn btn-secondary">
             <span>Pool</span>
           </a>
         </div>

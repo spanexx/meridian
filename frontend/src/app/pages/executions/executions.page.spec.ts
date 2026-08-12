@@ -152,6 +152,7 @@ describe('ExecutionsPage (wireframe-aligned)', () => {
 
   // ─── format helpers (unit) ─────────────────────────────────────────────
   it('formatMoney() renders with thousands separator', async () => {
+    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
     const { ExecutionsPageComponent: Comp } = await import('./executions.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
@@ -161,6 +162,7 @@ describe('ExecutionsPage (wireframe-aligned)', () => {
   });
 
   it('formatRoi() renders "+X.X%" / "-X.X%" / "0.0%"', async () => {
+    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
     const { ExecutionsPageComponent: Comp } = await import('./executions.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
