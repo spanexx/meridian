@@ -360,4 +360,198 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
     expect(c.formatUsd(1000)).toBe('$1,000');
     expect(c.formatUsd(1423580)).toBe('$1,423,580');
   });
+
+  // ─── CHUNK 2/4: Governance Parameters card ───────────────────────────────
+
+  it('renders the Governance Parameters card with warning banner', async () => {
+    const f = await renderPage('alpha');
+    const root = f.nativeElement as HTMLElement;
+    const card = root.querySelector('[data-testid="governance-card"]');
+    expect(card).toBeTruthy();
+    expect(card?.textContent).toContain('Governance Parameters');
+    expect(card?.textContent).toContain('can only be changed by a Governance Vote');
+    expect(root.querySelector('[data-testid="governance-card"] svg[data-icon="alert-triangle"]')).toBeTruthy();
+  });
+
+  it('governance params: 6 parameters (ROI floor, Win-rate target, Capital share, Signal share, Reserve ratio, Single-execution cap)', async () => {
+    const f = await renderPage('alpha');
+    const card = (f.nativeElement as HTMLElement).querySelector('[data-testid="governance-card"]') as HTMLElement;
+    const expected = ['ROI floor', 'Win-rate target', 'Capital share', 'Signal share', 'Reserve ratio', 'Single-execution cap'];
+    for (const label of expected) {
+      expect(card.textContent).toContain(label);
+    }
+  });
+
+  it('each governance param has a Propose change button with vote-required badge', async () => {
+    const f = await renderPage('alpha');
+    const card = (f.nativeElement as HTMLElement).querySelector('[data-testid="governance-card"]') as HTMLElement;
+    const proposeButtons = card.querySelectorAll('button[data-action="propose"]');
+    expect(proposeButtons.length).toBe(6);
+    const badges = card.querySelectorAll('.badge[data-testid="vote-required-badge"]');
+    expect(badges.length).toBe(6);
+    expect(card.textContent).toContain('Vote required');
+  });
+
+  it('clicking a Propose button calls onPropose(label) and increments proposalsCount', async () => {
+    const f = await renderPage('alpha');
+    const c = f.componentInstance as unknown as {
+      onPropose: (label: string) => void;
+      lastProposalLabel: () => string | null;
+      proposalsCount: () => number;
+    };
+    expect(c.proposalsCount).toBe(0);
+    expect(c.lastProposalLabel).toBeNull();
+    c.onPropose('ROI floor');
+    expect(c.proposalsCount).toBe(1);
+    expect(c.lastProposalLabel).toBe('ROI floor');
+  });
+
+  // ─── CHUNK 2/4: Members & Roles card ─────────────────────────────────────
+
+  it('renders the Members & Roles card', async () => {
+    const f = await renderPage('alpha');
+    const card = (f.nativeElement as HTMLElement).querySelector('[data-testid="members-roles-card"]');
+    expect(card).toBeTruthy();
+    expect(card?.textContent).toContain('Members & Roles');
+  });
+
+  it('members roles: 3 toggles (Open enrollment, Require KYC, Vetter privilege auto-promotion)', async () => {
+    const f = await renderPage('alpha');
+    const card = (f.nativeElement as HTMLElement).querySelector('[data-testid="members-roles-card"]') as HTMLElement;
+    const expected = ['Open enrollment', 'Require KYC', 'Vetter privilege auto-promotion'];
+    for (const label of expected) {
+      expect(card.textContent).toContain(label);
+    }
+    const switches = card.querySelectorAll('ui-switch');
+    expect(switches.length).toBe(3);
+  });
+
+  it('initial toggles mirror the community settings (openEnrollment=true, requireKyc=true, vetterAutoPromote=false)', async () => {
+    const f = await renderPage('alpha');
+    const c = f.componentInstance as unknown as {
+      roleOpenEnrollment: () => boolean;
+      roleRequireKyc: () => boolean;
+      roleVetterAutoPromote: () => boolean;
+    };
+    expect(c.roleOpenEnrollment).toBe(true);
+    expect(c.roleRequireKyc).toBe(true);
+    expect(c.roleVetterAutoPromote).toBe(false);
+  });
+
+  it('toggle handlers update the role state', async () => {
+    const f = await renderPage('alpha');
+    const c = f.componentInstance as unknown as {
+      setRoleOpenEnrollment: (v: boolean) => void;
+      setRoleRequireKyc: (v: boolean) => void;
+      setRoleVetterAutoPromote: (v: boolean) => void;
+      roleOpenEnrollment: () => boolean;
+      roleRequireKyc: () => boolean;
+      roleVetterAutoPromote: () => boolean;
+    };
+    c.setRoleOpenEnrollment(false);
+    c.setRoleVetterAutoPromote(true);
+    expect(c.roleOpenEnrollment).toBe(false);
+    expect(c.roleRequireKyc).toBe(true);
+    expect(c.roleVetterAutoPromote).toBe(true);
+  });
+
+  // ─── CHUNK 2/4: Danger Zone card ──────────────────────────────────────────
+
+  it('renders the Danger Zone card with Irreversible caption', async () => {
+    const f = await renderPage('alpha');
+    const card = (f.nativeElement as HTMLElement).querySelector('[data-testid="danger-zone-card"]');
+    expect(card).toBeTruthy();
+    expect(card?.textContent).toContain('Danger Zone');
+    expect(card?.textContent).toContain('Irreversible');
+  });
+
+  it('danger zone has Archive community + Transfer admin role buttons', async () => {
+    const f = await renderPage('alpha');
+    const card = (f.nativeElement as HTMLElement).querySelector('[data-testid="danger-zone-card"]') as HTMLElement;
+    expect(card.textContent).toContain('Archive community');
+    expect(card.textContent).toContain('Transfer admin role');
+    expect(card.querySelectorAll('button[data-action="archive"]').length).toBe(1);
+    expect(card.querySelectorAll('button[data-action="transfer-admin"]').length).toBe(1);
+  });
+
+  it('clicking Archive opens the confirmation modal', async () => {
+    const f = await renderPage('alpha');
+    const c = f.componentInstance as unknown as {
+      archiveModalOpen: () => boolean;
+      onArchive: () => void;
+    };
+    expect(c.archiveModalOpen).toBe(false);
+    c.onArchive();
+    f.detectChanges();
+    expect(c.archiveModalOpen).toBe(true);
+    const root = f.nativeElement as HTMLElement;
+    // Dump body to figure out where the data-testid lands
+    const allTestIds = Array.from(root.querySelectorAll('[data-testid]')).map(e => e.getAttribute('data-testid'));
+    expect(root.querySelector('[data-testid="archive-confirm-modal"]')).toBeTruthy();
+  });
+
+  it('Archive confirm: confirmArchive() sets status to archived and closes modal', async () => {
+    const f = await renderPage('alpha');
+    const c = f.componentInstance as unknown as {
+      onArchive: () => void;
+      confirmArchive: () => void;
+      archiveModalOpen: () => boolean;
+      communityStatus: () => string;
+    };
+    c.onArchive();
+    c.confirmArchive();
+    expect(c.archiveModalOpen).toBe(false);
+    expect(c.communityStatus).toBe('archived');
+  });
+
+  it('Transfer admin calls onTransferAdmin returning transfer-initiated', async () => {
+    const f = await renderPage('alpha');
+    const c = f.componentInstance as unknown as { onTransferAdmin: () => string };
+    expect(c.onTransferAdmin()).toBe('transfer-initiated');
+  });
+
+  // ─── CHUNK 2/4: How changes work sidebar card ─────────────────────────────
+
+  it('renders the How changes work sidebar card with 4-step process list', async () => {
+    const f = await renderPage('alpha');
+    const card = (f.nativeElement as HTMLElement).querySelector('[data-testid="how-changes-card"]');
+    expect(card).toBeTruthy();
+    expect(card?.textContent).toContain('How changes work');
+    const steps = card?.querySelectorAll('[data-testid="how-changes-step"]') ?? [];
+    expect(steps.length).toBe(4);
+    for (const label of ['Propose', 'Debate', 'Vote', 'Enact']) {
+      expect(card?.textContent).toContain(label);
+    }
+  });
+
+  it('How changes work has an Open governance CTA linking to /governance', async () => {
+    const f = await renderPage('alpha');
+    const card = (f.nativeElement as HTMLElement).querySelector('[data-testid="how-changes-card"]') as HTMLElement;
+    const cta = Array.from(card.querySelectorAll('a')).find(a =>
+      a.textContent?.includes('Open governance'),
+    );
+    expect(cta).toBeTruthy();
+    expect(cta?.getAttribute('href')).toBe('/governance');
+  });
+
+  it('howChangesSteps() returns the 4 step labels', async () => {
+    const f = await renderPage('alpha');
+    const c = f.componentInstance as unknown as { howChangesSteps: () => ReadonlyArray<string> };
+    expect(c.howChangesSteps()).toEqual(['Propose', 'Debate', 'Vote', 'Enact']);
+  });
+
+  it('governanceParameters() returns 6 entries with label + value', async () => {
+    const f = await renderPage('alpha');
+    const c = f.componentInstance as unknown as {
+      governanceParameters: () => ReadonlyArray<{ label: string; value: string }>;
+    };
+    const params = c.governanceParameters();
+    expect(params.length).toBe(6);
+    for (const label of ['ROI floor', 'Win-rate target', 'Single-execution cap']) {
+      expect(params.map((p) => p.label)).toContain(label);
+    }
+    for (const p of params) {
+      expect(p.value).toBeTruthy();
+    }
+  });
 });

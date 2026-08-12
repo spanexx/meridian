@@ -78,6 +78,7 @@ const SUPPORTED_NAMES = [
   'share-2',
   'trending-up',
   'user',
+  'user-cog',
   'users',
   'vote',
   'watch',
