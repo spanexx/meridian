@@ -260,6 +260,46 @@ def check_unit_tests(files: list[Path]) -> int:
     return 0
 
 
+def check_icons(files: list[Path]) -> int:
+    """
+    Icon cross-check: every <ui-icon name="X"> referenced in staged
+    .ts template code must have a matching key in the icon component's
+    ICON_PATHS dictionary. A name used in a template but missing from
+    the dictionary renders an invisible (0-child) SVG — the bug class
+    that shipped twice in PR #19/#20 (sun/cog paths never committed).
+    """
+    header("[6/6] Icon cross-check")
+    errors = 0
+    icon_ts = REPO_ROOT / "frontend/src/app/ui/icon/icon.component.ts"
+    if not icon_ts.exists():
+        ok("icon component not found — skipping")
+        return 0
+    icon_src = icon_ts.read_text(errors="ignore")
+    defined = set(re.findall(r"'([\w-]+)':\s*'<", icon_src))
+    template_files = [
+        f for f in files
+        if f.exists() and f.suffix == ".ts"
+        and "spec" not in f.name
+    ]
+    if not template_files:
+        ok("no staged template files")
+        return 0
+    used = set()
+    for f in template_files:
+        content = f.read_text(errors="ignore")
+        used.update(re.findall(r'<ui-icon\s+name="([\w-]+)"', content))
+    missing = sorted(used - defined)
+    if missing:
+        for name in missing:
+            fail(f"<ui-icon name=\"{name}\"> used but missing from ICON_PATHS "
+                 f"({icon_ts.relative_to(REPO_ROOT)}). Add the path data — "
+                 f"an empty entry renders an invisible icon.")
+            errors += 1
+    else:
+        ok(f"all {len(used)} referenced icon name(s) exist in ICON_PATHS")
+    return errors
+
+
 def check_tdd(files: list[Path]) -> int:
     """
     TDD enforcement: every exported function/class/method declared in a
@@ -275,7 +315,7 @@ def check_tdd(files: list[Path]) -> int:
       - The file is in a test directory itself (src/__tests__, *.spec.ts)
       - The file is auto-generated (has `// AUTO-GENERATED`)
     """
-    header("[6/6] TDD enforcement")
+    header("[7/7] TDD enforcement")
     errors = 0
     source_files = [
         f for f in files
@@ -402,6 +442,7 @@ def main() -> int:
     total_errors += check_comments(files)
     total_errors += check_types(files)
     total_errors += check_unit_tests(files)
+    total_errors += check_icons(files)
     total_errors += check_tdd(files)
 
     print()
