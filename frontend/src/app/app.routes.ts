@@ -146,24 +146,18 @@ export const routes: Routes = [
     },
   },
   {
-    path: 'community/:id/members',
-    loadComponent: () =>
-      import('./pages/_placeholder/_placeholder.page').then(
-        (m) => m.PlaceholderPageComponent,
-      ),
-    data: {
-      title: 'Members',
-      subtitle:
-        'Capital / Signal / Access providers in this Community. Members belong to a Community — there is no global members list.',
-      iconName: 'users',
-      packName: 'community-members-pack',
-    },
-  },
-  {
     path: 'community/:id/settings',
     loadComponent: () =>
       import('./pages/community-settings/community-settings.page').then(
         (m) => m.CommunitySettingsPageComponent,
+      ),
+  },
+
+  {
+    path: 'community/:id/members',
+    loadComponent: () =>
+      import('./pages/community-members/community-members.page').then(
+        (m) => m.CommunityMembersPageComponent,
       ),
   },
   {
