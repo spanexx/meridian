@@ -42,6 +42,20 @@ export const routes: Routes = [
       import('./pages/pool/pool.page').then((m) => m.PoolPageComponent),
   },
   {
+    path: 'executions/:id',
+    loadComponent: () =>
+      import('./pages/execution-detail/execution-detail.page').then(
+        (m) => m.ExecutionDetailPageComponent,
+      ),
+  },
+  {
+    path: 'execution-detail/:id',
+    loadComponent: () =>
+      import('./pages/execution-detail/execution-detail.page').then(
+        (m) => m.ExecutionDetailPageComponent,
+      ),
+  },
+  {
     path: 'opportunities/:id',
     loadComponent: () =>
       import('./pages/opportunity-detail/opportunity-detail.page').then(

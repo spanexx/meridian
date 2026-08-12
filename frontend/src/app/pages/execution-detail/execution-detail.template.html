@@ -1,0 +1,250 @@
+<section class="page">
+  <!-- breadcrumb -->
+  <div class="flex items-center gap-2 text-xs text-slate-500 mb-4" data-testid="execution-breadcrumb">
+    <a [routerLink]="['/executions']" class="hover:text-slate-300">Executions</a>
+    <ui-icon name="chevron-right"></ui-icon>
+    <span class="text-slate-300">{{ executionRef() }}</span>
+  </div>
+
+  <header class="mb-8">
+    <!-- status + category badges: row at small, inline at sm+ -->
+    <div class="flex items-center gap-3 mb-3 flex-wrap">
+      <span class="badge badge-warning">Listed</span>
+      <span class="badge badge-neutral">Apparel</span>
+      <!-- action buttons float to the right at sm+ -->
+      <div class="ml-auto flex items-center gap-2">
+        <button class="btn btn-ghost" type="button" [attr.aria-label]="'Share ' + executionRef()">
+          <ui-icon name="share-2"></ui-icon>
+        </button>
+        <button class="btn btn-secondary" type="button">
+          <ui-icon name="download"></ui-icon>
+          <span class="hidden sm:inline">Export</span>
+        </button>
+      </div>
+    </div>
+    <!-- title: text-2xl at base, text-3xl at sm+ -->
+    <h1 class="page-title text-2xl sm:text-3xl">Limited Edition Sneaker Resale</h1>
+    <!-- subtitle: wrap onto natural lines at small -->
+    <p class="page-subtitle max-w-2xl mt-2 text-sm leading-relaxed">
+      From
+      <a [routerLink]="['/opportunities', sourceOpportunity.ref]" class="text-violet-400 hover:text-violet-300">
+        {{ sourceOpportunity.ref }} · {{ sourceOpportunity.title }}
+      </a>
+      <br class="sm:hidden" />
+      <span class="hidden sm:inline"> · </span>
+      Operator {{ operator }}
+      <span class="hidden sm:inline"> · </span>
+      <br class="sm:hidden" />
+      {{ flightDuration }} in flight
+    </p>
+  </header>
+
+  <!-- Timeline -->
+  <section class="card p-6 mb-6">
+    <h2 class="text-base font-semibold mb-5">Timeline</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      @for (step of steps; track step.label) {
+        <div
+          class="text-center"
+          [attr.data-step]="step.label"
+          [attr.data-current]="step.state === 'current' ? 'true' : null"
+          [attr.data-pending]="step.state === 'pending' ? 'true' : null"
+        >
+          <div
+            class="w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2"
+            [style.background]="step.state === 'done' ? 'var(--gradient-emerald)' :
+                                 step.state === 'current' ? 'var(--a-500)' :
+                                 'var(--bg-overlay)'"
+            [style.border]="step.state === 'pending' ? '1px solid var(--border-subtle)' : null"
+            [style.box-shadow]="step.state === 'current' ? '0 0 30px rgba(245,158,11,0.4)' : null"
+          >
+            <ui-icon
+              [name]="step.state === 'pending' ? 'circle-dollar-sign' : (step.state === 'current' ? 'tag' : 'check')"
+              class="w-5 h-5 text-white"
+            ></ui-icon>
+          </div>
+          <div class="text-xs font-medium" [class.text-amber-400]="step.state === 'current'">
+            {{ step.label }}
+          </div>
+          <div
+            class="text-[10px] mt-1"
+            [class.text-slate-500]="step.state !== 'current'"
+            [style.color]="step.state === 'current' ? 'var(--text-3)' : null"
+          >
+            {{ step.date }}{{ step.state === 'current' ? ' · current' : '' }}
+          </div>
+        </div>
+      }
+    </div>
+    <div class="mt-5 progress-track">
+      <div
+        class="progress-fill progress-fill-amber"
+        [style.width.%]="timelineProgress()"
+        data-progress-fill
+      ></div>
+    </div>
+    <div class="flex justify-between text-[10px] uppercase tracking-wider text-slate-500 mt-2">
+      <span>Funded</span>
+      <span>Acquired</span>
+      <span>Listed</span>
+      <span>Paid out</span>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Capital -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Capital</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-5">
+          <div class="card p-4">
+            <div class="kpi-label mb-1.5">Allocated</div>
+            <div class="kpi-number">$18,500</div>
+            <div class="text-xs text-slate-500 mt-1">{{ capital.allocatedNote }}</div>
+          </div>
+          <div class="card p-4">
+            <div class="kpi-label mb-1.5">Spent</div>
+            <div class="kpi-number">$18,200</div>
+            <div class="text-xs text-slate-500 mt-1">{{ capital.spentNote }}</div>
+          </div>
+          <div class="card p-4">
+            <div class="kpi-label mb-1.5">Recovered</div>
+            <div class="kpi-number text-emerald-400">$4,280</div>
+            <div class="text-xs text-emerald-400 mt-1">{{ capital.recoveredNote }}</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Inventory -->
+      <section class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-semibold">Inventory</h2>
+          <span class="text-xs text-slate-500">{{ inventory.length }} items</span>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          @for (item of inventoryGrouped(); track item.seed) {
+            <div class="card p-2" data-item>
+              <img
+                [attr.src]="'https://picsum.photos/seed/' + item.seed + '/300/300'"
+                [attr.alt]="'Inventory ' + item.size + ' on ' + item.channel"
+                class="w-full aspect-square rounded-md object-cover"
+                loading="lazy"
+              />
+              <div class="mt-2 px-1">
+                <div class="text-xs font-medium">Size {{ item.size }}</div>
+                <div class="text-[10px] text-slate-500">
+                  {{ item.status }} · {{ item.channel }}
+                </div>
+                <div class="flex items-center justify-between mt-1.5">
+                  <span
+                    class="text-xs font-semibold"
+                    [class.text-emerald-400]="item.status === 'Sold'"
+                  >
+                    ${{ item.price | number }}
+                  </span>
+                  <span
+                    class="badge"
+                    [class.badge-warning]="item.status === 'Listed'"
+                    [class.badge-success]="item.status === 'Sold'"
+                  >
+                    {{ item.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Event Log -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Event Log</h2>
+        <p class="text-xs text-slate-500 mb-4">
+          Append-only record — every action traceable. Reconstructable from the event stream.
+        </p>
+        <div class="space-y-2 max-h-72 overflow-y-auto">
+          @for (event of eventLog; track event.timestamp + event.code) {
+            <div
+              class="flex items-center gap-3 text-xs p-2.5 rounded"
+              style="background: var(--bg-overlay);"
+              data-event
+            >
+              <span class="font-mono w-24" style="color: var(--text-3);">{{ event.timestamp }}</span>
+              <span
+                class="badge text-[10px]"
+                [class.badge-info]="event.variant === 'info'"
+                [class.badge-success]="event.variant === 'success'"
+                [class.badge-warning]="event.variant === 'warning'"
+              >
+                {{ event.code }}
+              </span>
+              <span style="color: var(--text-1);">{{ event.text }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Payout Preview -->
+      <section class="glass p-6">
+        <h2 class="text-base font-semibold mb-4">Payout Preview</h2>
+        <div class="text-xs text-slate-500 mb-4">
+          Projected at current ROI · if all 8 sold at listed prices
+        </div>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between">
+            <span class="text-slate-400">Gross revenue</span>
+            <span class="font-medium">${{ payout.gross | number }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Total costs</span>
+            <span class="font-medium">${{ payout.costs | number }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-400">Platform fee (5%)</span>
+            <span class="font-medium text-rose-400">−${{ -payout.fee }}</span>
+          </div>
+          <div
+            class="flex justify-between pt-3 border-t"
+            style="border-color: var(--border-subtle);"
+          >
+            <span class="text-slate-400">Net profit</span>
+            <span class="font-semibold text-emerald-400">${{ payout.net | number }}</span>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t" style="border-color: var(--border-subtle);">
+          <div class="kpi-label mb-2">Distribution</div>
+          <div class="space-y-2 text-xs">
+            @for (row of distribution(); track row.label) {
+              <div class="flex justify-between">
+                <span class="text-slate-400">{{ row.label }}</span>
+                <span class="font-medium">
+                  ${{ row.amount | number }} · {{ row.pct }}%
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Participants -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Participants</h2>
+        <div class="space-y-3 text-sm">
+          @for (p of participants; track p.name) {
+            <a [routerLink]="[p.url]" class="flex items-center gap-3">
+              <div class="avatar" [style.background]="p.gradient">{{ p.initials }}</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium">{{ p.name }}</div>
+                <div class="text-[10px] uppercase tracking-wider text-slate-500">{{ p.role }}</div>
+              </div>
+            </a>
+          }
+        </div>
+      </section>
+    </div>
+  </div>
+</section>

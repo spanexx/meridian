@@ -15,6 +15,7 @@
  * @reviewed 2026-08-11
  */
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 interface Execution {
   ref: string;
@@ -37,6 +38,7 @@ interface Execution {
   selector: 'app-executions-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink],
   template: `
     <section class="page">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
@@ -73,7 +75,7 @@ interface Execution {
       >
         @for (e of visibleExecutions(); track e.ref) {
           <a
-            [attr.href]="'/execution-detail/' + e.ref"
+            [routerLink]="['/executions', e.ref]"
             class="card card-hover p-6 block"
             data-filterable
             [attr.data-status]="e.status"

@@ -85,7 +85,26 @@ visible when the new opportunity-detail route was added.
   `<a href="../opportunity-detail/index.html">` because the
   wireframe is a static HTML demo. In the SPA, this pattern
   translates to `routerLink`, never `[attr.href]`.
-- The icon guard (`scripts/pre-commit.py [6/8]`) catches a
+- The icon guard (`scripts/pre-commit.py [6/9]`) catches a
   different class of regression: missing icon paths. A similar
   guard for raw `[attr.href]` patterns is worth adding — see
   the "follow-up" in PR #25.
+- **2026-08-12 second occurrence**: the same bug resurfaced in
+  `frontend/src/app/pages/executions/executions.page.ts` after
+  PR #26 fixed the opportunities list. The user clicked an
+  execution card on `/executions`, the browser did a full reload,
+  and they reported it as "you don't learn." Verified the
+  offending template — same `[attr.href]="'/execution-detail/' + e.ref"`
+  pattern, no `RouterLink` import, no `imports:` array at all.
+  Fix: change to `[routerLink]="['/executions', e.ref]"`, add
+  `RouterLink` to `imports: []`. Same PR also wired the
+  execution-detail route `/executions/:id` that did not exist
+  yet (the page only had the `/execution-detail/:id` fallback).
+  Add a regression test that asserts the rendered href matches
+  the route pattern (the green pattern is `^\/executions\/E-\S+$`).
+- **Lesson**: when adding a new detail page that didn't exist
+  before, audit the parent list page for the same `[attr.href]`
+  pattern. The lesson is only effective if applied at the
+  right moment — listing pages with detail routes are the
+  hot spot. The pre-commit router-link guard catches this
+  going forward.
