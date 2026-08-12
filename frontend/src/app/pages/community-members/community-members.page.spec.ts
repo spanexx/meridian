@@ -449,4 +449,90 @@ describe('CommunityMembersPageComponent', () => {
     expect(link.getAttribute('href')).toBe('/community-detail/alpha');  // resolved by routerLink
   });
 
+
+  // ─── Role dropdown (mobile < sm) ────────────────────────────────────
+  it('role dropdown is hidden by default', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as { roleMenuOpen: boolean };
+    expect(c.roleMenuOpen).toBe(false);
+  });
+
+  it('openRoleMenu() opens the menu', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as {
+      openRoleMenu: () => void;
+      roleMenuOpen: boolean;
+    };
+    c.openRoleMenu();
+    f.detectChanges();
+    expect(c.roleMenuOpen).toBe(true);
+  });
+
+  it('mobile role menu has 4 items (All / Capital / Signal / Access) with counts', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as { openRoleMenu: () => void };
+    c.openRoleMenu();
+    f.detectChanges();
+    const items = (f.nativeElement as HTMLElement).querySelectorAll('[data-filter-role]');
+    expect(items.length).toBe(4);
+    const labels = Array.from(items).map((el) => el.textContent?.trim() ?? '');
+    expect(labels).toEqual(['All124', 'Capital42', 'Signal67', 'Access15']);
+  });
+
+  it('selectRole() from the dropdown closes the menu and updates activeRole', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as {
+      openRoleMenu: () => void;
+      selectRole: (r: 'all' | 'capital' | 'signal' | 'access') => void;
+      roleMenuOpen: boolean;
+      activeRole: string;
+    };
+    c.openRoleMenu();
+    f.detectChanges();
+    expect(c.roleMenuOpen).toBe(true);
+    c.selectRole('signal');
+    f.detectChanges();
+    expect(c.roleMenuOpen).toBe(false);
+    expect(c.activeRole).toBe('signal');
+  });
+
+  it('closeRoleMenu() closes the menu without changing the role', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as {
+      openRoleMenu: () => void;
+      closeRoleMenu: () => void;
+      roleMenuOpen: boolean;
+      activeRole: string;
+    };
+    c.openRoleMenu();
+    c.closeRoleMenu();
+    expect(c.roleMenuOpen).toBe(false);
+    expect(c.activeRole).toBe('all');
+  });
+
+  it('toggleRoleMenu() flips open/closed', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as {
+      toggleRoleMenu: () => void;
+      roleMenuOpen: boolean;
+    };
+    expect(c.roleMenuOpen).toBe(false);
+    c.toggleRoleMenu();
+    expect(c.roleMenuOpen).toBe(true);
+    c.toggleRoleMenu();
+    expect(c.roleMenuOpen).toBe(false);
+  });
+
+  it('role dropdown button has data-testid="role-menu-button"', async () => {
+    const f = await renderPage();
+    const btn = (f.nativeElement as HTMLElement).querySelector('[data-testid="role-menu-button"]');
+    expect(btn).toBeTruthy();
+  });
+
+  it('the inline role tabs (data-filter-tab) are still rendered for ≥sm', async () => {
+    const f = await renderPage();
+    const tabs = (f.nativeElement as HTMLElement).querySelectorAll('[data-filter-tab]');
+    expect(tabs.length).toBe(4);
+  });
+
 });

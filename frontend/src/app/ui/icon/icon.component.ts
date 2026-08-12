@@ -33,6 +33,7 @@ const ICON_PATHS: Readonly<Record<string, string>> = Object.freeze({
   'check-circle-2': '<circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path>',
   'chevron-left': '<polyline points="15 18 9 12 15 6"></polyline>',
   'chevron-right': '<path d="m9 18 6-6-6-6"></path>',
+  'chevron-down':  '<path d="m6 9 6 6 6-6"></path>',
   'download':      '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>',
   'message-square': '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>',
   'save':        '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline>',

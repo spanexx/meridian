@@ -68,8 +68,44 @@
     </div>
   </header>
 
-  <!-- role tabs -->
-  <div class="tabs mb-6 flex gap-1 border-b border-slate-700/40" data-filter-tabs="">
+  <!-- role dropdown (mobile < sm) -->
+  <div class="sm:hidden mb-4">
+    <button
+      type="button"
+      class="btn btn-secondary w-full justify-between"
+      data-testid="role-menu-button"
+      (click)="toggleRoleMenu()"
+    >
+      <span class="flex items-center gap-2">
+        <ui-icon name="users" class="w-4 h-4"></ui-icon>
+        <span>{{ activeRoleLabel() }}</span>
+        <span class="text-slate-500">· {{ activeRoleCount() }}</span>
+      </span>
+      <ui-icon name="chevron-down" class="w-4 h-4" [class.rotate-180]="roleMenuOpen"></ui-icon>
+    </button>
+    @if (roleMenuOpen) {
+      <div
+        class="menu mt-1 bg-slate-800 border border-slate-700 rounded-md shadow-lg overflow-hidden"
+        data-testid="role-menu"
+      >
+        @for (r of roles; track r.value) {
+          <button
+            type="button"
+            class="menu-item w-full text-left px-4 py-2 hover:bg-slate-700 flex items-center justify-between text-sm"
+            [class.active]="activeRole === r.value"
+            [attr.data-filter-role]="r.value"
+            (click)="selectRole(r.value)"
+          >
+            <span>{{ r.label }}</span>
+            <span class="text-slate-500">{{ r.count }}</span>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- role tabs (≥ sm) -->
+  <div class="tabs mb-6 hidden sm:flex gap-1 border-b border-slate-700/40" data-filter-tabs="">
     <button
       type="button"
       class="tab px-4 py-2 text-sm"
