@@ -70,7 +70,7 @@ type UserVote = 'approve' | 'reject' | null;
         <!-- Acquisition -->
         <section class="card p-6">
           <h2 class="text-base font-semibold mb-4">Acquisition</h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-5">
             <div>
               <div class="kpi-label mb-1.5">Source</div>
               <div class="text-sm">Boutique wholesale</div>
@@ -95,7 +95,7 @@ type UserVote = 'approve' | 'reject' | null;
         <!-- Resale -->
         <section class="card p-6">
           <h2 class="text-base font-semibold mb-4">Resale</h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-5">
             <div>
               <div class="kpi-label mb-1.5">Channels</div>
               <div class="flex flex-wrap gap-1.5 mt-1">
@@ -122,7 +122,7 @@ type UserVote = 'approve' | 'reject' | null;
         <!-- Financials -->
         <section class="card p-6">
           <h2 class="text-base font-semibold mb-4">Financials</h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-5">
             <div class="card p-4">
               <div class="kpi-label mb-1.5">Est. profit</div>
               <div class="kpi-number text-emerald-400">$7,300</div>
