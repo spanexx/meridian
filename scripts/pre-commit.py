@@ -124,7 +124,7 @@ def is_header_exempt(path: Path) -> bool:
 
 
 def check_yaml(files: list[Path]) -> int:
-    header("[1/9] YAML validity")
+    header("[1/10] YAML validity")
     errors = 0
     yaml_files = [f for f in files if f.suffix in {".yml", ".yaml"} and f.exists()]
     if not yaml_files:
@@ -147,7 +147,7 @@ def check_yaml(files: list[Path]) -> int:
 
 
 def check_secrets(files: list[Path]) -> int:
-    header("[2/9] Secrets scan")
+    header("[2/10] Secrets scan")
     errors = 0
     candidates = [f for f in files if f.exists() and f.suffix not in {".png", ".jpg", ".gif", ".ico"}]
     for f in candidates:
@@ -165,7 +165,7 @@ def check_secrets(files: list[Path]) -> int:
 
 
 def check_comments(files: list[Path]) -> int:
-    header("[3/9] Comment policy")
+    header("[3/10] Comment policy")
     errors = 0
 
     source_files = [
@@ -207,7 +207,7 @@ def check_comments(files: list[Path]) -> int:
 
 
 def check_types(files: list[Path]) -> int:
-    header("[4/9] Type check (tsc)")
+    header("[4/10] Type check (tsc)")
     ts_files = [f for f in files if f.exists() and f.suffix in {".ts", ".tsx"}]
     if not ts_files:
         ok("no TS files staged")
@@ -232,7 +232,7 @@ def check_types(files: list[Path]) -> int:
 
 
 def check_unit_tests(files: list[Path]) -> int:
-    header("[5/9] Unit tests (vitest)")
+    header("[5/10] Unit tests (vitest)")
     ts_files = [f for f in files if f.exists() and f.suffix in {".ts", ".tsx"}]
     if not ts_files:
         ok("no TS files staged")
@@ -268,7 +268,7 @@ def check_icons(files: list[Path]) -> int:
     the dictionary renders an invisible (0-child) SVG — the bug class
     that shipped twice in PR #19/#20 (sun/cog paths never committed).
     """
-    header("[6/9] Icon cross-check")
+    header("[6/10] Icon cross-check")
     errors = 0
     icon_ts = REPO_ROOT / "frontend/src/app/ui/icon/icon.component.ts"
     if not icon_ts.exists():
@@ -313,7 +313,7 @@ def check_router_links(files: list[Path]) -> int:
     external link or asset). External links (http/https/mailto)
     are exempt.
     """
-    header("[8/9] Router links")
+    header("[8/10] Router links")
     errors = 0
     template_files = [
         f for f in files
@@ -352,6 +352,123 @@ def check_router_links(files: list[Path]) -> int:
     return errors
 
 
+
+def check_link_targets(files: list[Path]) -> int:
+    """
+    Link-target enforcement: every `[routerLink]` or `href` in a staged
+    page template must point at a route registered in app.routes.ts.
+
+    The user feedback (2026-08-12): "when designing a page that links to
+    other pages, the links must work (lead somewhere) even if the
+    destination is a stub." A routerLink to a non-existent path 404s
+    in production — only catchable at runtime. Pre-commit catches it.
+
+    Exempt:
+      - External URLs (http://, https://, mailto:, //)
+      - Pure fragment links (#anchor)
+      - Routes registered in app.routes.ts (everything else must match)
+    """
+    header("[9/10] Link targets")
+    errors = 0
+    template_files = [
+        f for f in files
+        if f.exists()
+        and f.suffix == ".ts"
+        and f.name.endswith(".ts")
+        and "/pages/" in str(f)
+        and "spec" not in f.name
+        and "index.ts" not in f.name
+    ]
+    if not template_files:
+        ok("no page templates staged")
+        return 0
+
+    routes_ts = REPO_ROOT / "frontend/src/app/app.routes.ts"
+    if not routes_ts.exists():
+        ok("app.routes.ts not found — skipping link-target check")
+        return 0
+    routes_src = routes_ts.read_text(errors="ignore")
+
+    # Real routes registered in app.routes.ts.
+    KNOWN_ROUTES: list[str] = re.findall(r"path:\s*['\"]([^'\"]+)['\"]", routes_src)
+
+    def route_matches(href: str) -> bool:
+        """Return True if href matches any registered route (with :foo
+        segments treated as wildcards)."""
+        for r in KNOWN_ROUTES:
+            if href == r:
+                return True
+        href = href.rstrip("/")
+        for r in KNOWN_ROUTES:
+            r_norm = r.rstrip("/")
+            rhs_parts = r_norm.split("/")
+            lhs_parts = href.split("/")
+            if len(rhs_parts) != len(lhs_parts):
+                continue
+            ok_match = True
+            for rp, lp in zip(rhs_parts, lhs_parts):
+                if rp.startswith(":"):
+                    continue
+                if rp != lp:
+                    ok_match = False
+                    break
+            if ok_match:
+                return True
+        return False
+
+    def normalize_url(value: str) -> str:
+        """Strip outer quote pairs iteratively (`/path`, '/path', etc.)."""
+        v = value.strip()
+        while len(v) >= 2 and v[0] == v[-1] and v[0] in ('"', "'"):
+            v = v[1:-1]
+        return v
+
+    # Match:
+    #   <a [routerLink]="...">  (outer double-quote, value inside)
+    #   <a [routerLink]='...'>  (outer single-quote)
+    #   <a href="...">          (bare href)
+    # Pattern: <a ... [routerLink] or href  =  "  ...stuff...  "
+    # The inner can contain single OR double quotes but not both.
+    HREF_RE = re.compile(
+        r"<a\b[^>]*?(?:\[routerLink\]|[\[]routerLink[\]]|href)"
+        r"\s*=\s*"
+        r"(?:\"([^\"]*)\"|'([^']*)')"
+    )
+
+    for f in template_files:
+        try:
+            content = f.read_text(errors="ignore")
+        except (UnicodeDecodeError, OSError):
+            continue
+        bad: list[str] = []
+        for m in HREF_RE.finditer(content):
+            raw = m.group(1) if m.group(1) is not None else m.group(2)
+            url = normalize_url(raw)
+            if not url:
+                continue
+            if url.startswith(("http://", "https://", "mailto:", "//", "#")):
+                continue
+            if "#" in url:
+                url = url.split("#", 1)[0]
+            if not url:
+                continue
+            if not route_matches(url):
+                bad.append(url)
+        if bad:
+            for url in bad:
+                fail(f"{f.relative_to(REPO_ROOT)}: link target {url!r} does not "
+                     f"resolve to a registered route in app.routes.ts. Add the "
+                     f"route, or use a placeholder stub.")
+                errors += 1
+    if errors == 0:
+        ok(f"all link targets in {len(template_files)} template(s) resolve to "
+           f"a registered route")
+    return errors
+
+
+
+
+
 def check_new_page(files: list[Path]) -> int:
     """
     New-page pack enforcement: every staged page component (under
@@ -364,7 +481,7 @@ def check_new_page(files: list[Path]) -> int:
     packages can't import the component), and the route is
     unreachable.
     """
-    header("[7/9] New-page pack")
+    header("[7/10] New-page pack")
     errors = 0
     page_files = [
         f for f in files
@@ -416,7 +533,7 @@ def check_tdd(files: list[Path]) -> int:
       - The file is in a test directory itself (src/__tests__, *.spec.ts)
       - The file is auto-generated (has `// AUTO-GENERATED`)
     """
-    header("[9/9] TDD enforcement")
+    header("[10/10] TDD enforcement")
     errors = 0
     source_files = [
         f for f in files
@@ -546,6 +663,7 @@ def main() -> int:
     total_errors += check_icons(files)
     total_errors += check_new_page(files)
     total_errors += check_router_links(files)
+    total_errors += check_link_targets(files)
     total_errors += check_tdd(files)
 
     print()
