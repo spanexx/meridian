@@ -26,6 +26,7 @@ import {
   computed,
   inject,
   input,
+  signal,
 } from '@angular/core';
 import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -53,9 +54,6 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
   { label: 'Members',       icon: 'user',               path: '/members',       section: 'Community' },
   { label: 'Governance',    icon: 'vote',               path: '/governance',    section: 'Community' },
   { label: 'Payouts',       icon: 'circle-dollar-sign', path: '/payouts',       section: 'Community' },
-  { label: 'Notifications', icon: 'bell',               path: '/notifications', section: 'Account' },
-  { label: 'Settings',      icon: 'settings',           path: '/settings',      section: 'Account' },
-  { label: 'Your Profile',  icon: 'user',               path: '/profile',       section: 'Account' },
 ] as const);
 
 @Component({
@@ -67,7 +65,7 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
     <div class="app-shell" data-testid="shell">
       <!-- Mobile top bar (hidden >= 1280px via .mobile-bar CSS) -->
       <div class="mobile-bar">
-        <button type="button" class="icon-btn" data-sidebar-toggle aria-label="Open menu">
+        <button type="button" class="icon-btn" data-sidebar-toggle aria-label="Open menu" (click)="toggleSidebar()">
           <ui-icon name="menu"></ui-icon>
         </button>
         <a routerLink="/" class="flex items-center gap-2">
@@ -76,16 +74,25 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
           </div>
           <span class="text-sm font-semibold tracking-tight">MERIDIAN</span>
         </a>
-        <button type="button" class="icon-btn" data-theme-toggle aria-label="Toggle theme">
-          <ui-icon name="moon"></ui-icon>
+        <button type="button" class="icon-btn" data-theme-toggle aria-label="Toggle theme" (click)="toggleTheme()">
+          <ui-icon name="sun"></ui-icon>
         </button>
       </div>
 
       <!-- Mobile backdrop -->
-      <div class="sidebar-backdrop" hidden data-sidebar-backdrop></div>
+      <div
+      class="sidebar-backdrop"
+      [hidden]="!sidebarOpen()"
+      data-sidebar-backdrop
+      (click)="closeSidebar()"
+    ></div>
 
       <!-- The actual sidebar — 260px wide, fixed left, full height -->
-      <aside class="sidebar" data-testid="sidebar">
+      <aside
+        class="sidebar"
+        [class.open]="sidebarOpen()"
+        data-testid="sidebar"
+      >
         <a routerLink="/" class="flex items-center gap-2.5 mb-2 px-2">
           <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--gradient-violet);">
             <ui-icon name="diamond" class="text-white" [size]="16"></ui-icon>
@@ -122,21 +129,27 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
         <!-- Bottom-row: notifications / theme / avatar menu -->
         <div class="mt-auto pt-4 border-t" style="border-color: var(--border-subtle);">
           <div class="flex items-center justify-around px-2 py-1.5">
-            <button type="button" class="icon-btn" data-dropdown="notifMenu" title="Notifications">
+            <button
+              type="button"
+              class="icon-btn"
+              data-dropdown="notifMenu"
+              title="Notifications"
+            >
               <ui-icon name="bell"></ui-icon>
             </button>
-            <button type="button" class="icon-btn" data-theme-toggle title="Toggle theme">
-              <ui-icon name="moon"></ui-icon>
+            <button type="button" class="icon-btn" data-theme-toggle title="Toggle theme" (click)="toggleTheme()">
+              <ui-icon name="sun"></ui-icon>
             </button>
-            <button type="button" class="icon-btn" data-dropdown="avatarMenu" title="Account">
-              <ui-icon name="user"></ui-icon>
-            </button>
+            <a routerLink="/settings" class="icon-btn" title="Settings" data-nav="/settings">
+              <ui-icon name="settings"></ui-icon>
+            </a>
+
           </div>
           <a routerLink="/profile" class="nav-item mt-1">
             <div class="avatar" style="background: var(--gradient-violet);">AC</div>
             <div class="flex-1 min-w-0">
-              <div class="text-sm text-slate-100 truncate">Alex Chen</div>
-              <div class="text-[10px] uppercase tracking-wider text-violet-300">Vetter · T3</div>
+              <div class="text-sm truncate" style="color: var(--text-1);">Alex Chen</div>
+              <div class="text-[10px] uppercase tracking-wider" style="color: var(--v-300);">Vetter · T3</div>
             </div>
           </a>
         </div>
@@ -177,7 +190,34 @@ export class ShellComponent {
     return groups;
   });
 
-  /** True if the given nav path matches the current URL segment. */
+  /** Mobile sidebar open state — controlled by the mobile-bar menu button. */
+  readonly sidebarOpen = signal(false);
+
+  /** Current theme key. */
+  private readonly theme = signal<'dark' | 'light'>('dark');
+
+  /** Toggles the page theme. Wired to the data-theme-toggle buttons. */
+  toggleTheme(): void {
+    this.theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
+    document.documentElement.dataset['theme'] = this.theme();
+  }
+
+  /** Toggles the mobile sidebar. Called from the mobile-bar menu button. */
+  toggleSidebar(): void {
+    this.sidebarOpen.update((v) => !v);
+  }
+
+  /** Opens the mobile sidebar. */
+  openSidebar(): void {
+    this.sidebarOpen.set(true);
+  }
+
+  /** Closes the mobile sidebar. Called from the backdrop click. */
+  closeSidebar(): void {
+    this.sidebarOpen.set(false);
+  }
+
+/** True if the given nav path matches the current URL segment. */
   isActive(path: string): boolean {
     const e = this.currentUrl();
     const url = e instanceof NavigationEnd ? e.urlAfterRedirects : '';
