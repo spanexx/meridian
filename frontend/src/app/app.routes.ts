@@ -36,4 +36,9 @@ export const routes: Routes = [
         (m) => m.ExecutionsPageComponent,
       ),
   },
+  {
+    path: 'pool',
+    loadComponent: () =>
+      import('./pages/pool/pool.page').then((m) => m.PoolPageComponent),
+  },
 ];

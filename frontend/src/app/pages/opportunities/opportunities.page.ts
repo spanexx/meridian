@@ -111,8 +111,8 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
         </button>
       </div>
 
-      <!-- Status tabs (one row) -->
-      <div class="tabs mb-6" data-testid="status-filter">
+      <!-- Status tabs (one row, desktop) -->
+      <div class="tabs mb-6 hidden sm:flex" data-testid="status-filter">
         @for (s of statuses; track s.key) {
           <button
             type="button"
@@ -124,6 +124,19 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
           >{{ s.label }} <span class="text-slate-500">{{ s.count }}</span></button>
         }
       </div>
+
+      <!-- Status filter dropdown (mobile, mirrors the tabs) -->
+      <select
+        class="input w-full mb-6 sm:hidden"
+        data-testid="status-select"
+        [attr.aria-label]="'Filter by status'"
+        [value]="status()"
+        (change)="onStatusChange($event)"
+      >
+        @for (s of statuses; track s.key) {
+          <option [attr.value]="s.key">{{ s.label }} {{ s.count }}</option>
+        }
+      </select>
 
       <!-- Table -->
       <div class="card p-0 overflow-hidden">
@@ -231,6 +244,13 @@ export class OpportunitiesPageComponent {
   /** Currently selected status tab. */
   readonly status = signal<'all' | Opportunity['status']>('all');
   readonly page = signal(1);
+
+  /** Mobile dropdown: mirror a tab selection into the status signal. */
+  onStatusChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value as 'all' | Opportunity['status'];
+    this.status.set(value);
+    this.page.set(1);
+  }
 
   /** The 6 status tabs with their counts (matches wireframe counts). */
   readonly statuses = [
