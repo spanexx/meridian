@@ -157,6 +157,20 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
     }
   });
 
+  it('opportunity detail row links use routerLink for in-app navigation (no full page reload)', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    // Ref + Title columns both navigate to /opportunities/:ref
+    // (the Submitter column links to /members/:name, which is a different route)
+    const detailLinks = Array.from(root.querySelectorAll('tbody a[href*="/opportunities/"]')) as HTMLAnchorElement[];
+    expect(detailLinks.length).toBeGreaterThan(0);
+    for (const a of detailLinks) {
+      const href = a.getAttribute('href') ?? '';
+      // routerLink renders /opportunities/O-#### (matches the route we registered)
+      expect(href).toMatch(/^\/opportunities\/[A-Z0-9-]+$/);
+    }
+  });
+
   it('table renders 8 rows by default (one page)', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
