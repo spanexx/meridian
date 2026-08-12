@@ -1,46 +1,26 @@
 /**
- * UiIconComponent — inline-SVG icon component replacing lucide-angular
- * (which was removed mid-session, 2026-08-11, per MEMORY).
+ * UiIconComponent — inline-SVG icon component replacing lucide-angular.
  *
- * The dashboard wireframe uses 13 lucide icons. This component maps
- * each to an inline SVG so we get the visual fidelity of the
- * wireframe without pulling in the lucide-angular package. Adding
- * the package would add ~150kB to the bundle for 13 icons.
+ * Per the user (2026-08-12): PR #19 (lucide web font) was a regression —
+ * lucide-static's `lucide.ttf` ships a showcase font that renders icon
+ * NAMES as text characters (e.g. \e059 displays the literal text "bell"
+ * inside the font glyph). We reverted to inline SVG path data sourced
+ * from lucide v0.x. The visual rendering is slightly thinner than the
+ * real lucide icons the wireframe uses, but the layout is correct.
  *
- * Usage:
- *   <ui-icon name="plus" />
- *   <ui-icon name="zap" size="14" />
- *   <ui-icon name="plus" [ariaLabel]="'Submit'" />
- *
- * The path strings come from a static lookup table (ICON_PATHS) so
- * the only thing the DomSanitizer sees is well-formed SVG markup.
- * We use bypassSecurityTrustHtml because Angular's default HTML
- * sanitizer strips event handlers AND removes non-HTML elements it
- * does not recognize (line/polyline/polygon fall in the latter).
- * The icon data is static code (not user input), so trust is safe.
- *
- * When the icon name is unknown the component renders an empty SVG
- * with a debug data-attribute so dashboards never silently lose
- * their icons.
+ * Going forward: when we want exact lucide-fidelity, the right path is
+ * to inline the per-icon SVG paths into this component directly (not
+ * the font), which we already do. The path data here matches the
+ * shape of the wireframe; it just doesn't have the subpixel hints that
+ * the real lucide font provides.
  *
  * @owner   spanexx
- * @reviewed 2026-08-11
+ * @reviewed 2026-08-12
  */
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 
-/**
- * SVG path data for each supported icon. Sourced from lucide v0.x
- * the same icons bundled with the wireframe (meridian/meridian/kit/).
- * 21 names now cover every icon currently referenced in any
- * meridian wireframe page.
- */
+/** SVG path data for each supported icon, sourced from lucide v0.x. */
 const ICON_PATHS: Readonly<Record<string, string>> = Object.freeze({
   'arrow-right':  '<line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline>',
   'banknote':     '<rect x="2" y="6" width="20" height="12" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M6 12h.01M18 12h.01"></path>',
@@ -58,7 +38,7 @@ const ICON_PATHS: Readonly<Record<string, string>> = Object.freeze({
   'package':      '<line x1="16.5" y1="9.4" x2="21.5" y2="15"></line><line x1="19" y1="5" x2="9" y2="15"></line><line x1="9" y1="9" x2="9" y2="19" stroke-linejoin="round"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>',
   'plus':         '<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>',
   'plus-circle':  '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line>',
-  'settings':     '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>',
+  'settings':     '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>',
   'share-2':      '<circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>',
   'trending-up':  '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline>',
   'user':         '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>',
@@ -98,19 +78,10 @@ const ICON_PATHS: Readonly<Record<string, string>> = Object.freeze({
 export class UiIconComponent {
   private readonly sanitizer = inject(DomSanitizer);
 
-  /** Icon name. Unknown names render an empty svg with a debug attribute. */
   readonly name = input.required<string>();
-  /** Pixel size; default 18 matches the wireframe's `w-4.5 h-4.5` visual weight. */
   readonly size = input<number>(18);
-  /** If set, the svg is exposed to assistive tech via aria-label + role=img. */
   readonly ariaLabel = input<string | null>(null);
 
-  /**
-   * Resolves to the icon's SVG inner content, sanitized via Angular's
-   * DomSanitizer bypass. The data is static (not user input), so the
-   * trust is safe and necessary — Angular's default sanitizer strips
-   * SVG primitives like <line> that aren't pure-HTML.
-   */
   readonly safePath = computed<SafeHtml>(() => {
     const raw = ICON_PATHS[this.name()] ?? '';
     if (!raw && typeof console !== 'undefined') {
