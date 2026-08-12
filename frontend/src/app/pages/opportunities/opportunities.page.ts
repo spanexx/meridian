@@ -18,6 +18,7 @@
  * @reviewed 2026-08-11
  */
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 interface Submitter {
   initials: string;
@@ -58,6 +59,7 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
   selector: 'app-opportunities-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterLink, RouterLinkActive],
   template: `
     <section class="page">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
@@ -157,14 +159,19 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
             </thead>
             <tbody>
               @for (opp of pagedRows(); track opp.ref) {
-                <tr class="table-row" [attr.data-category]="opp.category" [attr.data-status]="opp.status" data-filterable>
+                <tr
+                  class="table-row"
+                  [attr.data-category]="opp.category"
+                  [attr.data-status]="opp.status"
+                  data-filterable
+                >
                   <td class="hidden md:table-cell">
-                    <a [attr.href]="'/opportunity-detail/' + opp.ref">
+                    <a [routerLink]="['/opportunities', opp.ref]">
                       <span class="text-xs text-slate-500 font-mono">{{ opp.ref }}</span>
                     </a>
                   </td>
                   <td>
-                    <a [attr.href]="'/opportunity-detail/' + opp.ref">
+                    <a [routerLink]="['/opportunities', opp.ref]">
                       <div class="font-medium">{{ opp.title }}</div>
                       <div class="text-xs text-slate-500 mt-0.5">{{ opp.subtitle }}</div>
                     </a>
@@ -173,7 +180,7 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
                     <span class="badge badge-neutral">{{ categoryLabel(opp.category) }}</span>
                   </td>
                   <td class="hidden lg:table-cell">
-                    <a class="flex items-center gap-2" [attr.href]="'/member-detail/' + opp.submitter.name">
+                    <a [routerLink]="['/members', opp.submitter.name]" class="flex items-center gap-2">
                       <div class="avatar" [style.background]="opp.submitter.gradient">{{ opp.submitter.initials }}</div>
                       <span class="text-xs truncate min-w-0">{{ opp.submitter.name }}</span>
                     </a>
@@ -199,7 +206,7 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
                     <span class="badge" [class]="'badge-' + statusVariant(opp.status)">{{ statusLabel(opp.status) }}</span>
                   </td>
                   <td>
-                    <a [attr.href]="'/opportunity-detail/' + opp.ref">
+                    <a [routerLink]="['/opportunities', opp.ref]">
                       <i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i>
                     </a>
                   </td>

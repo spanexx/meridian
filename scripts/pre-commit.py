@@ -124,7 +124,7 @@ def is_header_exempt(path: Path) -> bool:
 
 
 def check_yaml(files: list[Path]) -> int:
-    header("[1/8] YAML validity")
+    header("[1/9] YAML validity")
     errors = 0
     yaml_files = [f for f in files if f.suffix in {".yml", ".yaml"} and f.exists()]
     if not yaml_files:
@@ -147,7 +147,7 @@ def check_yaml(files: list[Path]) -> int:
 
 
 def check_secrets(files: list[Path]) -> int:
-    header("[2/8] Secrets scan")
+    header("[2/9] Secrets scan")
     errors = 0
     candidates = [f for f in files if f.exists() and f.suffix not in {".png", ".jpg", ".gif", ".ico"}]
     for f in candidates:
@@ -165,7 +165,7 @@ def check_secrets(files: list[Path]) -> int:
 
 
 def check_comments(files: list[Path]) -> int:
-    header("[3/8] Comment policy")
+    header("[3/9] Comment policy")
     errors = 0
 
     source_files = [
@@ -207,7 +207,7 @@ def check_comments(files: list[Path]) -> int:
 
 
 def check_types(files: list[Path]) -> int:
-    header("[4/8] Type check (tsc)")
+    header("[4/9] Type check (tsc)")
     ts_files = [f for f in files if f.exists() and f.suffix in {".ts", ".tsx"}]
     if not ts_files:
         ok("no TS files staged")
@@ -232,7 +232,7 @@ def check_types(files: list[Path]) -> int:
 
 
 def check_unit_tests(files: list[Path]) -> int:
-    header("[5/8] Unit tests (vitest)")
+    header("[5/9] Unit tests (vitest)")
     ts_files = [f for f in files if f.exists() and f.suffix in {".ts", ".tsx"}]
     if not ts_files:
         ok("no TS files staged")
@@ -268,7 +268,7 @@ def check_icons(files: list[Path]) -> int:
     the dictionary renders an invisible (0-child) SVG — the bug class
     that shipped twice in PR #19/#20 (sun/cog paths never committed).
     """
-    header("[6/8] Icon cross-check")
+    header("[6/9] Icon cross-check")
     errors = 0
     icon_ts = REPO_ROOT / "frontend/src/app/ui/icon/icon.component.ts"
     if not icon_ts.exists():
@@ -300,6 +300,58 @@ def check_icons(files: list[Path]) -> int:
     return errors
 
 
+def check_router_links(files: list[Path]) -> int:
+    """
+    Router-link enforcement: in any Angular template, a navigation
+    anchor must use [routerLink] not [attr.href]. A raw [attr.href]
+    bypasses the router and causes a full document reload — the
+    bug that escaped until PR #26 when the user reported "the
+    whole app refreshes" on row click.
+
+    The guard scans staged .ts files for any `<a [attr.href]`
+    pointing at a path that starts with `/` (an app route, not an
+    external link or asset). External links (http/https/mailto)
+    are exempt.
+    """
+    header("[8/9] Router links")
+    errors = 0
+    template_files = [
+        f for f in files
+        if f.exists()
+        and f.suffix == ".ts"
+        and f.name.endswith(".ts")
+        and "/pages/" in str(f)
+        and "spec" not in f.name
+    ]
+    if not template_files:
+        ok("no page templates staged")
+        return 0
+    for f in template_files:
+        try:
+            content = f.read_text(errors="ignore")
+        except (UnicodeDecodeError, OSError):
+            continue
+        # Look for <a ... [attr.href]="/...">  (an internal route)
+        # and the equivalent bare href="/..."  (rare but possible).
+        # We're permissive: only flag when it's clearly an internal
+        # route. External (http/https/mailto/#) are exempt.
+        offenders: list[str] = []
+        for m in re.finditer(r'<a\b[^>]*\[attr\.href\]="([^"]+)"', content):
+            url = m.group(1).strip().strip("'\"")
+            if url.startswith("/") and not url.startswith("//"):
+                offenders.append(url)
+        if offenders:
+            for url in offenders:
+                fail(f"{f.relative_to(REPO_ROOT)}: <a [attr.href]=\"{url}\"> "
+                     f"bypasses the router and causes a full page reload. "
+                     f"Use [routerLink] instead. See "
+                     f".agents/lessons/router-link-vs-attr-href.md.")
+                errors += 1
+    if errors == 0:
+        ok(f"all {len(template_files)} page template(s) use [routerLink] for navigation")
+    return errors
+
+
 def check_new_page(files: list[Path]) -> int:
     """
     New-page pack enforcement: every staged page component (under
@@ -312,7 +364,7 @@ def check_new_page(files: list[Path]) -> int:
     packages can't import the component), and the route is
     unreachable.
     """
-    header("[7/8] New-page pack")
+    header("[7/9] New-page pack")
     errors = 0
     page_files = [
         f for f in files
@@ -364,7 +416,7 @@ def check_tdd(files: list[Path]) -> int:
       - The file is in a test directory itself (src/__tests__, *.spec.ts)
       - The file is auto-generated (has `// AUTO-GENERATED`)
     """
-    header("[8/8] TDD enforcement")
+    header("[9/9] TDD enforcement")
     errors = 0
     source_files = [
         f for f in files
@@ -493,6 +545,7 @@ def main() -> int:
     total_errors += check_unit_tests(files)
     total_errors += check_icons(files)
     total_errors += check_new_page(files)
+    total_errors += check_router_links(files)
     total_errors += check_tdd(files)
 
     print()

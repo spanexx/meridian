@@ -41,4 +41,18 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/pool/pool.page').then((m) => m.PoolPageComponent),
   },
+  {
+    path: 'opportunities/:id',
+    loadComponent: () =>
+      import('./pages/opportunity-detail/opportunity-detail.page').then(
+        (m) => m.OpportunityDetailPageComponent,
+      ),
+  },
+  {
+    path: 'opportunity-detail/:id',
+    loadComponent: () =>
+      import('./pages/opportunity-detail/opportunity-detail.page').then(
+        (m) => m.OpportunityDetailPageComponent,
+      ),
+  },
 ];
