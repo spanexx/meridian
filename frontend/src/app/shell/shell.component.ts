@@ -141,7 +141,7 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
               <ui-icon name="sun"></ui-icon>
             </button>
             <a routerLink="/settings" class="icon-btn" title="Settings" data-nav="/settings">
-              <ui-icon name="settings"></ui-icon>
+              <ui-icon name="cog"></ui-icon>
             </a>
 
           </div>
