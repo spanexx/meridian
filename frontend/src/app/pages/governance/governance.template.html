@@ -1,0 +1,190 @@
+<!--
+  GovernancePageComponent template (wireframe/meridian/governance/index.html).
+
+  @owner   spanexx
+  @reviewed 2026-08-12
+-->
+<section class="page">
+
+  <!-- header -->
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+    <div>
+      <h1 class="page-title">Governance</h1>
+      <p class="page-subtitle">Community-Governed Parameters — any member proposes, VETTER+ votes, weight from reputation.</p>
+    </div>
+    <button type="button" class="btn btn-primary" data-action="open-propose-modal" (click)="openProposeModal()">
+      <ui-icon name="file-plus" class="w-4 h-4"></ui-icon>
+      Propose change
+    </button>
+  </header>
+
+  <!-- Propose modal -->
+  <ui-modal [open]="proposeModalOpen" title="Propose a parameter change">
+    <form class="space-y-4" data-testid="propose-modal" (submit)="submitProposal(); $event.preventDefault()">
+      <div>
+        <label>Parameter</label>
+        <select class="input" [value]="getProposeParameter()" (change)="setProposeParameter($any($event.target).value)">
+          @for (opt of parameterOptions(); track opt) {
+            <option [value]="opt" [selected]="opt === getProposeParameter()">{{ opt }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label>Proposed value</label>
+        <input type="text" class="input" placeholder="e.g. 18%" [value]="getProposeValue()" (input)="setProposeValue($any($event.target).value)">
+      </div>
+      <div>
+        <label>Rationale</label>
+        <textarea class="input" rows="3" placeholder="Why should the Community adopt this?" [value]="getProposeRationale()" (input)="setProposeRationale($any($event.target).value)"></textarea>
+      </div>
+      <div class="card p-4 text-xs text-blue-200" data-testid="propose-info-banner" style="background: rgba(96,165,250,0.04); border-color: rgba(96,165,250,0.2);">
+        <div class="flex items-start gap-2">
+          <ui-icon name="info" class="w-4 h-4 text-blue-400 mt-0.5"></ui-icon>
+          <div>Results apply to future executions only — never retroactively. Safety rails (reconciliation, no-ponzi, KYC) can never be voted on.</div>
+        </div>
+      </div>
+      <div class="flex gap-3 justify-end">
+        <button type="button" class="btn btn-ghost" (click)="closeProposeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">
+          <ui-icon name="send" class="w-4 h-4"></ui-icon>
+          Submit proposal
+        </button>
+      </div>
+    </form>
+  </ui-modal>
+
+  <!-- Active Proposals -->
+  <section class="card p-6 mb-6" data-testid="active-proposals-section">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h2 class="text-base font-semibold">Active Proposals</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Vote closes in 22 hours</p>
+      </div>
+      <span class="badge badge-warning">2 open</span>
+    </div>
+
+    <div class="space-y-4">
+      @for (p of activeProposals(); track p.id) {
+        <div class="card p-5" data-testid="proposal-card">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-sm font-semibold">{{ p.title }}</span>
+                <span class="badge badge-warning">Voting</span>
+              </div>
+              <div class="text-xs text-slate-500">Proposed by {{ p.proposer }} · {{ p.proposerTier }} · "{{ p.rationale }}"</div>
+            </div>
+            <span class="text-xs text-slate-500 whitespace-nowrap">{{ p.hoursLeft }}h left</span>
+          </div>
+          <div class="flex items-center justify-between text-sm mb-2">
+            <div>
+              <span class="text-emerald-400 font-semibold" data-count-approve>{{ p.approve }}</span>
+              <span class="text-slate-500">approve</span>
+              <span class="mx-2 text-slate-600">·</span>
+              <span class="text-rose-400 font-semibold" data-count-reject>{{ p.reject }}</span>
+              <span class="text-slate-500">reject</span>
+            </div>
+            <span class="text-xs text-slate-500">Required: {{ p.requiredVotes }} weighted votes</span>
+          </div>
+          <div class="progress-track mb-4">
+            <div class="progress-fill progress-fill-emerald" data-vote-bar [style.width.%]="(p.approve / (p.approve + p.reject)) * 100"></div>
+          </div>
+          <div class="flex gap-3" data-vote-group>
+            <button type="button" class="vote-btn flex-1" data-vote data-vote-type="approve" (click)="onVoteApprove(p.id)">
+              <ui-icon name="thumbs-up" class="w-4 h-4"></ui-icon>
+              Approve
+            </button>
+            <button type="button" class="vote-btn flex-1" data-vote data-vote-type="reject" (click)="onVoteReject(p.id)">
+              <ui-icon name="thumbs-down" class="w-4 h-4"></ui-icon>
+              Reject
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Parameters + sidebar -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Community-Governed Parameters -->
+    <section class="card p-6 lg:col-span-2" data-testid="parameters-grid">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-base font-semibold">Community-Governed Parameters</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Current values · each set by a Governance Vote with provenance</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @for (p of parameters(); track p.label) {
+          <article class="card p-5" data-testid="parameter-card">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-sm font-medium">{{ p.label }}</div>
+              @if (p.label !== 'Distribution shares') {
+                <span class="badge badge-success">Active</span>
+              } @else {
+                <a [routerLink]="['/payouts']" class="text-xs text-violet-400 hover:text-violet-300">See payouts →</a>
+              }
+            </div>
+            @if (p.label !== 'Distribution shares') {
+              <div class="text-3xl font-light">{{ p.currentValue }}</div>
+              <div class="text-[11px] text-slate-500 mt-2">Set by vote · {{ p.setDate }} · {{ p.approvalPct }}% approval</div>
+            } @else {
+              <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 text-center">
+                @for (d of distributionShares(); track d.name) {
+                  <div>
+                    <div class="text-xl font-semibold">{{ d.value }}</div>
+                    <div class="text-[10px] text-slate-500">{{ d.name }}</div>
+                  </div>
+                }
+              </div>
+              <div class="text-[11px] text-slate-500 mt-3">Set by vote · {{ p.setDate }} · {{ p.approvalPct }}% approval · applies to future executions only</div>
+            }
+          </article>
+        }
+      </div>
+    </section>
+
+    <!-- Sidebar -->
+    <section class="space-y-6">
+      <!-- Safety Rails -->
+      <div class="card p-6" data-testid="safety-rails-card">
+        <div class="flex items-center gap-2 mb-4">
+          <ui-icon name="shield" class="w-4 h-4 text-emerald-400"></ui-icon>
+          <h2 class="text-base font-semibold">Safety Rails</h2>
+        </div>
+        <p class="text-xs text-slate-500 mb-4">Never community-voted. Integrity is non-negotiable.</p>
+        <div class="space-y-2 text-xs">
+          @for (rail of safetyRails(); track rail) {
+            <div class="flex items-center gap-2 p-2.5 rounded" data-testid="safety-rail-item" style="background: var(--bg-overlay);">
+              <ui-icon name="lock" class="w-3 h-3 text-slate-500"></ui-icon>
+              {{ rail }}
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Recent Votes -->
+      <div class="card p-6" data-testid="recent-votes-card">
+        <h2 class="text-base font-semibold mb-4">Recent Votes</h2>
+        <div class="space-y-3 text-xs">
+          @for (v of recentVotes(); track v.title) {
+            <div class="flex items-center justify-between" data-testid="recent-vote-entry">
+              <div>
+                <div class="text-slate-200">{{ v.title }}</div>
+                <div class="text-slate-500">{{ v.date }} · {{ v.approvalPct }}% approval</div>
+              </div>
+              @if (v.passed) {
+                <span class="badge badge-success">Passed</span>
+              } @else {
+                <span class="badge badge-danger">Rejected</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  </div>
+
+</section>

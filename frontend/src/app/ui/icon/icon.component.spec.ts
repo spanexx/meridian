@@ -62,6 +62,7 @@ const SUPPORTED_NAMES = [
   'clock',
   'cpu',
   'diamond',
+  'file-plus',
   'filter',
   'layout-dashboard',
   'lock',
