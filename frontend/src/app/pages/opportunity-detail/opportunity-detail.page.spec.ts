@@ -52,6 +52,28 @@ describe('OpportunityDetailPageComponent', () => {
     expect(root.textContent).toContain('Limited drop resale');
   });
 
+  it('header does NOT duplicate the ref outside the breadcrumb (breadcrumb owns it)', async () => {
+    const fixture = await renderPage();
+    const root = fixture.nativeElement as HTMLElement;
+    const crumb = root.querySelector('[data-testid="opportunity-breadcrumb"]');
+    const header = Array.from(root.querySelectorAll('header'))[0];
+    // crumb contains O-2049 in the breadcrumb chip
+    expect(crumb?.textContent).toMatch(/O-2049/);
+    // header should NOT have the ref as a standalone font-mono span
+    // (only badges IN VETTING / APPAREL + title + action buttons).
+    const refSpans = Array.from(header.querySelectorAll('span.font-mono'));
+    expect(refSpans.length).toBe(0);
+  });
+
+  it('header title scales: text-2xl at base, text-3xl at sm+', async () => {
+    const fixture = await renderPage();
+    const root = fixture.nativeElement as HTMLElement;
+    const header = Array.from(root.querySelectorAll('header'))[0];
+    const h1 = header.querySelector('h1');
+    expect(h1?.className ?? '').toMatch(/text-2xl/);
+    expect(h1?.className ?? '').toMatch(/sm:text-3xl/);
+  });
+
   it('renders the 2 ghost action buttons (share + bookmark)', async () => {
     const fixture = await renderPage();
     const root = fixture.nativeElement as HTMLElement;
