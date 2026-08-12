@@ -136,7 +136,7 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
             <button type="button" class="icon-btn" data-theme-toggle title="Toggle theme" (click)="toggleTheme()">
               <ui-icon name="sun"></ui-icon>
             </button>
-            <a routerLink="/settings" class="icon-btn" title="Settings" data-nav="/settings">
+            <a routerLink="/profile" class="icon-btn" title="Settings" data-nav="/profile">
               <ui-icon name="cog"></ui-icon>
             </a>
 

@@ -57,14 +57,14 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
     expect(sub?.textContent).toContain('Governance Vote');
   });
 
-  it('renders a Back to community link using routerLink to /community/:id', async () => {
+  it('renders a Back to community link using routerLink to /community-detail/:id', async () => {
     const f = await renderPage('alpha');
     const root = f.nativeElement as HTMLElement;
     const back = Array.from(root.querySelectorAll('a')).find(a =>
       a.textContent?.includes('Back to community'),
     );
     expect(back).toBeTruthy();
-    expect(back?.getAttribute('href')).toBe('/community/alpha');
+    expect(back?.getAttribute('href')).toBe('/community-detail/alpha');
   });
 
   // Breadcrumb -----------------------------------------------------------
@@ -89,7 +89,7 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
     expect(link?.getAttribute('href')).toBe('/communities');
   });
 
-  it('breadcrumb <community name> link points to /community/:id', async () => {
+  it('breadcrumb <community name> link points to /community-detail/:id', async () => {
     const f = await renderPage('alpha');
     const bc = (f.nativeElement as HTMLElement).querySelector(
       '[data-testid="community-settings-breadcrumb"]',
@@ -97,7 +97,7 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
     const link = Array.from(bc.querySelectorAll('a')).find(a =>
       a.textContent?.includes('MERIDIAN Alpha'),
     );
-    expect(link?.getAttribute('href')).toBe('/community/alpha');
+    expect(link?.getAttribute('href')).toBe('/community-detail/alpha');
   });
 
   // General card ---------------------------------------------------------

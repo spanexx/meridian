@@ -418,7 +418,7 @@ describe('CommunityMembersPageComponent', () => {
     const nav = (f.nativeElement as HTMLElement).querySelector('[data-testid="members-breadcrumb"]');
     expect(nav).toBeTruthy();
     const link = nav?.querySelector('a') as HTMLAnchorElement;
-    expect(link?.getAttribute('href')).toBe('/community/alpha');
+    expect(link?.getAttribute('href')).toBe('/community-detail/alpha');
     expect(link?.textContent).toContain('Alpha Syndicate');
   });
 
@@ -446,7 +446,7 @@ describe('CommunityMembersPageComponent', () => {
     const f = await renderPage();
     const nav = (f.nativeElement as HTMLElement).querySelector('[data-testid="members-breadcrumb"]');
     const link = nav?.querySelector('a') as HTMLAnchorElement;
-    expect(link.getAttribute('href')).toBe('/community/alpha');  // resolved by routerLink
+    expect(link.getAttribute('href')).toBe('/community-detail/alpha');  // resolved by routerLink
   });
 
 });
