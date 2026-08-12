@@ -40,27 +40,32 @@ type UserVote = 'approve' | 'reject' | null;
     </div>
 
     <!-- header -->
-    <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
-      <div>
-        <div class="flex items-center gap-3 mb-3">
-          <span class="text-xs text-slate-500 font-mono">O-2049</span>
-          <span class="badge badge-warning">In Vetting</span>
-          <span class="badge badge-neutral">Apparel</span>
+    <header class="mb-8">
+      <!-- status + category badges: row at small, inline at sm+ -->
+      <div class="flex items-center gap-3 mb-3 flex-wrap">
+        <span class="badge badge-warning">In Vetting</span>
+        <span class="badge badge-neutral">Apparel</span>
+        <!-- action buttons float to the right at sm+ -->
+        <div class="ml-auto flex items-center gap-2">
+          <button type="button" class="btn btn-ghost" aria-label="Share link">
+            <ui-icon name="share-2"></ui-icon>
+          </button>
+          <button type="button" class="btn btn-ghost" aria-label="Bookmark">
+            <ui-icon name="bookmark"></ui-icon>
+          </button>
         </div>
-        <h1 class="page-title text-3xl">Travis Scott × Nike Sneakers</h1>
-        <p class="page-subtitle max-w-2xl mt-2">
-          Limited drop resale — wholesale acquisition from boutique, 8 pairs, 14-day
-          liquidation via StockX, GOAT, eBay.
-        </p>
       </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <button type="button" class="btn btn-ghost" aria-label="Share link">
-          <ui-icon name="share-2"></ui-icon>
-        </button>
-        <button type="button" class="btn btn-ghost" aria-label="Bookmark">
-          <ui-icon name="bookmark"></ui-icon>
-        </button>
-      </div>
+      <!-- title: text-2xl at base, text-3xl at sm+ -->
+      <h1 class="page-title text-2xl sm:text-3xl">Travis Scott × Nike Sneakers</h1>
+      <!-- subtitle: wrap onto natural lines at small -->
+      <p class="page-subtitle max-w-2xl mt-2 text-sm leading-relaxed">
+        Limited drop resale
+        <br class="sm:hidden" />
+        <span class="hidden sm:inline"> — </span>
+        wholesale acquisition from boutique, 8 pairs,
+        <br class="sm:hidden" />
+        14-day liquidation via StockX, GOAT, eBay.
+      </p>
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -22,12 +22,18 @@ test.describe('opportunity detail page (wireframe-aligned)', () => {
     await expect(page.locator('h1', { hasText: 'Travis Scott' })).toBeVisible();
   });
 
-  test('header carries ref + status + category badges + 2 ghost buttons', async ({ page }) => {
+  test('header carries status + category badges + 2 ghost buttons (ref lives in breadcrumb)', async ({ page }) => {
     await page.goto('/opportunities/O-2049');
+    // breadcrumb owns the ref "O-2049"
+    const crumb = page.locator('[data-testid="opportunity-breadcrumb"]');
+    await expect(crumb.getByText('O-2049')).toBeVisible();
+    // header carries the badges (no duplicate ref)
     const header = page.locator('header').first();
-    await expect(header.getByText('O-2049')).toBeVisible();
     await expect(header.getByText('In Vetting')).toBeVisible();
     await expect(header.getByText('Apparel')).toBeVisible();
+    // header should NOT have a font-mono ref span
+    await expect(header.locator('span.font-mono')).toHaveCount(0);
+    // action buttons still present
     await expect(page.locator('button[aria-label="Share link"]')).toBeVisible();
     await expect(page.locator('button[aria-label="Bookmark"]')).toBeVisible();
   });
