@@ -190,4 +190,18 @@ describe('ExecutionsPage (wireframe-aligned)', () => {
     expect(failed.classList.contains('active')).toBe(true);
     expect((tabs[0] as HTMLElement).classList.contains('active')).toBe(false);
   });
+
+  // routerLink in-app navigation (regression: 2026-08-12 the user reported
+  // that clicking a row reloaded the whole app — same [attr.href] trap as
+  // /opportunities in PR #15).
+  it('execution cards use [routerLink] for in-app navigation (no full page reload)', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const links = Array.from(root.querySelectorAll('a[href*="/executions/"]')) as HTMLAnchorElement[];
+    expect(links.length).toBeGreaterThan(0);
+    for (const a of links) {
+      // routerLink renders /executions/E-#### (matches the route we registered)
+      expect(a.getAttribute('href') ?? '').toMatch(/^\/executions\/E-[\w-]+$/);
+    }
+  });
 });
