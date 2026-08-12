@@ -1,0 +1,142 @@
+<!--
+  CommunitySettingsPageComponent template (chunk 1/4 of wireframe).
+
+  @owner   spanexx
+  @reviewed 2026-08-12
+-->
+<section class="page">
+  <!-- breadcrumb -->
+  <div class="flex items-center gap-2 text-xs text-slate-500 mb-4" data-testid="community-settings-breadcrumb">
+    <a [routerLink]="['/communities']" class="hover:text-slate-300">Communities</a>
+    <ui-icon name="chevron-right" [size]="12" class="w-3 h-3 flex-shrink-0"></ui-icon>
+    <a [routerLink]="['/community', community?.ref]" class="hover:text-slate-300">{{ community?.name }}</a>
+    <ui-icon name="chevron-right" [size]="12" class="w-3 h-3 flex-shrink-0"></ui-icon>
+    <span class="text-slate-300">Settings</span>
+  </div>
+
+  <!-- header -->
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <h1 class="page-title mb-0">Community Settings</h1>
+        <span class="badge badge-premium">
+          <ui-icon name="lock" class="w-3 h-3"></ui-icon>
+          Admin
+        </span>
+      </div>
+      <p class="page-subtitle">Configure {{ community?.name }}. Governance parameters change through a Governance Vote — never unilaterally.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <a [routerLink]="['/community', community?.ref]" class="btn btn-ghost">
+        <ui-icon name="arrow-left" class="w-4 h-4"></ui-icon>
+        Back to community
+      </a>
+    </div>
+  </header>
+
+  <!-- main + sidebar -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- General -->
+      <section class="card p-6" data-testid="general-card">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold">General</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Identity and scope of this community.</p>
+          </div>
+          <ui-icon name="info" class="w-3 h-3 text-slate-500"></ui-icon>
+        </div>
+        <form class="space-y-4" data-testid="general-form" (submit)="submitGeneral($event)">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label>Community name</label>
+              <input type="text" class="input" [value]="formName" (input)="setFormName($any($event.target).value)">
+            </div>
+            <div>
+              <label>Community ID</label>
+              <input type="text" class="input font-mono" [value]="community?.id" disabled>
+            </div>
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea class="input" rows="3" [value]="formDescription" (input)="setFormDescription($any($event.target).value)"></textarea>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label>Focus</label>
+              <select class="input" [value]="formFocus" (change)="setFormFocus($any($event.target).value)">
+                @for (opt of focusOptions; track opt) {
+                  <option [value]="opt" [selected]="opt === formFocus">{{ opt }}</option>
+                }
+              </select>
+            </div>
+            <div>
+              <label>Region</label>
+              <select class="input" [value]="formRegion" (change)="setFormRegion($any($event.target).value)">
+                @for (opt of regionOptions; track opt) {
+                  <option [value]="opt" [selected]="opt === formRegion">{{ opt }}</option>
+                }
+              </select>
+            </div>
+            <div>
+              <label>Minimum contribution (USD)</label>
+              <input type="number" class="input" [value]="formMinContribution" min="0" step="100" (input)="setFormMinContribution($any($event.target).value)">
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="submit" class="btn btn-primary">
+              <ui-icon name="save" class="w-4 h-4"></ui-icon>
+              Save general
+            </button>
+          </div>
+        </form>
+      </section>
+
+    </div>
+
+    <!-- sidebar -->
+    <div class="space-y-6">
+      <!-- At a glance -->
+      <section class="card p-6" data-testid="at-a-glance-card">
+        <h2 class="text-base font-semibold mb-4">At a glance</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Status</span>
+            <span class="badge badge-success">{{ community?.status }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Members</span>
+            <span class="font-medium">{{ community?.members }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Total pool</span>
+            <span class="font-medium">{{ formatUsd(community?.totalPoolUsd ?? 0) }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Founded</span>
+            <span class="font-medium">{{ community?.founded }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-500">Active proposals</span>
+            <a [routerLink]="['/governance']" class="font-medium text-amber-400">{{ community?.activeProposals }} open</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Safety rails -->
+      <section class="card p-6" data-testid="safety-rails-card">
+        <h2 class="text-base font-semibold mb-3">Safety rails</h2>
+        <p class="text-xs text-slate-500 mb-3">Never community-governed. Fixed by design.</p>
+        <div class="space-y-2 text-sm">
+          @for (rail of safetyRails(); track rail) {
+            <div class="flex items-center gap-2" data-testid="safety-rail-item">
+              <ui-icon name="check-circle" class="w-4 h-4 text-emerald-400"></ui-icon>
+              <span>{{ rail }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  </div>
+</section>
