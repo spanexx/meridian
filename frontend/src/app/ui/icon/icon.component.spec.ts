@@ -1,38 +1,38 @@
 /**
- * Unit tests for UiIconComponent — the inline-SVG icon component
- * that replaces lucide-angular (which was removed mid-session,
- * 2026-08-11, per MEMORY).
+ * Unit tests for UiIconComponent — inline-SVG implementation.
  *
- * The dashboard wireframe uses 13 lucide icons (banknote, zap,
- * users, lightbulb, package, share-2, filter, plus, trending-up,
- * clock, arrow-right, cpu, watch). This component maps each to an
- * inline SVG so we get the visual fidelity without the bundle cost.
+ * The component renders an <svg> with the lucide path data
+ * sourced from lucide v0.x. (Per the user 2026-08-12: PR #19 tried
+ * to swap this for the lucide web font from lucide-static, but that
+ * font is a SHOWCASE font that renders icon names as text characters
+ * — a regression. We reverted to inline SVG.)
  *
  * Behavior pins:
- *   1. Component renders without error for each of the 13 supported
- *      names.
- *   2. The rendered <svg> has a viewBox so the icon scales via CSS.
- *   3. The component sets `aria-hidden="true"` by default (decorative);
- *      caller can override by passing an ariaLabel.
- *   4. Unknown name falls back to a generic placeholder and reason
- *      (so dashboards don't silently lose their lucide icons).
- *   5. The component is exported from the ui barrel so pages can
- *      `import { UiIconComponent } from '../../ui'`.
+ *   1. Renders an <svg> with viewBox="0 0 24 24".
+ *   2. The svg contains one or more <path>/<line>/<polyline> children.
+ *   3. Default size is 18 (matches the wireframe visual weight).
+ *   4. size input controls the rendered svg width/height.
+ *   5. ariaLabel input controls accessibility:
+ *      - omitted → aria-hidden="true" (decorative)
+ *      - set → aria-label="..." + role="img"
+ *   6. Unknown name renders an empty svg (no crash).
  *
  * @owner   spanexx
- * @reviewed 2026-08-11
+ * @reviewed 2026-08-12
  */
-import { TestBed, type ComponentFixture } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { UiIconComponent } from './icon.component';
 
 const SUPPORTED_NAMES = [
   'arrow-right',
   'banknote',
   'bell',
+  'circle-dollar-sign',
   'clock',
   'cpu',
   'diamond',
   'filter',
+  'layout-dashboard',
   'lightbulb',
   'log-out',
   'menu',
@@ -45,56 +45,78 @@ const SUPPORTED_NAMES = [
   'trending-up',
   'user',
   'users',
+  'vote',
   'watch',
   'zap',
 ] as const;
 
-async function renderIcon(name: string, ariaLabel?: string) {
-  await TestBed.configureTestingModule({
-    imports: [UiIconComponent],
-  }).compileComponents();
+function render(name: string, opts: { size?: number; ariaLabel?: string } = {}) {
+  TestBed.configureTestingModule({ imports: [UiIconComponent] });
   const fixture = TestBed.createComponent(UiIconComponent);
   fixture.componentRef.setInput('name', name);
-  if (ariaLabel !== undefined) {
-    fixture.componentRef.setInput('ariaLabel', ariaLabel);
-  }
+  if (opts.size !== undefined) fixture.componentRef.setInput('size', opts.size);
+  if (opts.ariaLabel !== undefined) fixture.componentRef.setInput('ariaLabel', opts.ariaLabel);
   fixture.detectChanges();
-  return fixture;
+  return fixture.nativeElement as HTMLElement;
 }
 
-describe('UiIconComponent', () => {
-  it.each(SUPPORTED_NAMES)('renders <svg> with viewBox for name=%s', async (name) => {
-    const fixture = await renderIcon(name);
-    const svg = fixture.nativeElement.querySelector('svg');
+describe('UiIconComponent (inline SVG)', () => {
+  it.each(SUPPORTED_NAMES)('renders an <svg> with viewBox="0 0 24 24" for name=%s', (name) => {
+    const root = render(name);
+    const svg = root.querySelector('svg');
     expect(svg).toBeTruthy();
-    expect(svg?.getAttribute('viewBox')).toBeTruthy();
+    expect(svg?.getAttribute('viewBox')).toBe('0 0 24 24');
   });
 
-  it('sets aria-hidden=true by default (decorative use)', async () => {
-    const fixture = await renderIcon('plus');
-    const svg = fixture.nativeElement.querySelector('svg');
+  it.each(SUPPORTED_NAMES)('svg has at least one <path>/<line>/<polyline> child for name=%s', (name) => {
+    const root = render(name);
+    const svg = root.querySelector('svg') as SVGElement;
+    // jsdom exposes all child SVG elements via getElementsByTagName*
+    const kids = svg.getElementsByTagName('path').length +
+                 svg.getElementsByTagName('line').length +
+                 svg.getElementsByTagName('polyline').length +
+                 svg.getElementsByTagName('polygon').length +
+                 svg.getElementsByTagName('circle').length +
+                 svg.getElementsByTagName('rect').length +
+                 svg.getElementsByTagName('g').length;
+    expect(kids).toBeGreaterThan(0);
+  });
+
+  it('size input controls the rendered svg width/height', () => {
+    const root = render('plus', { size: 24 });
+    const svg = root.querySelector('svg');
+    expect(svg?.getAttribute('width')).toBe('24');
+    expect(svg?.getAttribute('height')).toBe('24');
+  });
+
+  it('default size is 18', () => {
+    const root = render('plus');
+    const svg = root.querySelector('svg');
+    expect(svg?.getAttribute('width')).toBe('18');
+    expect(svg?.getAttribute('height')).toBe('18');
+  });
+
+  it('sets aria-hidden=true by default (decorative)', () => {
+    const root = render('plus');
+    const svg = root.querySelector('svg');
     expect(svg?.getAttribute('aria-hidden')).toBe('true');
   });
 
-  it('caller-supplied ariaLabel takes over and adds role=img', async () => {
-    const fixture = await renderIcon('plus', 'Submit');
-    const svg = fixture.nativeElement.querySelector('svg');
+  it('caller-supplied ariaLabel takes over with role=img', () => {
+    const root = render('plus', { ariaLabel: 'Submit' });
+    const svg = root.querySelector('svg');
     expect(svg?.getAttribute('aria-label')).toBe('Submit');
     expect(svg?.getAttribute('role')).toBe('img');
   });
 
-  it('unknown name renders a placeholder (not a crash)', async () => {
-    const fixture = await renderIcon('totally-unknown-icon');
-    const svg = fixture.nativeElement.querySelector('svg');
+  it('unknown name renders an empty svg (no crash)', () => {
+    const root = render('totally-unknown-icon');
+    const svg = root.querySelector('svg');
     expect(svg).toBeTruthy();
   });
 
-  it('size input controls the rendered svg width/height', async () => {
-    const fixture = await renderIcon('plus');
-    fixture.componentRef.setInput('size', 32);
-    fixture.detectChanges();
-    const svg = fixture.nativeElement.querySelector('svg');
-    expect(svg?.getAttribute('width')).toBe('32');
-    expect(svg?.getAttribute('height')).toBe('32');
+  it('host is inline-flex so it aligns with text', () => {
+    const root = render('plus');
+    expect(getComputedStyle(root).display).toBe('inline-flex');
   });
 });
