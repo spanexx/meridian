@@ -554,4 +554,18 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
       expect(p.value).toBeTruthy();
     }
   });
+it('closeArchiveModal() closes the modal without changing status', async () => {
+    const f = await renderPage('alpha');
+    const c = f.componentInstance as unknown as {
+      onArchive: () => void;
+      closeArchiveModal: () => void;
+      archiveModalOpen: () => boolean;
+      communityStatus: () => string;
+    };
+    c.onArchive();
+    expect(c.archiveModalOpen).toBe(true);
+    c.closeArchiveModal();
+    expect(c.archiveModalOpen).toBe(false);
+    expect(c.communityStatus).toBe('active');
+  });
 });
