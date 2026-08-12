@@ -169,16 +169,9 @@ export const routes: Routes = [
   {
     path: 'community/:id/settings',
     loadComponent: () =>
-      import('./pages/_placeholder/_placeholder.page').then(
-        (m) => m.PlaceholderPageComponent,
+      import('./pages/community-settings/community-settings.page').then(
+        (m) => m.CommunitySettingsPageComponent,
       ),
-    data: {
-      title: 'Community Settings',
-      subtitle:
-        'Community-level configuration: name, focus, region, voting weights. Community-Governed Parameters are managed via Governance, not here.',
-      iconName: 'settings',
-      packName: 'community-settings-pack',
-    },
   },
   {
     path: 'members/:name',

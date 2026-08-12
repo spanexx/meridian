@@ -24,6 +24,7 @@ import { TestBed } from '@angular/core/testing';
 import { UiIconComponent } from './icon.component';
 
 const SUPPORTED_NAMES = [
+  'arrow-left',
   'arrow-right',
   'arrow-down-to-line',
   'alert-triangle',
@@ -46,6 +47,7 @@ const SUPPORTED_NAMES = [
   'more-horizontal',
   'percent',
   'pie-chart',
+  'save',
   'send',
   'shield',
   'sparkles',
@@ -62,6 +64,7 @@ const SUPPORTED_NAMES = [
   'diamond',
   'filter',
   'layout-dashboard',
+  'lock',
   'lightbulb',
   'log-out',
   'menu',
