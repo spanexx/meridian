@@ -176,6 +176,48 @@ describe('ShellComponent', () => {
     }
   });
 
+  // ─── official logo mark (PR #22) ─────────────────────────────────────
+  it('renders the official mark (ui-logo) in the sidebar brand link', async () => {
+    const fixture = await renderShell();
+    const root = fixture.nativeElement as HTMLElement;
+    const sidebarLink = Array.from(root.querySelectorAll('aside.sidebar a')).find(
+      (a) => a.getAttribute('href') === '/',
+    );
+    expect(sidebarLink).toBeTruthy();
+    const logo = sidebarLink?.querySelector('ui-logo svg');
+    expect(logo).toBeTruthy();
+    // The official mark: ring circle (direct child of svg) + one arc path
+    const svg = logo as SVGElement;
+    expect(svg.querySelectorAll(':scope > circle').length).toBe(1);
+    expect(svg.querySelectorAll(':scope > g path').length).toBe(1);
+  });
+
+  it('renders the official mark (ui-logo) in the mobile-bar brand link', async () => {
+    const fixture = await renderShell();
+    const root = fixture.nativeElement as HTMLElement;
+    const mobileLink = Array.from(root.querySelectorAll('.mobile-bar a')).find(
+      (a) => a.getAttribute('href') === '/',
+    );
+    expect(mobileLink).toBeTruthy();
+    expect(mobileLink?.querySelector('ui-logo svg')).toBeTruthy();
+  });
+
+  it('renders the MERIDIAN wordmark with wide letter-spacing', async () => {
+    const fixture = await renderShell();
+    const root = fixture.nativeElement as HTMLElement;
+    const sidebarLink = Array.from(root.querySelectorAll('aside.sidebar a')).find(
+      (a) => a.getAttribute('href') === '/',
+    );
+    const wordmark = Array.from(sidebarLink?.querySelectorAll('div, span') ?? []).find(
+      (el) => el.textContent?.trim() === 'MERIDIAN',
+    );
+    expect(wordmark).toBeTruthy();
+    // 0.55em wide tracking per the official logo SVG (letter-spacing="0.55em")
+    const cls = wordmark?.getAttribute('class') ?? '';
+    expect(cls).toMatch(/tracking-\[0\.55em\]/);
+    expect(cls).toContain('brand-wordmark');
+  });
+
   it('the cog button links to /settings', async () => {
     const fixture = await renderShell();
     const root = fixture.nativeElement as HTMLElement;

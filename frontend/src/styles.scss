@@ -8,4 +8,10 @@
     margin: 0;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   }
+
+  /* Official brand wordmark typography (per the official logo SVG:
+     Montserrat 300, wide tracking). Used by the shell brand mark. */
+  .brand-wordmark {
+    font-family: 'Montserrat', 'Futura', 'Helvetica Neue', sans-serif;
+  }
 }

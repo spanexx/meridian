@@ -32,6 +32,7 @@ import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UiIconComponent } from '../ui/icon/icon.component';
+import { UiLogoComponent } from '../ui/logo/ui-logo.component';
 
 /**
  * The navigation map mirrors wireframe/meridian/kit/app.js NAV.
@@ -59,7 +60,7 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
 @Component({
   selector: 'ui-shell',
   standalone: true,
-  imports: [RouterLink, UiIconComponent],
+  imports: [RouterLink, UiIconComponent, UiLogoComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="app-shell" data-testid="shell">
@@ -69,10 +70,8 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
           <ui-icon name="menu"></ui-icon>
         </button>
         <a routerLink="/" class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-md flex items-center justify-center" style="background: var(--gradient-violet);">
-            <ui-icon name="diamond" class="text-white" [size]="14"></ui-icon>
-          </div>
-          <span class="text-sm font-semibold tracking-tight">MERIDIAN</span>
+          <ui-logo [size]="26" ariaLabel="Meridian — go to dashboard"></ui-logo>
+          <span class="brand-wordmark text-sm font-light tracking-[0.55em]">MERIDIAN</span>
         </a>
         <button type="button" class="icon-btn" data-theme-toggle aria-label="Toggle theme" (click)="toggleTheme()">
           <ui-icon name="sun"></ui-icon>
@@ -94,11 +93,9 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
         data-testid="sidebar"
       >
         <a routerLink="/" class="flex items-center gap-2.5 mb-2 px-2">
-          <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--gradient-violet);">
-            <ui-icon name="diamond" class="text-white" [size]="16"></ui-icon>
-          </div>
+          <ui-logo [size]="30" ariaLabel="Meridian — go to dashboard"></ui-logo>
           <div>
-            <div class="text-sm font-semibold tracking-tight">MERIDIAN</div>
+            <div class="brand-wordmark text-sm font-light tracking-[0.55em]">MERIDIAN</div>
             <div class="text-[10px] uppercase tracking-widest text-slate-500">Collective Arbitrage</div>
           </div>
         </a>
