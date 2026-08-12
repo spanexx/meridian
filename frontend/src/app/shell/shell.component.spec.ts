@@ -227,7 +227,7 @@ describe('ShellComponent', () => {
       (b) => b.querySelector('ui-icon')?.getAttribute('name') === 'cog',
     );
     expect(gear).toBeTruthy();
-    expect(gear?.getAttribute('href')).toBe('/settings');
+    expect(gear?.getAttribute('href')).toBe('/profile');
   });
 });
 

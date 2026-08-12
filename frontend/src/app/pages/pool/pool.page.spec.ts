@@ -201,13 +201,13 @@ describe('PoolPageComponent', () => {
     expect(headers).toContain('Share');
   });
 
-  it('renders the "All members" link to /members', async () => {
+  it('renders the "All members" link to /community/alpha/members', async () => {
     const fixture = await renderPool();
     const root = fixture.nativeElement as HTMLElement;
     const link = Array.from(root.querySelectorAll('a')).find((a) =>
       a.textContent?.includes('All members'),
     );
-    expect(link?.getAttribute('href')).toBe('/members');
+    expect(link?.getAttribute('href')).toBe('/community/alpha/members');
   });
 
   // ─── modals ────────────────────────────────────────────────────────────
@@ -254,6 +254,14 @@ describe('PoolPageComponent', () => {
     expect(modal?.hidden).toBe(false);
     expect(modal?.textContent).toContain('Request withdrawal');
   });
+
+  it('memberUrl() slugifies member names and produces /members/<slug>', async () => {
+    const f = await renderPool();
+    const c = f.componentInstance as unknown as { memberUrl: (n: string) => string };
+    expect(c.memberUrl('Dana Voss')).toBe('/members/dana-voss');
+    expect(c.memberUrl('Tomás Alves')).toBe('/members/tomas-alves');
+  });
+
 });
 
 describe('CONTRIBUTORS', () => {
@@ -262,4 +270,5 @@ describe('CONTRIBUTORS', () => {
     const shares = CONTRIBUTORS.map((c) => c.share);
     expect(shares).toEqual([20.0, 13.9, 10.0, 6.8, 5.5]);
   });
+
 });

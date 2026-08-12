@@ -394,15 +394,22 @@ def check_link_targets(files: list[Path]) -> int:
 
     def route_matches(href: str) -> bool:
         """Return True if href matches any registered route (with :foo
-        segments treated as wildcards)."""
+        segments treated as wildcards).
+
+        v2 fix (2026-08-12): strip the leading "/" from href before
+        splitting, otherwise "/opportunities".split("/") yields
+        ["", "opportunities"] (length 2) which never matches the
+        registered "opportunities" (length 1). Bare routerLink strings
+        (routerLink="/opportunities") feed hrefs starting with "/";
+        array form ([routerLink]="['/opportunities']") also feeds them.
+        """
+        href_norm = href.lstrip("/").rstrip("/")
         for r in KNOWN_ROUTES:
-            if href == r:
+            r_norm = r.lstrip("/").rstrip("/")
+            if href_norm == r_norm:
                 return True
-        href = href.rstrip("/")
-        for r in KNOWN_ROUTES:
-            r_norm = r.rstrip("/")
             rhs_parts = r_norm.split("/")
-            lhs_parts = href.split("/")
+            lhs_parts = href_norm.split("/")
             if len(rhs_parts) != len(lhs_parts):
                 continue
             ok_match = True
@@ -429,8 +436,12 @@ def check_link_targets(files: list[Path]) -> int:
     #   <a href="...">          (bare href)
     # Pattern: <a ... [routerLink] or href  =  "  ...stuff...  "
     # The inner can contain single OR double quotes but not both.
+    # Match the THREE routerLink forms Angular allows, plus bare `href`:
+    #   <a [routerLink]="...">          outer double or single quote
+    #   <a routerLink="/path">           bare routerLink (no brackets — valid Angular syntax)
+    #   <a href="/path">                 plain href (catch residual ones)
     HREF_RE = re.compile(
-        r"<a\b[^>]*?(?:\[routerLink\]|[\[]routerLink[\]]|href)"
+        r"<a\b[^>]*?(?:\[routerLink\]|[\[]routerLink[\]]|routerLink|href)"
         r"\s*=\s*"
         r"(?:\"([^\"]*)\"|'([^']*)')"
     )
@@ -446,6 +457,13 @@ def check_link_targets(files: list[Path]) -> int:
             url = normalize_url(raw)
             if not url:
                 continue
+            # Skip array-form bindings ([routerLink]="[expr, ...]" or
+            # [routerLink]="['/literal', ...]"). We can't statically
+            # resolve the bound expression; string-form links (the
+            # audit's main target) are caught by the regex.
+            if url.startswith("[") and url.endswith("]"):
+                continue
+            # Skip Angular's built-in routerLink keywords.
             if url.startswith(("http://", "https://", "mailto:", "//", "#")):
                 continue
             if "#" in url:

@@ -13,7 +13,7 @@
   <div class="flex items-center gap-2 text-xs text-slate-500 mb-4" data-testid="community-settings-breadcrumb">
     <a [routerLink]="['/communities']" class="hover:text-slate-300">Communities</a>
     <ui-icon name="chevron-right" [size]="12" class="w-3 h-3 flex-shrink-0"></ui-icon>
-    <a [routerLink]="['/community', community?.ref]" class="hover:text-slate-300">{{ community?.name }}</a>
+    <a [routerLink]="['/community-detail', community?.ref]" class="hover:text-slate-300">{{ community?.name }}</a>
     <ui-icon name="chevron-right" [size]="12" class="w-3 h-3 flex-shrink-0"></ui-icon>
     <span class="text-slate-300">Settings</span>
   </div>
@@ -31,7 +31,7 @@
       <p class="page-subtitle">Configure {{ community?.name }}. Governance parameters change through a Governance Vote — never unilaterally.</p>
     </div>
     <div class="flex items-center gap-2">
-      <a [routerLink]="['/community', community?.ref]" class="btn btn-ghost">
+      <a [routerLink]="['/community-detail', community?.ref]" class="btn btn-ghost">
         <ui-icon name="arrow-left" class="w-4 h-4"></ui-icon>
         Back to community
       </a>

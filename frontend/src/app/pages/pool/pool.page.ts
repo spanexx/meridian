@@ -318,7 +318,7 @@ function smoothPath(points: number[]): string {
       <section class="card p-6 lg:col-span-2">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-base font-semibold">Top Capital Contributors</h2>
-          <a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" routerLink="/members">
+          <a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" routerLink="/community/alpha/members">
             All members<ui-icon name="arrow-right" [size]="12"></ui-icon>
           </a>
         </div>
@@ -338,7 +338,7 @@ function smoothPath(points: number[]): string {
               @for (c of CONTRIBUTORS; track c.name) {
                 <tr class="table-row">
                   <td>
-                    <a class="flex items-center gap-2" routerLink="/members">
+                    <a class="flex items-center gap-2" [routerLink]="[memberUrl(c.name)]">
                       <div class="avatar" style="background: var(--gradient-violet);">{{ c.initials }}</div>
                       <span class="text-sm truncate min-w-0">{{ c.name }}</span>
                     </a>
@@ -391,4 +391,19 @@ export class PoolPageComponent {
       build('reserve', 'reserve', '#f59e0b'),
     ];
   }
+
+  /**
+   * Slug-ify a member name for the /members/:name URL.
+   * Mirrors the helper in community-members.page.ts so the links match.
+   */
+  memberUrl(name: string): string {
+    const slug = name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+    return `/members/${slug}`;
+  }
+
 }
