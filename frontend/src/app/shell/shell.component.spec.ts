@@ -239,7 +239,9 @@ describe('ANGULAR_NAV_ITEMS', () => {
     expect(labels).toContain('Executions');
     expect(labels).toContain('Capital Pool');
     expect(labels).toContain('Communities');
-    expect(labels).toContain('Members');
+    expect(labels).toContain('Communities');
+    // Members is no longer in the sidebar — members belong to a community
+    expect(labels).not.toContain('Members');
     expect(labels).toContain('Governance');
     expect(labels).toContain('Payouts');
     // Per PR #20 these live in the bottom-row icons instead:

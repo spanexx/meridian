@@ -1,0 +1,276 @@
+<!--
+  CommunitiesPageComponent template.
+
+  @owner   spanexx
+  @reviewed 2026-08-12
+-->
+<section class="page">
+  <!-- header -->
+  <header class="mb-8">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h1 class="page-title text-2xl sm:text-3xl">Communities</h1>
+        <p class="page-subtitle max-w-2xl mt-2 text-sm leading-relaxed">
+          Member-owned arbitrage collectives. v1 runs one community; the governance model supports multiple.
+        </p>
+      </div>
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <input
+          class="input w-full sm:w-56"
+          data-search
+          placeholder="Search communities…"
+          type="search"
+        />
+        <button class="btn btn-secondary" data-dropdown="statusMenu" type="button">
+          <ui-icon name="filter"></ui-icon>
+          <span>Status</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- status dropdown (hidden by default) -->
+  <div class="menu" id="statusMenu" hidden>
+    <div class="menu-head">Status</div>
+    <button class="menu-item active" data-filter-category="all" type="button">
+      <ui-icon name="layout-grid"></ui-icon>
+      <span>All communities</span>
+    </button>
+    <button class="menu-item" data-filter-category="active" type="button">
+      <span class="badge badge-success text-[10px]">Active</span>
+      <span>Operating</span>
+    </button>
+    <button class="menu-item" data-filter-category="proposed" type="button">
+      <span class="badge badge-warning text-[10px]">Proposed</span>
+      <span>In voting</span>
+    </button>
+    <button class="menu-item" data-filter-category="archived" type="button">
+      <span class="badge badge-neutral text-[10px]">Archived</span>
+      <span>Closed</span>
+    </button>
+  </div>
+
+  <!-- status tabs row -->
+  <div class="tabs mb-6" data-filter-tabs role="tablist">
+    <button
+      class="tab"
+      [class.active]="activeTab() === 'all'"
+      data-filter-tab="all"
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'all'"
+      (click)="setTab('all')"
+    >
+      All <span class="text-slate-500">{{ statusCount('all') }}</span>
+    </button>
+    <button
+      class="tab"
+      [class.active]="activeTab() === 'active'"
+      data-filter-tab="active"
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'active'"
+      (click)="setTab('active')"
+    >
+      Active <span class="text-slate-500">{{ statusCount('active') }}</span>
+    </button>
+    <button
+      class="tab"
+      [class.active]="activeTab() === 'proposed'"
+      data-filter-tab="proposed"
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'proposed'"
+      (click)="setTab('proposed')"
+    >
+      Proposed <span class="text-slate-500">{{ statusCount('proposed') }}</span>
+    </button>
+    <button
+      class="tab"
+      [class.active]="activeTab() === 'archived'"
+      data-filter-tab="archived"
+      type="button"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'archived'"
+      (click)="setTab('archived')"
+    >
+      Archived <span class="text-slate-500">{{ statusCount('archived') }}</span>
+    </button>
+  </div>
+
+  <!-- table card -->
+  <div data-list data-page-size="6">
+    <section class="card p-0 overflow-hidden" data-list-body>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Community</th>
+              <th class="hidden md:table-cell">Status</th>
+              <th>Pool</th>
+              <th class="hidden sm:table-cell">Members</th>
+              <th class="hidden md:table-cell">ROI</th>
+              <th class="hidden lg:table-cell">Executions</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of filteredRows(); track row.ref) {
+              <tr class="table-row" [attr.data-status]="row.status" [attr.data-filterable]="true">
+                <td>
+                  <a
+                    [routerLink]="['/communities', row.ref]"
+                    class="flex items-center gap-3"
+                    [attr.data-row-link]="row.ref"
+                  >
+                    <div
+                      class="w-10 h-10 rounded-lg flex items-center justify-center"
+                      [style.background]="gradientVar(row.avatarGradient)"
+                    >
+                      <ui-icon [name]="row.iconName" class="text-white"></ui-icon>
+                    </div>
+                    <div>
+                      <div class="text-sm font-medium">{{ row.name }}</div>
+                      <div class="text-xs text-slate-500">{{ row.focus }} · {{ row.scope }}</div>
+                    </div>
+                  </a>
+                </td>
+                <td class="hidden md:table-cell">
+                  <span class="badge" [class]="
+                    row.status === 'active' ? 'badge-success' :
+                    row.status === 'proposed' ? 'badge-warning' :
+                    'badge-neutral'
+                  ">
+                    {{
+                      row.status === 'active' ? 'Active' :
+                      row.status === 'proposed' ? 'Proposed' :
+                      'Archived'
+                    }}
+                  </span>
+                </td>
+                <td>
+                  <span
+                    class="text-sm font-semibold"
+                    [class.text-gradient-emerald]="isPoolLive(row)"
+                    [class.text-slate-400]="!isPoolLive(row)"
+                  >{{ row.poolLabel }}</span>
+                </td>
+                <td class="hidden sm:table-cell"><span class="text-sm">{{ row.memberCount }}</span></td>
+                <td class="hidden md:table-cell">
+                  <span
+                    class="text-sm"
+                    [class.text-emerald-400]="row.roiIsPositive === true"
+                    [class.text-xs]="row.roiIsPositive === null"
+                    [class.text-slate-500]="row.roiIsPositive === null"
+                  >{{ row.roiLabel }}</span>
+                </td>
+                <td class="hidden lg:table-cell">
+                  <span
+                    class="text-xs"
+                    [class.text-slate-400]="isExecutionLive(row)"
+                    [class.text-slate-500]="!isExecutionLive(row)"
+                  >{{ row.executionCount }}</span>
+                </td>
+                <td>
+                  <a [routerLink]="['/communities', row.ref]" aria-label="Open community">
+                    <ui-icon name="arrow-right" class="w-4 h-4 text-slate-500"></ui-icon>
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- empty state (hidden by default since 3 rows present) -->
+      <div class="empty" data-empty hidden>
+        <ui-icon name="users" class="w-8 h-8 mx-auto"></ui-icon>
+        <p class="text-sm mt-2">No communities found</p>
+      </div>
+
+      <!-- pagination -->
+      <div class="flex items-center justify-between px-5 py-4 border-t" style="border-color: var(--border-subtle);">
+        <div class="text-xs text-slate-500">
+          Showing <span data-page-num>{{ paginationRange() }}</span> of {{ totalCount() }} communities
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="btn btn-ghost" data-page-prev type="button" disabled>
+            <ui-icon name="chevron-left" class="w-4 h-4"></ui-icon>
+          </button>
+          <button class="btn btn-ghost" data-page-next type="button" disabled>
+            <ui-icon name="chevron-right" class="w-4 h-4"></ui-icon>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- bottom row -->
+  <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <p class="text-xs text-slate-500">
+      v1 limitation: Only one active community. The governance model supports multiple communities for future expansion.
+    </p>
+    <button
+      class="btn btn-secondary"
+      type="button"
+      data-modal-open="createCommunityModal"
+      (click)="openCreateModal()"
+    >
+      <ui-icon name="plus"></ui-icon>
+      <span>Propose community</span>
+    </button>
+  </div>
+</section>
+
+<!-- create-community modal (hidden by default) -->
+<div class="modal-overlay" id="createCommunityModal" [hidden]="!createModalOpen()">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div>
+        <h2 class="modal-title">Propose a new community</h2>
+        <p class="text-xs text-slate-500 mt-1">Any member may propose. Requires community vote for approval.</p>
+      </div>
+      <button class="icon-btn" type="button" (click)="closeCreateModal()" aria-label="Close">
+        <ui-icon name="x" class="w-4 h-4"></ui-icon>
+      </button>
+    </div>
+    <form class="space-y-4" data-auth-form data-success="Community proposal submitted for voting">
+      <div>
+        <label>Community name</label>
+        <input type="text" class="input" placeholder="e.g., Tech Arbitrage Collective" required />
+      </div>
+      <div>
+        <label>Focus area</label>
+        <select class="input">
+          <option>General arbitrage</option>
+          <option>Electronics</option>
+          <option>Collectibles</option>
+          <option>Fashion</option>
+          <option>Regional focus</option>
+        </select>
+      </div>
+      <div>
+        <label>Geographic scope</label>
+        <select class="input">
+          <option>Global</option>
+          <option>North America</option>
+          <option>Europe</option>
+          <option>Asia-Pacific</option>
+          <option>Specific region</option>
+        </select>
+      </div>
+      <div>
+        <label>Description</label>
+        <textarea class="input" rows="3" placeholder="Explain the community's purpose and focus..."></textarea>
+      </div>
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="terms" required />
+        <label for="terms" style="margin-bottom: 0;" class="text-xs">I agree to the community formation terms</label>
+      </div>
+      <button type="submit" class="btn btn-primary w-full justify-center">
+        <ui-icon name="send" class="w-4 h-4"></ui-icon>
+        <span>Submit proposal</span>
+      </button>
+    </form>
+  </div>
+</div>

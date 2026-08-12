@@ -42,6 +42,13 @@ export const routes: Routes = [
       import('./pages/pool/pool.page').then((m) => m.PoolPageComponent),
   },
   {
+    path: 'communities',
+    loadComponent: () =>
+      import('./pages/communities/communities.page').then(
+        (m) => m.CommunitiesPageComponent,
+      ),
+  },
+  {
     path: 'executions/:id',
     loadComponent: () =>
       import('./pages/execution-detail/execution-detail.page').then(
