@@ -164,12 +164,12 @@ describe('CommunityMembersPageComponent', () => {
     const f = await renderPage();
     const rows = (f.nativeElement as HTMLElement).querySelectorAll('[data-testid="member-row"]');
     for (const row of Array.from(rows)) {
-      const link = row.querySelector('a[href^="/members/"]') as HTMLAnchorElement;
+      const link = row.querySelector('a[href^="/community/"]') as HTMLAnchorElement;
       expect(link).toBeTruthy();
       const href = link.getAttribute('href')!;
-      expect(href.startsWith('/members/')).toBe(true);
-      // Slug should be the lowercased name
-      expect(href).toMatch(/^\/members\/[a-z][a-z0-9-]+$/);
+      // Member URLs are now community-scoped: /community/:id/members/:memberId
+      expect(href.startsWith('/community/')).toBe(true);
+      expect(href).toMatch(/^\/community\/[a-z][a-z0-9-]+\/members\/[a-z][a-z0-9-]+$/);
     }
   });
 
@@ -346,10 +346,10 @@ describe('CommunityMembersPageComponent', () => {
     expect(c.slugForName('Yuki Nakamura')).toBe('yuki-nakamura');
   });
 
-  it('memberUrl() builds /members/<slug>', async () => {
+  it('memberUrl() builds the community-scoped /community/<id>/members/<slug> URL', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { memberUrl: (n: string) => string };
-    expect(c.memberUrl('Dana Voss')).toBe('/members/dana-voss');
+    const c = f.componentInstance as unknown as { memberUrl: (name: string) => string };
+    expect(c.memberUrl('Dana Voss')).toBe('/community/alpha/members/dana-voss');
   });
 
   it('contributionText() returns the preformatted string', async () => {
@@ -609,6 +609,23 @@ describe('CommunityMembersPageComponent', () => {
     c.closeAllMenus();
     expect(c.tierMenuOpen).toBe(false);
     expect(c.roleMenuOpen).toBe(false);
+  });
+
+  it('activeRoleLabel() returns the display label for the current role', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as { activeRoleLabel: () => string };
+    // Default role is 'all'
+    expect(c.activeRoleLabel()).toBe('All');
+  });
+
+  it('activeRoleCount() returns the total count for the default "all" role', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as {
+      activeRoleCount: () => number;
+      counts: { total: number };
+    };
+    // Default _activeRole is 'all' → returns counts.total
+    expect(c.activeRoleCount()).toBe(c.counts.total);
   });
 
 });

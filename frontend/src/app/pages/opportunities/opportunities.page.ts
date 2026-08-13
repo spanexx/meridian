@@ -180,7 +180,7 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
                     <span class="badge badge-neutral">{{ categoryLabel(opp.category) }}</span>
                   </td>
                   <td class="hidden lg:table-cell">
-                    <a [routerLink]="['/members', opp.submitter.name]" class="flex items-center gap-2">
+                    <a [routerLink]="['/community', 'alpha', 'members', opp.submitter.name]" class="flex items-center gap-2">
                       <div class="avatar" [style.background]="opp.submitter.gradient">{{ opp.submitter.initials }}</div>
                       <span class="text-xs truncate min-w-0">{{ opp.submitter.name }}</span>
                     </a>

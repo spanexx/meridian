@@ -173,8 +173,13 @@ export class CommunityMembersPageComponent {
   }
 
   /** The URL each row links to. */
+  /**
+   * URL to a single member's public profile, scoped to the current
+   * community. Matches the route in app.routes.ts:
+   *   /community/:id/members/:memberId
+   */
   memberUrl(name: string): string {
-    return `/members/${this.slugForName(name)}`;
+    return `/community/${this.id}/members/${this.slugForName(name)}`;
   }
 
   /**

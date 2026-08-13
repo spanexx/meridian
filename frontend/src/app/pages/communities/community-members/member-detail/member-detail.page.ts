@@ -23,13 +23,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
   computed,
+  input,
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DecimalPipe, TitleCasePipe } from '@angular/common';
-import { UiIconComponent } from '../../ui/icon/icon.component';
+import { UiIconComponent } from '../../../../ui/icon/icon.component';
 
 interface Member {
   readonly name: string;
@@ -83,7 +83,10 @@ interface Member {
 })
 export class MemberDetailPageComponent {
   /** Route :name param — wires the page to whatever member was requested. */
-  @Input() id: string = 'dana-voss';
+  /** Community ref bound from route param `:id`. Defaults to 'alpha'. */
+  readonly id = input<string>('alpha');
+  /** Member slug bound from route param `:memberId`. Defaults to 'dana-voss'. */
+  readonly memberId = input<string>('dana-voss');
 
   // ─── Dataset (1 row per member slug; production would hit a service) ────
   private readonly members: readonly Member[] = [
@@ -143,8 +146,19 @@ export class MemberDetailPageComponent {
 
   /** Active member object — fallback if slug doesn't match. */
   readonly member = computed<Member>(() => {
-    const slug = this.id;
+    const slug = this.memberId();
     return this.members.find((m) => m.ref === slug) ?? { ...this.fallback, ref: slug };
+  });
+
+  /**
+   * Community display name keyed by the route-bound community ref.
+   * Production: read from a service. For now, the mock dataset only
+   * supports 'alpha' (MERIDIAN Alpha Syndicate).
+   */
+  readonly communityName = computed<string>(() => {
+    const ref = this.id();
+    if (ref === 'alpha') return 'Alpha Syndicate';
+    return ref;
   });
 
   /** Hero gradient for the avatar (mirrors the wireframe's violet). */
@@ -164,9 +178,9 @@ export class MemberDetailPageComponent {
     return this._following();
   }
 
-  /** Stable share URL for the profile. */
+  /** Stable share URL for the profile (community-scoped). */
   shareUrl(): string {
-    return `https://meridian.example/members/${this.id}`;
+    return `https://meridian.example/community/${this.id()}/members/${this.memberId()}`;
   }
 
   /** Initials helper for arbitrary names (also exposed for testing). */

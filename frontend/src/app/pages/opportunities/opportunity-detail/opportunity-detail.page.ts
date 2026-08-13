@@ -297,7 +297,7 @@ type UserVote = 'approve' | 'reject' | null;
         <!-- Submitter -->
         <section class="card p-6">
           <h2 class="text-base font-semibold mb-4">Submitter</h2>
-          <a routerLink="/members/mike-rivera" class="flex items-center gap-3 mb-4">
+          <a routerLink="/community/alpha/members/mike-rivera" class="flex items-center gap-3 mb-4">
             <div class="avatar" style="width: 2.5rem; height: 2.5rem; background: var(--gradient-amber);">MR</div>
             <div>
               <div class="text-sm font-medium" style="color: var(--text-1);">Mike Rivera</div>

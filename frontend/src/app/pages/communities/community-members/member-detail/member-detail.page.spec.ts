@@ -25,9 +25,10 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { MemberDetailPageComponent } from './member-detail.page';
 
-async function renderPage(initialId: string = 'dana-voss') {
+async function renderPage(communityId: string = 'alpha', memberId: string = 'dana-voss') {
   const f = TestBed.createComponent(MemberDetailPageComponent);
-  f.componentRef.setInput('id', initialId);
+  f.componentRef.setInput('id', communityId);
+  f.componentRef.setInput('memberId', memberId);
   f.detectChanges();
   return f;
 }
@@ -41,7 +42,7 @@ describe('MemberDetailPageComponent', () => {
   });
   // ─── Header / hero ─────────────────────────────────────────────────
   it('renders the breadcrumb Members > <name>', async () => {
-    const f = await renderPage('dana-voss');
+    const f = await renderPage('alpha', 'dana-voss');
     const bc = (f.nativeElement as HTMLElement).textContent ?? '';
     expect(bc).toContain('Members');
     expect(bc).toContain('Dana Voss');
@@ -129,9 +130,9 @@ describe('MemberDetailPageComponent', () => {
   });
 
   it('shareUrl() returns https://meridian.example/members/<slug>', async () => {
-    const f = await renderPage('dana-voss');
+    const f = await renderPage('alpha', 'dana-voss');
     const c = f.componentInstance as unknown as { shareUrl: () => string };
-    expect(c.shareUrl()).toBe('https://meridian.example/members/dana-voss');
+    expect(c.shareUrl()).toBe('https://meridian.example/community/alpha/members/dana-voss');
   });
 
   // ─── Reputation (4 sub-cards) ──────────────────────────────────────
@@ -223,7 +224,7 @@ describe('MemberDetailPageComponent', () => {
   });
 
   it('member() returns a fallback "Unknown contributor" for an unknown slug', async () => {
-    const f = await renderPage('nobody-real');
+    const f = await renderPage('alpha', 'nobody-real');
     const c = f.componentInstance as unknown as {
       member: () => { name: string; ref: string };
     };
@@ -232,19 +233,25 @@ describe('MemberDetailPageComponent', () => {
   });
 
   // ─── Routing ───────────────────────────────────────────────────────
-  it('id defaults to "dana-voss" so the page renders before the route binds', async () => {
+  it('id defaults to "alpha" and memberId defaults to "dana-voss" so the page renders before the route binds', async () => {
     const f = TestBed.createComponent(MemberDetailPageComponent);
-    // no setInput call — input stays at the field default
+    // no setInput call — inputs stay at their field defaults
     f.detectChanges();
-    const c = f.componentInstance as unknown as { member: () => { ref: string } };
+    const c = f.componentInstance as unknown as {
+      id: () => string;
+      memberId: () => string;
+      member: () => { ref: string };
+    };
+    expect(c.id()).toBe('alpha');
+    expect(c.memberId()).toBe('dana-voss');
     expect(c.member().ref).toBe('dana-voss');
   });
 
   it('breadcrumb links back to /communities (the members list)', async () => {
-    const f = await renderPage('dana-voss');
+    const f = await renderPage('alpha', 'dana-voss');
     const bcLink = (f.nativeElement as HTMLElement).querySelector('[data-testid="member-breadcrumb"] a');
     expect(bcLink).toBeTruthy();
-    expect(bcLink?.getAttribute('href')).toBe('/communities');
+    expect(bcLink?.getAttribute('href')).toBe('/community-detail/alpha');
   });
 
   // ─── Helpers ─────────────────────────────────────────────────────────
