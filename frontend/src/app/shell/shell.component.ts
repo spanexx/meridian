@@ -35,7 +35,7 @@ import { UiLogoComponent } from '../ui/logo/ui-logo.component';
 
 /**
  * The navigation map mirrors wireframe/meridian/kit/app.js NAV.
- * 7 entries across Platform / Community sections + the Quick Actions
+ * 6 entries across Platform / Community sections + the Quick Actions
  * block (Submit Signal) which is rendered separately.
  *
  * There is no "Account" section: /settings is reached via the bottom-row
@@ -55,7 +55,6 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
   { label: 'Executions',    icon: 'zap',                path: '/executions',    section: 'Platform' },
   { label: 'Capital Pool',  icon: 'banknote',           path: '/pool',          section: 'Platform' },
   { label: 'Communities',   icon: 'users',              path: '/communities',   section: 'Community' },
-  { label: 'Governance',    icon: 'vote',               path: '/community/alpha/governance', section: 'Community' },
   { label: 'Payouts',       icon: 'circle-dollar-sign', path: '/payouts',       section: 'Community' },
 ] as const);
 
