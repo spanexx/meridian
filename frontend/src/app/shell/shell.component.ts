@@ -52,7 +52,7 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
   { label: 'Executions',    icon: 'zap',                path: '/executions',    section: 'Platform' },
   { label: 'Capital Pool',  icon: 'banknote',           path: '/pool',          section: 'Platform' },
   { label: 'Communities',   icon: 'users',              path: '/communities',   section: 'Community' },
-  { label: 'Governance',    icon: 'vote',               path: '/governance',    section: 'Community' },
+  { label: 'Governance',    icon: 'vote',               path: '/community/alpha/governance', section: 'Community' },
   { label: 'Payouts',       icon: 'circle-dollar-sign', path: '/payouts',       section: 'Community' },
   { label: 'Settings',      icon: 'settings',           path: '/settings',      section: 'Account' },
 ] as const);

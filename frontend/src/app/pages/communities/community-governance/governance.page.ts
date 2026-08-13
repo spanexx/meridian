@@ -1,22 +1,33 @@
 /**
- * GovernancePageComponent — community governance (proposals, votes, parameters).
+ * GovernancePageComponent — per-community governance view.
  *
- * Renders per wireframe/meridian/governance/index.html.
- * Sections:
+ * Renders per wireframe/meridian/governance/index.html:
+ *   - breadcrumb: ← {communityName} / Governance
  *   - header: title + Propose change button
  *   - Propose modal (form)
  *   - Active Proposals card (vote tally + Approve/Reject)
  *   - Community-Governed Parameters grid (5 cards)
  *   - Sidebar: Safety Rails + Recent Votes
  *
+ * Bound to the community ref via signal input `id` (route param
+ * :id from /community/:id/governance). Defaults to 'alpha' so
+ * the page renders before the route binds.
+ *
  * @owner   spanexx
- * @reviewed 2026-08-12
+ * @reviewed 2026-08-13
  */
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  inject,
+  input,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UiIconComponent } from '../../ui/icon/icon.component';
-import { UiModalComponent } from '../../ui/modal/modal.component';
+import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { UiModalComponent } from '../../../ui/modal/modal.component';
 
 interface Proposal {
   readonly id: number;
@@ -96,6 +107,19 @@ const RECENT_VOTES: ReadonlyArray<RecentVote> = [
   templateUrl: './governance.template.html',
 })
 export class GovernancePageComponent {
+  /** Community ref bound from route param `:id`. Defaults to 'alpha'. */
+  readonly id = input<string>('alpha');
+
+  /**
+   * Display name for the bound community. v1: only 'alpha' is mapped
+   * to 'Alpha Syndicate'. Production: pull from a service.
+   */
+  readonly communityName = computed<string>(() => {
+    const ref = this.id();
+    if (ref === 'alpha') return 'Alpha Syndicate';
+    return ref;
+  });
+
   private readonly cdr = inject(ChangeDetectorRef);
 
   // Mutable active proposals (vote tally can change via Approve/Reject).

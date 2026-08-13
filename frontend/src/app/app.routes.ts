@@ -97,11 +97,22 @@ export const routes: Routes = [
   // a real component here. The link-audit regression test on
   // community-detail pins the placeholder list.
   {
-    path: 'governance',
+    // Governance is per-community (proposals and parameters only matter
+    // within a single community). Same pattern as /community/:id/members
+    // and /community/:id/settings (PR #45).
+    path: 'community/:id/governance',
     loadComponent: () =>
-      import('./pages/governance/governance.page').then(
+      import('./pages/communities/community-governance/governance.page').then(
         (m) => m.GovernancePageComponent,
       ),
+  },
+  {
+    // Backwards-compat alias: legacy /governance redirects the user to
+    // the default community's governance view. Same pattern as the
+    // community/:id alias (PR #45).
+    path: 'governance',
+    redirectTo: 'community/alpha/governance',
+    pathMatch: 'full',
   },
   {
     path: 'payouts',
