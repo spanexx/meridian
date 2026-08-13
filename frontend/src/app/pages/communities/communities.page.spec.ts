@@ -386,7 +386,7 @@ describe('CommunitiesPageComponent', () => {
     const c = f.componentInstance as unknown as {
       gradientVar: (g: 'violet' | 'amber' | 'blue') => string;
     };
-    expect(c.gradientVar('violet')).toBe('var(--gradient-violet)');
+    expect(c.gradientVar('violet')).toBe('var(--gradient-copper)');
     expect(c.gradientVar('amber')).toBe('var(--gradient-amber)');
     expect(c.gradientVar('blue')).toBe('var(--gradient-blue)');
   });

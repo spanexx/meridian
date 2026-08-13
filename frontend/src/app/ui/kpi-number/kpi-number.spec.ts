@@ -59,7 +59,7 @@ describe('UiKpiCardComponent', () => {
     const fixture = await renderHost({ gradient: '' });
     const number = fixture.nativeElement.querySelector('.kpi-number');
     expect(number.classList.contains('text-gradient-emerald')).toBe(false);
-    expect(number.classList.contains('text-gradient-violet')).toBe(false);
+    expect(number.classList.contains('text-gradient-copper')).toBe(false);
     expect(number.classList.contains('text-gradient-blue')).toBe(false);
   });
 
@@ -69,10 +69,10 @@ describe('UiKpiCardComponent', () => {
     expect(number.classList.contains('text-gradient-emerald')).toBe(true);
   });
 
-  it('applies text-gradient-violet when gradient=violet', async () => {
+  it('applies text-gradient-copper when gradient=violet', async () => {
     const fixture = await renderHost({ gradient: 'violet' });
     const number = fixture.nativeElement.querySelector('.kpi-number');
-    expect(number.classList.contains('text-gradient-violet')).toBe(true);
+    expect(number.classList.contains('text-gradient-copper')).toBe(true);
   });
 
   it('applies text-gradient-blue when gradient=blue', async () => {
@@ -85,5 +85,24 @@ describe('UiKpiCardComponent', () => {
     const fixture = await renderHost();
     const root = fixture.nativeElement;
     expect(root.textContent).toContain('$');
+  });
+
+  // Direct unit test for numberClass — the three "applies text-gradient-X"
+  // tests above cover the rendered DOM, but this pins the mapping at the
+  // method level too (covers the legacy 'violet' → copper alias explicitly).
+  it('numberClass returns the right CSS class for each gradient key', async () => {
+    const fixture = await renderHost();
+    const kpiDebug = fixture.debugElement.query(de =>
+      de.componentInstance instanceof UiKpiCardComponent,
+    );
+    const cmp = kpiDebug.componentInstance as UiKpiCardComponent;
+    cmp.gradient = 'emerald';
+    expect(cmp.numberClass()).toBe('kpi-number text-gradient-emerald');
+    cmp.gradient = 'violet';
+    expect(cmp.numberClass()).toBe('kpi-number text-gradient-copper');
+    cmp.gradient = 'blue';
+    expect(cmp.numberClass()).toBe('kpi-number text-gradient-blue');
+    cmp.gradient = '';
+    expect(cmp.numberClass()).toBe('kpi-number');
   });
 });

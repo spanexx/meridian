@@ -202,7 +202,7 @@ export class ExecutionDetailPageComponent {
       initials: 'AC',
       name: 'Alex Chen',
       role: 'Operator',
-      gradient: 'var(--gradient-violet)',
+      gradient: 'var(--gradient-copper)',
       url: '/profile',
     },
   ];

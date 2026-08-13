@@ -153,7 +153,7 @@ export class ProfilePageComponent {
 
   // ─── Helpers ─────────────────────────────────────────────────────────
   /** Hero gradient for the avatar. */
-  readonly avatarGradient = 'var(--gradient-violet)';
+  readonly avatarGradient = 'var(--gradient-copper)';
 
   /** Per-color CSS var for the reputation score text. */
   reputationColor(color: 'violet' | 'emerald' | 'blue' | 'amber'): string {

@@ -333,7 +333,7 @@ interface OpportunityRow {
           <!-- Your Portfolio -->
           <section class="card p-6">
             <div class="flex items-center gap-3 mb-5">
-              <div class="avatar" style="width: 2.5rem; height: 2.5rem; background: var(--gradient-violet);">AC</div>
+              <div class="avatar" style="width: 2.5rem; height: 2.5rem; background: var(--gradient-copper);">AC</div>
               <div>
                 <div class="text-sm font-semibold">Your Portfolio</div>
                 <div class="text-xs text-slate-500">Alex Chen</div>
@@ -360,7 +360,7 @@ interface OpportunityRow {
                   <div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Signals</div>
                 </a>
                 <a [routerLink]="['/governance']">
-                  <div class="text-lg font-semibold text-gradient-violet">14</div>
+                  <div class="text-lg font-semibold text-gradient-copper">14</div>
                   <div class="text-[10px] uppercase tracking-wider text-slate-500 mt-1">Votes Cast</div>
                 </a>
               </div>

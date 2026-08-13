@@ -105,7 +105,7 @@ const ROWS: ReadonlyArray<CommunityRow> = [
 ];
 
 const GRADIENT_VAR: Readonly<Record<CommunityRow['avatarGradient'], string>> = {
-  violet: 'var(--gradient-violet)',
+  violet: 'var(--gradient-copper)',
   amber: 'var(--gradient-amber)',
   blue: 'var(--gradient-blue)',
 };

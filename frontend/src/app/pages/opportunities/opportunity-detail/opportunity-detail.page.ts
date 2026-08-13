@@ -369,7 +369,7 @@ export class OpportunityDetailPageComponent {
     name: string; initials: string; gradient: string; tier: number; quote: string; choice: 'approve' | 'reject';
   }> = [
     { name: 'Jules Tan',     initials: 'JT', gradient: 'var(--gradient-blue)',   tier: 4, quote: 'Checked StockX — last 30 days sales match ROI. Approval.',  choice: 'approve' },
-    { name: 'Sarah Park',    initials: 'SP', gradient: 'var(--gradient-violet)', tier: 3, quote: 'Boutique verified. Shipping window OK.',                   choice: 'approve' },
+    { name: 'Sarah Park',    initials: 'SP', gradient: 'var(--gradient-copper)', tier: 3, quote: 'Boutique verified. Shipping window OK.',                   choice: 'approve' },
     { name: 'Marcus Rivera', initials: 'MR', gradient: 'var(--gradient-emerald)', tier: 3, quote: 'Boutique reputable. Approve.',                              choice: 'approve' },
     { name: 'Kenji Honda',   initials: 'KH', gradient: 'var(--gradient-amber)',  tier: 2, quote: 'Margin too tight. Boutique markup too high.',               choice: 'reject'  },
   ];

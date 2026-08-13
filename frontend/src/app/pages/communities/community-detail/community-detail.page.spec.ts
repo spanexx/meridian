@@ -214,7 +214,7 @@ describe('CommunityDetailPageComponent', () => {
     const root = f.nativeElement as HTMLElement;
     const k = root.querySelector('[data-testid="kpi-card-roi"]');
     expect(k?.textContent).toContain('+18.4%');
-    expect(k?.querySelector('.text-gradient-violet')).toBeTruthy();
+    expect(k?.querySelector('.text-gradient-copper')).toBeTruthy();
     expect(k?.textContent).toContain('Target: 15%');
     expect(k?.querySelector('svg[data-icon="percent"]')).toBeTruthy();
     expect(k?.querySelector('svg[data-icon="check-circle"]')).toBeTruthy();
@@ -452,7 +452,7 @@ describe('CommunityDetailPageComponent', () => {
   it('gradientAvatar() returns the matching gradient var for the community', async () => {
     const f = await renderPage('alpha');
     const c = f.componentInstance as unknown as { gradientAvatar: () => string };
-    expect(c.gradientAvatar()).toBe('var(--gradient-violet)');
+    expect(c.gradientAvatar()).toBe('var(--gradient-copper)');
   });
 
   it('safetyRails() returns 4 non-empty strings (the wireframe Safety Rails list)', async () => {
