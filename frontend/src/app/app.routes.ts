@@ -134,16 +134,9 @@ export const routes: Routes = [
   {
     path: 'profile',
     loadComponent: () =>
-      import('./pages/_placeholder/_placeholder.page').then(
-        (m) => m.PlaceholderPageComponent,
+      import('./pages/profile/profile.page').then(
+        (m) => m.ProfilePageComponent,
       ),
-    data: {
-      title: 'Profile',
-      subtitle:
-        'Your member profile, reputation tier, capital contribution history, and lifetime earnings.',
-      iconName: 'user',
-      packName: 'profile-pack',
-    },
   },
   {
     path: 'community/:id/settings',
