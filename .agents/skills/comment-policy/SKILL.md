@@ -132,6 +132,46 @@ grepping. Do not delete them when "the issue is fixed"; update the
 comment to mark it resolved (`// DISCOVERY 2026-08-11 ... RESOLVED
 2026-08-15: see <commit>`).
 
+### Pitfall 1 — the pointer must be on the LINE BELOW the tag, not the same line
+
+The pre-commit hook's `check_comment_policy()` validates DISCOVERY /
+MISTAKE / DRIFT tags with this regex (from `scripts/pre-commit.py`):
+
+```python
+TAG_LINE = re.compile(r"^\s*(?://|#|\*)\s*(DISCOVERY|MISTAKE|DRIFT)\s+({TAG_DATE}).*$", re.MULTILINE)
+TAG_POINTER = r"(?:see |refs? )?(?:\S+:\d+|commit [0-9a-f]+|\S+\.\S+)"
+```
+
+The validation searches for the pointer in
+`content[m.end():m.start() + 400]` — that is, **the chars AFTER the
+tag line** (since `m.end()` is at end of the matched tag line). A
+pointer appended to the end of the same line as the tag is INSIDE
+`m.group(0)` and NOT in the search window — the check will fail with
+`DISCOVERY YYYY-MM-DD missing pointer (file:line, commit, or doc ref)`.
+
+Wrong (pointer on the same line — fails the check):
+
+```ts
+// DISCOVERY 2026-08-13: alias for community-detail/:id — see .agents/skills/playwright-cli/SKILL.md.
+```
+
+Right (pointer on the line BELOW):
+
+```ts
+// DISCOVERY 2026-08-13: alias for community-detail/:id.
+// See .agents/skills/playwright-cli/SKILL.md.
+```
+
+The pointer must match one of:
+- `path:line` (e.g. `app.routes.ts:184`)
+- `commit <sha>` (e.g. `commit 7d33c14`)
+- `path.ext` (e.g. `.agents/skills/playwright-cli/SKILL.md`)
+
+Caught this the hard way on 2026-08-13 when PR #45's DISCOVERY
+block was rejected three times before the pointer moved to its own
+line. Reproduce: see PR #45 commit message and the `DISCOVERY` block
+in `frontend/src/app/app.routes.ts`.
+
 ## 4. Files that don't need headers
 
 - Auto-generated files (`*.d.ts`, `package-lock.json`, generated

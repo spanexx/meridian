@@ -418,3 +418,63 @@ playwright-cli show --annotate
 * **Tracing** [references/tracing.md](references/tracing.md)
 * **Video recording** [references/video-recording.md](references/video-recording.md)
 * **Inspecting element attributes** [references/element-attributes.md](references/element-attributes.md)
+
+## Multi-breakpoint verification recipe
+
+When a UI fix involves positioning (dropdowns, modals, popovers, sticky nav, etc.), verify at **the breakpoint you fixed AND the breakpoint you broke**. A fix that works at desktop can push the element off-screen at mobile, and vice versa. The standard set for the MERIDIAN SPA is:
+
+```bash
+# Open at desktop, capture the trigger area
+playwright-cli open http://127.0.0.1:4200/<route>
+playwright-cli resize 1280 800
+# Click the dropdown trigger, screenshot, close
+playwright-cli click <ref>
+playwright-cli screenshot   # → /tmp/x-desktop.png
+
+# Resize to mobile, reload (layout reflows), re-click
+playwright-cli resize 375 800
+playwright-cli reload
+playwright-cli click <ref>
+playwright-cli screenshot   # → /tmp/x-mobile.png
+
+# Then for each screenshot: read the file, verify the element is
+# ENTIRELY within the viewport bounds. A common check is to ask
+# `vision_analyze` "is the dropdown fully visible, not cut off at
+# either edge?"
+```
+
+If the positioning uses a directional Tailwind class (`left-0`,
+`right-0`, `top-0`, `bottom-0`), the responsive version is usually
+`left-0 sm:right-0 sm:left-auto` — at <sm use `left-0`, at sm+
+override with `right-0` and reset `left` to `auto`.
+
+For absolute positioning anchored to a button: the button's wrapper
+needs `inline-block` (or `inline-flex`) so the wrapper shrinks to
+the button's width — otherwise `left-0`/`right-0` anchor to the
+nearest positioned ancestor which may be the whole header row.
+
+## Pitfalls
+
+1. **Don't trust green checks before visual verify.** `npm run test`
+   only runs the component class in a headless TestBed — it never
+   proves a browser can navigate to the page or that the rendered
+   layout matches the source. Always probe with `playwright-cli goto`
+   + `screenshot` before claiming a page works. Use the route probe
+   recipe above to catch silent redirects (e.g. `/community/alpha`
+   silently redirecting to `/` when no bare route was registered —
+   bug found on 2026-08-13).
+2. **Click-away dropdowns need a wrapper marker.** Dropdowns that
+   close on outside click must have a wrapper carrying something
+   like `data-menu-container` (or similar) so the document:click
+   handler can distinguish "click INSIDE the menu (don't close)"
+   from "click OUTSIDE (close)". Bare buttons + a separate
+   `<div class="menu">` won't work — the click bubbles through
+   the menu panel and re-triggers the toggle.
+3. **The click-away handler must run on every dropdown state, not
+   just the open one.** If the document:click handler checks
+   `if (menuOpen) close()`, the menu will only close on the first
+   outside click after open; a second click is silently dropped
+   because the menu is already closed. Pattern: call
+   `closeOnOutsideClick(target)` unconditionally, and the handler
+   itself decides whether to close.
+
