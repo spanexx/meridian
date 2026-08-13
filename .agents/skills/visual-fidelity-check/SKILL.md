@@ -165,3 +165,11 @@ Rule of thumb: every positioning fix MUST be visually verified at
 **both the breakpoint you fixed AND the breakpoint you broke**.
 For dropdowns this is usually 375 (mobile) + 1280 (desktop).
 For navigation it is usually 375 + 768 + 1280.
+
+## 4. Grid breakpoints must respect the sidebar — `sm` is too early when a sidebar is at md+
+
+The shell sidebar is hidden on mobile and slides in at `md` (≥768px), eating ~256px of horizontal space. So at `sm` (640px) the content has ~640px, but at `md` (768px) it shrinks to ~512px. A grid that uses `sm:grid-cols-3` will fit fine at 640px and break at 768-1024px (the "death zone") because the cells are too narrow for the KPI labels.
+
+For multi-column content inside the shell, snap horizontal layouts to `lg:grid-cols-*` (≥1024px), not `sm:grid-cols-*`. Below `lg`, fall back to single-column (stacked). The Meridian hero KPI grid in `pages/member-detail/member-detail.template.html` was fixed by changing `grid-cols-1 sm:grid-cols-3` to `grid-cols-1 lg:grid-cols-3` on 2026-08-13.
+
+Verify at all three breakpoints: 375 (mobile, stacked), 768 (tablet, stacked — death zone), 1280 (desktop, horizontal).

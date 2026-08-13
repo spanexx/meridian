@@ -1,0 +1,162 @@
+<section class="page">
+
+  <!-- breadcrumb -->
+  <nav class="flex items-center gap-2 text-xs text-slate-500 mb-4" data-testid="member-breadcrumb">
+    <a [routerLink]="['/communities']" class="hover:text-slate-300">Members</a>
+    <ui-icon name="chevron-right" class="w-3 h-3"></ui-icon>
+    <span class="text-slate-300">{{ member().name }}</span>
+  </nav>
+
+  <!-- hero -->
+  <section class="glass p-4 sm:p-6 mb-6 relative overflow-hidden">
+    <div class="absolute -top-1/4 right-0 w-96 h-96 rounded-full"
+         style="background: radial-gradient(closest-side, rgba(16,185,129,0.12), transparent 70%);"></div>
+    <div class="relative flex flex-col sm:flex-row sm:items-start gap-6">
+      <div class="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center text-xl sm:text-2xl font-semibold text-white flex-shrink-0"
+           [style.background]="avatarGradient">
+        {{ member().initials }}
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-3 mb-1 flex-wrap">
+          <h1 class="text-xl sm:text-2xl font-semibold tracking-tight">{{ member().name }}</h1>
+          <span class="badge badge-premium">
+            {{ member().role | titlecase }} · {{ member().tier.toUpperCase() }}
+          </span>
+          @if (member().verified) {
+            <span class="badge badge-success">Verified</span>
+          }
+        </div>
+        <div class="text-sm text-slate-400 mb-4">
+          {{ member().location }} · Member since {{ member().memberSince }}
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-4">
+          <div>
+            <div class="text-xs uppercase tracking-wider text-slate-500">Overall</div>
+            <div class="text-xl sm:text-2xl font-light text-gradient-violet">{{ member().overall }}</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase tracking-wider text-slate-500">Capital</div>
+            <div class="text-xl sm:text-2xl font-light">{{ formatUsd(member().capitalDeployed) }}</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase tracking-wider text-slate-500 whitespace-nowrap">Lifetime earned</div>
+            <div class="text-xl sm:text-2xl font-light text-gradient-emerald">+{{ formatUsd(member().lifetimeEarned) }}</div>
+          </div>
+        </div>
+      </div>
+      <button
+        type="button"
+        class="btn btn-primary w-full sm:w-auto justify-center"
+        data-testid="follow-button"
+        attr.data-copy="{{ shareUrl() }}"
+        (click)="follow()">
+        @if (following()) {
+          <ui-icon name="check" class="w-4 h-4"></ui-icon>
+          Following
+        } @else {
+          <ui-icon name="user-plus" class="w-4 h-4"></ui-icon>
+          Follow
+        }
+      </button>
+    </div>
+  </section>
+
+  <!-- reputation + side cards -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Reputation -->
+    <section class="card p-6 lg:col-span-2">
+      <h2 class="text-base font-semibold mb-5">Reputation</h2>
+      <div class="grid grid-cols-2 gap-4">
+        @for (r of member().reputation; track r.key) {
+          <div class="card p-5" data-reputation-card>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center"
+                     [style.background]="reputationTint(r.color)">
+                  <ui-icon [name]="r.icon" class="w-4 h-4" [style.color]="reputationColor(r.color)"></ui-icon>
+                </div>
+                <div>
+                  <div class="text-sm font-medium">{{ r.label }}</div>
+                  <div class="text-[10px] uppercase tracking-wider text-slate-500">{{ r.sub }}</div>
+                </div>
+              </div>
+              <div class="text-2xl font-light" [style.color]="reputationColor(r.color)">{{ r.score }}</div>
+            </div>
+            <div class="progress-track mb-3">
+              <div class="progress-fill"
+                   [class]="'progress-fill-' + r.color"
+                   [style.width.%]="r.score"></div>
+            </div>
+            <div class="text-xs text-slate-500">{{ r.note }}</div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Side cards -->
+    <div class="space-y-6">
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Contribution</h2>
+        <div class="space-y-2 text-xs">
+          @for (c of member().contribution; track c.label) {
+            <div class="flex justify-between">
+              <span class="text-slate-500">{{ c.label }}</span>
+              <span [class.text-violet-300]="c.accent === 'violet'"
+                    [class.text-slate-200]="!c.accent">{{ c.value }}</span>
+            </div>
+          }
+        </div>
+      </section>
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Access Credentials</h2>
+        @for (cred of member().credentials; track cred.name) {
+          <div class="card p-4">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg flex items-center justify-center"
+                   style="background: rgba(96,165,250,0.12);">
+                <ui-icon [name]="cred.icon" class="w-4 h-4 text-blue-400"></ui-icon>
+              </div>
+              <div class="flex-1">
+                <div class="text-sm font-medium">{{ cred.name }}</div>
+                <div class="text-[10px] text-slate-500">{{ cred.status }}</div>
+              </div>
+              <span class="badge" [class]="'badge-' + cred.badge">Active</span>
+            </div>
+          </div>
+        }
+      </section>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <section class="card p-6 mt-6">
+    <h2 class="text-base font-semibold mb-4">Recent Activity</h2>
+    <div class="table-scroll">
+      <table data-testid="recent-activity-table">
+        <thead>
+          <tr>
+            <th class="hidden sm:table-cell">Date</th>
+            <th>Event</th>
+            <th>Result</th>
+            <th class="hidden md:table-cell">Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of member().activity; track a.date + a.event) {
+            <tr class="table-row">
+              <td class="hidden sm:table-cell"><span class="text-xs text-slate-500">{{ a.date }}</span></td>
+              <td><a [routerLink]="[a.link]" class="text-sm">{{ a.event }}</a></td>
+              <td><span class="badge" [class]="'badge-' + a.resultVariant">{{ a.result }}</span></td>
+              <td class="hidden md:table-cell">
+                <span class="text-xs"
+                      [class.text-slate-500]="a.impactVariant === 'neutral'"
+                      [class.text-emerald-400]="a.impactVariant === 'positive'">{{ a.impact }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</section>
