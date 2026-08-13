@@ -44,7 +44,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UiIconComponent } from '../../ui/icon/icon.component';
+import { UiIconComponent } from '../../../ui/icon/icon.component';
 
 interface CommunityData {
   readonly ref: string;

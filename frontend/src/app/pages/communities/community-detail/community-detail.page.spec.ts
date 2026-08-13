@@ -42,7 +42,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { CommunityDetailPageComponent } from './community-detail.page';
-import { UiIconComponent } from '../../ui/icon/icon.component';
+import { UiIconComponent } from '../../../ui/icon/icon.component';
 
 async function renderPage(id?: string) {
   await TestBed.configureTestingModule({

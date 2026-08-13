@@ -16,10 +16,10 @@
 
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UiIconComponent } from '../../ui/icon/icon.component';
-import { UiSwitchComponent } from '../../ui/switch/switch.component';
-import { UiModalComponent } from '../../ui/modal/modal.component';
-import { UiToastComponent } from '../../ui/toast/toast.component';
+import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { UiSwitchComponent } from '../../../ui/switch/switch.component';
+import { UiModalComponent } from '../../../ui/modal/modal.component';
+import { UiToastComponent } from '../../../ui/toast/toast.component';
 
 interface CommunitySettings {
   readonly ref: string;

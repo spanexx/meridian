@@ -22,7 +22,7 @@
 
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UiIconComponent } from '../../ui/icon/icon.component';
+import { UiIconComponent } from '../../../ui/icon/icon.component';
 
 export type Tier = 't1' | 't2' | 't3' | 't4';
 export type Role = 'capital' | 'signal' | 'access';
