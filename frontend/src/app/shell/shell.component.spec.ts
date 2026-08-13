@@ -5,8 +5,10 @@
  * TDD RED: written before implementation. Behavior pins:
  *   1. Renders a .sidebar <aside> with 260px fixed positioning (theme.css).
  *   2. Renders the MERIDIAN brand mark + tagline at the top of the sidebar.
- *   3. Renders nav sections ("Platform", "Community", "Account") with
- *      one nav-item per entry in our ANGULAR_NAV_ITEMS table.
+ *   3. Renders nav sections ("Platform", "Community") with one
+ *      nav-item per entry in our ANGULAR_NAV_ITEMS table.
+ *      (No "Account" section — /settings is reached via the bottom-row
+ *      gear icon, so a sidebar Settings entry would just duplicate it.)
  *   4. Marks the active nav-item based on the route URL passed in as input.
  *   5. Renders the "Quick Actions" section with Submit Signal link.
  *   6. Renders a bottom-row trio (notifications / theme toggle / avatar).
@@ -62,16 +64,18 @@ describe('ShellComponent', () => {
     expect(items.length).toBeGreaterThanOrEqual(ANGULAR_NAV_ITEMS.length);
   });
 
-  it('renders nav-section headings for each section (Platform + Community + Account)', async () => {
+  it('renders nav-section headings for each section (Platform + Community) — no Account', async () => {
     const fixture = await renderShell();
     const sections = fixture.nativeElement.querySelectorAll('.nav-section');
     const labels = Array.from(sections).map((s) => s.textContent?.trim());
     expect(labels).toContain('Platform');
     expect(labels).toContain('Community');
     expect(labels).toContain('Quick Actions');
-    // Settings lives in the Account section (added in PR #53 so the
-    // /settings route is reachable from the sidebar nav).
-    expect(labels).toContain('Account');
+    // /settings is reached via the bottom-row gear icon. An "Account"
+    // nav section that listed Settings would just duplicate that icon,
+    // so it was removed (the gear is already wired to /profile, which
+    // is the user's own private profile page).
+    expect(labels).not.toContain('Account');
   });
 
   it('marks the active nav-item based on current route', async () => {
@@ -232,32 +236,33 @@ describe('ShellComponent', () => {
 });
 
 describe('ANGULAR_NAV_ITEMS', () => {
-  it('contains each wireframe route (Platform + Community + Account/Settings)', () => {
+  it('contains each wireframe route (Platform + Community only)', () => {
     const labels = ANGULAR_NAV_ITEMS.map((i) => i.label);
     expect(labels).toContain('Dashboard');
     expect(labels).toContain('Opportunities');
     expect(labels).toContain('Executions');
     expect(labels).toContain('Capital Pool');
     expect(labels).toContain('Communities');
-    expect(labels).toContain('Communities');
     // Members is no longer in the sidebar — members belong to a community
     expect(labels).not.toContain('Members');
     expect(labels).toContain('Governance');
     expect(labels).toContain('Payouts');
-    // Settings was added back in PR #53 (Account section) so the
-    // /settings route is reachable from the sidebar nav. Notifications
-    // and Your Profile remain in the bottom-row icon buttons.
-    expect(labels).toContain('Settings');
+    // Settings is NOT in the sidebar nav — the bottom-row gear icon
+    // already opens /profile, and the Profile page links into /settings,
+    // so listing Settings in the sidebar would duplicate that entry.
+    expect(labels).not.toContain('Settings');
   });
 
-  it('matches the wireframe NAV ordering (Platform, Community, then Account)', () => {
+  it('only contains Platform + Community sections (no Account)', () => {
     const sections = ANGULAR_NAV_ITEMS.map((i) => i.section);
     // first item is Platform section
     expect(sections[0]).toBe('Platform');
-    // at least one item belongs to each section
+    // every item is Platform or Community — no Account section
+    const allowed = new Set(['Platform', 'Community']);
+    for (const s of sections) {
+      expect(allowed.has(s)).toBe(true);
+    }
     expect(sections).toContain('Platform');
     expect(sections).toContain('Community');
-    // Account section comes after Community (added in PR #53 for Settings).
-    expect(sections.indexOf('Community')).toBeLessThan(sections.indexOf('Account'));
   });
 });

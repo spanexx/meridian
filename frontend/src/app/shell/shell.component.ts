@@ -11,7 +11,6 @@
  *       MERIDIAN brand + tagline
  *       nav-section: Platform
  *       nav-section: Community
- *       nav-section: Account
  *       nav-section: Quick Actions
  *       bottom-row: notifications / theme toggle / avatar menu
  *     main.main
@@ -36,14 +35,18 @@ import { UiLogoComponent } from '../ui/logo/ui-logo.component';
 
 /**
  * The navigation map mirrors wireframe/meridian/kit/app.js NAV.
- * 11 entries across Platform / Community / Account sections + the
- * Quick Actions block (Submit Signal) which is rendered separately.
+ * 7 entries across Platform / Community sections + the Quick Actions
+ * block (Submit Signal) which is rendered separately.
+ *
+ * There is no "Account" section: /settings is reached via the bottom-row
+ * gear icon, and the user's own /profile lives in the bottom-row avatar
+ * link. A sidebar Settings entry would just duplicate the gear.
  */
 export interface NavItem {
   label: string;
   icon: string;
   path: string;
-  section: 'Platform' | 'Community' | 'Account';
+  section: 'Platform' | 'Community';
 }
 
 export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
@@ -54,7 +57,6 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
   { label: 'Communities',   icon: 'users',              path: '/communities',   section: 'Community' },
   { label: 'Governance',    icon: 'vote',               path: '/community/alpha/governance', section: 'Community' },
   { label: 'Payouts',       icon: 'circle-dollar-sign', path: '/payouts',       section: 'Community' },
-  { label: 'Settings',      icon: 'settings',           path: '/settings',      section: 'Account' },
 ] as const);
 
 @Component({
@@ -143,7 +145,7 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
 
           </div>
           <a routerLink="/profile" class="nav-item mt-1">
-            <div class="avatar" style="background: var(--gradient-violet);">AC</div>
+            <div class="avatar" style="background: var(--gradient-copper);">AC</div>
             <div class="flex-1 min-w-0">
               <div class="text-sm truncate" style="color: var(--text-1);">Alex Chen</div>
               <div class="text-[10px] uppercase tracking-wider" style="color: var(--v-300);">Vetter · T3</div>
