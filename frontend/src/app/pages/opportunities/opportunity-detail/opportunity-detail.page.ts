@@ -21,7 +21,7 @@
  */
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UiIconComponent } from '../../ui/icon/icon.component';
+import { UiIconComponent } from '../../../ui/icon/icon.component';
 
 type VettingPanel = 'checks' | 'votes' | 'comments';
 type UserVote = 'approve' | 'reject' | null;
