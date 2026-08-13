@@ -51,14 +51,14 @@ export const routes: Routes = [
   {
     path: 'communities/:id',
     loadComponent: () =>
-      import('./pages/community-detail/community-detail.page').then(
+      import('./pages/communities/community-detail/community-detail.page').then(
         (m) => m.CommunityDetailPageComponent,
       ),
   },
   {
     path: 'community-detail/:id',
     loadComponent: () =>
-      import('./pages/community-detail/community-detail.page').then(
+      import('./pages/communities/community-detail/community-detail.page').then(
         (m) => m.CommunityDetailPageComponent,
       ),
   },
@@ -148,7 +148,7 @@ export const routes: Routes = [
   {
     path: 'community/:id/settings',
     loadComponent: () =>
-      import('./pages/community-settings/community-settings.page').then(
+      import('./pages/communities/community-settings/community-settings.page').then(
         (m) => m.CommunitySettingsPageComponent,
       ),
   },
@@ -156,7 +156,7 @@ export const routes: Routes = [
   {
     path: 'community/:id/members',
     loadComponent: () =>
-      import('./pages/community-members/community-members.page').then(
+      import('./pages/communities/community-members/community-members.page').then(
         (m) => m.CommunityMembersPageComponent,
       ),
   },

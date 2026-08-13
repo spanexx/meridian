@@ -17,7 +17,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { CommunityMembersPageComponent } from './community-members.page';
-import { UiIconComponent } from '../../ui/icon/icon.component';
+import { UiIconComponent } from '../../../ui/icon/icon.component';
 
 async function renderPage() {
   await TestBed.configureTestingModule({
