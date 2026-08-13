@@ -186,15 +186,8 @@ export const routes: Routes = [
   {
     path: 'members/:name',
     loadComponent: () =>
-      import('./pages/_placeholder/_placeholder.page').then(
-        (m) => m.PlaceholderPageComponent,
+      import('./pages/member-detail/member-detail.page').then(
+        (m) => m.MemberDetailPageComponent,
       ),
-    data: {
-      title: 'Member Profile',
-      subtitle:
-        'Individual member profile — reputation tier, capital contributed, signals submitted, lifetime earnings.',
-      iconName: 'user',
-      packName: 'member-detail-pack',
-    },
   },
 ];
