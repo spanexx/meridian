@@ -161,6 +161,29 @@ export const routes: Routes = [
       ),
   },
   {
+    // DISCOVERY 2026-08-13: alias for community-detail/:id.
+    // See .agents/skills/playwright-cli/SKILL.md.
+    // The shell sidebar and several breadcrumb links historically
+    // used /community/<ref>, which had no route registered and
+    // silently redirected to / on miss — users reached a blank
+    // page. Added this alias so both URLs work, matching the
+    // dual-route pattern already used for communities/:id +
+    // community-detail/:id and executions/:id + execution-detail/:id.
+    //
+    // Pointer: .agents/skills/playwright-cli/SKILL.md — the
+    // route probe found /community/alpha redirected to / because
+    // the user typed it without the -detail suffix.
+    //
+    // Order matters: this entry is placed AFTER
+    // /community/:id/{members,settings} so the children still match
+    // their own routes (Angular's first-match-wins).
+    path: 'community/:id',
+    loadComponent: () =>
+      import('./pages/communities/community-detail/community-detail.page').then(
+        (m) => m.CommunityDetailPageComponent,
+      ),
+  },
+  {
     path: 'members/:name',
     loadComponent: () =>
       import('./pages/_placeholder/_placeholder.page').then(
