@@ -139,6 +139,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'settings',
+    loadComponent: () =>
+      import('./pages/settings/settings.page').then(
+        (m) => m.SettingsPageComponent,
+      ),
+  },
+  {
     path: 'community/:id/settings',
     loadComponent: () =>
       import('./pages/communities/community-settings/community-settings.page').then(
