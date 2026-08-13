@@ -65,28 +65,28 @@ export const routes: Routes = [
   {
     path: 'executions/:id',
     loadComponent: () =>
-      import('./pages/execution-detail/execution-detail.page').then(
+      import('./pages/executions/execution-detail/execution-detail.page').then(
         (m) => m.ExecutionDetailPageComponent,
       ),
   },
   {
     path: 'execution-detail/:id',
     loadComponent: () =>
-      import('./pages/execution-detail/execution-detail.page').then(
+      import('./pages/executions/execution-detail/execution-detail.page').then(
         (m) => m.ExecutionDetailPageComponent,
       ),
   },
   {
     path: 'opportunities/:id',
     loadComponent: () =>
-      import('./pages/opportunity-detail/opportunity-detail.page').then(
+      import('./pages/opportunities/opportunity-detail/opportunity-detail.page').then(
         (m) => m.OpportunityDetailPageComponent,
       ),
   },
   {
     path: 'opportunity-detail/:id',
     loadComponent: () =>
-      import('./pages/opportunity-detail/opportunity-detail.page').then(
+      import('./pages/opportunities/opportunity-detail/opportunity-detail.page').then(
         (m) => m.OpportunityDetailPageComponent,
       ),
   },
