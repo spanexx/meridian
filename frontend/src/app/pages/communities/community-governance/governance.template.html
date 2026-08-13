@@ -2,9 +2,16 @@
   GovernancePageComponent template (wireframe/meridian/governance/index.html).
 
   @owner   spanexx
-  @reviewed 2026-08-12
+  @reviewed 2026-08-13
 -->
 <section class="page">
+
+  <!-- breadcrumb — community-scoped (back-link / Governance) -->
+  <nav class="breadcrumb text-xs text-slate-500 mb-4" data-testid="governance-breadcrumb">
+    <a [routerLink]="['/community-detail', id()]" class="hover:text-slate-300">← {{ communityName() }}</a>
+    <span class="mx-2">/</span>
+    <span class="text-slate-300">Governance</span>
+  </nav>
 
   <!-- header -->
   <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">

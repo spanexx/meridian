@@ -1,27 +1,36 @@
 /**
- * RED spec — GovernancePageComponent (wireframe/meridian/governance/index.html).
+ * GovernancePageComponent — per-community governance view.
  *
- * Sections (v1 scope):
+ * Renders per wireframe/meridian/governance/index.html:
+ *   - breadcrumb: ← {communityName} / Governance (matches the
+ *     community-members / community-settings breadcrumb pattern)
  *   - header: page title "Governance" + subtitle + Propose change button
  *   - Propose modal (Parameter select, proposed value, rationale, info banner, cancel/submit)
  *   - Active Proposals card (2 proposals with approve/reject tally + Approve/Reject buttons)
  *   - Community-Governed Parameters grid (5 cards: ROI floor, Win-rate target, Reserve target, Single-execution cap, Distribution shares with link to /payouts)
  *   - Sidebar: Safety Rails (5 read-only items) + Recent Votes (4 history rows)
  *
+ * Route: /community/:id/governance — proposals and parameters belong
+ * to a community, not to the platform. The :id input binds to the
+ * community ref and defaults to 'alpha' so the page renders before
+ * the route binds. The legacy /governance route stays as an alias
+ * pointing to /community/alpha/governance (same pattern as PR #45).
+ *
  * @owner   spanexx
- * @reviewed 2026-08-12
+ * @reviewed 2026-08-13
  */
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { GovernancePageComponent } from './governance.page';
-import { UiIconComponent } from '../../ui/icon/icon.component';
+import { UiIconComponent } from '../../../ui/icon/icon.component';
 
-async function renderPage() {
+async function renderPage(communityId: string = 'alpha') {
   await TestBed.configureTestingModule({
     imports: [GovernancePageComponent, UiIconComponent],
     providers: [provideRouter([])],
   }).compileComponents();
   const fixture = TestBed.createComponent(GovernancePageComponent);
+  fixture.componentRef.setInput('id', communityId);
   fixture.detectChanges();
   return fixture;
 }
@@ -322,5 +331,24 @@ describe('GovernancePageComponent', () => {
     };
     c.setProposeRationale('Burn-out risk is increasing.');
     expect(c.getProposeRationale()).toBe('Burn-out risk is increasing.');
+  });  // ─── Per-community breadcrumb + input binding ────────────────────────────
+  it('renders a breadcrumb "← {communityName} / Governance"', async () => {
+    const f = await renderPage();
+    const bc = f.nativeElement.querySelector('[data-testid=governance-breadcrumb]') as HTMLElement;
+    expect(bc).toBeTruthy();
+    const text = bc.textContent ?? '';
+    expect(text).toContain('Alpha Syndicate');
+    expect(text).toContain('Governance');
+    const backLink = bc.querySelector('a') as HTMLAnchorElement;
+    expect(backLink.getAttribute('href')).toBe('/community-detail/alpha');
   });
+
+  it('id defaults to "alpha" so the page renders before the route binds', async () => {
+    // renderPage() with no args uses the default 'alpha'. No explicit
+    // setInput call — input stays at its field default.
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as { id: () => string };
+    expect(c.id()).toBe('alpha');
+  });
+
 });
