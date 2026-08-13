@@ -1,0 +1,318 @@
+<section class="page" data-testid="settings-page">
+
+  <!-- header -->
+  <header class="mb-8">
+    <h1 class="page-title">Settings</h1>
+    <p class="page-subtitle">Profile, security, notifications, and appearance.</p>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs mb-6 flex-wrap" role="tablist" aria-label="Settings sections">
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab() === 'profile'"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'profile'"
+      data-testid="settings-tab"
+      data-tab="profile"
+      (click)="selectTab('profile')">
+      <ui-icon name="user" class="w-4 h-4"></ui-icon>
+      Profile
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab() === 'security'"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'security'"
+      data-testid="settings-tab"
+      data-tab="security"
+      (click)="selectTab('security')">
+      <ui-icon name="shield" class="w-4 h-4"></ui-icon>
+      Security
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab() === 'notifications'"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'notifications'"
+      data-testid="settings-tab"
+      data-tab="notifications"
+      (click)="selectTab('notifications')">
+      <ui-icon name="bell" class="w-4 h-4"></ui-icon>
+      Notifications
+    </button>
+    <button
+      type="button"
+      class="tab"
+      [class.active]="activeTab() === 'appearance'"
+      role="tab"
+      [attr.aria-selected]="activeTab() === 'appearance'"
+      data-testid="settings-tab"
+      data-tab="appearance"
+      (click)="selectTab('appearance')">
+      <ui-icon name="palette" class="w-4 h-4"></ui-icon>
+      Appearance
+    </button>
+  </div>
+
+  <!-- Profile -->
+  <section
+    class="card p-6 max-w-2xl"
+    role="tabpanel"
+    data-testid="settings-panel"
+    data-panel-name="profile"
+    [hidden]="activeTab() !== 'profile'">
+    <h2 class="text-base font-semibold mb-5">Profile</h2>
+    <form class="space-y-4" (ngSubmit)="saveProfile()">
+      <div class="flex items-center gap-4 mb-4">
+        <div class="avatar" style="width: 3.5rem; height: 3.5rem; font-size: 1.1rem; background: var(--gradient-violet);">
+          {{ user.initials }}
+        </div>
+        <div class="flex gap-2">
+          <button type="button" class="btn btn-secondary text-xs" (click)="saveProfile()">
+            <ui-icon name="upload" class="w-3 h-3"></ui-icon>
+            Upload photo
+          </button>
+          <button type="button" class="btn btn-ghost text-xs" (click)="saveProfile()">
+            Remove
+          </button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label>First name</label>
+          <input
+            type="text"
+            class="input"
+            data-testid="settings-first-name"
+            [value]="user.firstName">
+        </div>
+        <div>
+          <label>Last name</label>
+          <input
+            type="text"
+            class="input"
+            data-testid="settings-last-name"
+            [value]="user.lastName">
+        </div>
+      </div>
+      <div>
+        <label>Display name</label>
+        <input
+          type="text"
+          class="input"
+          data-testid="settings-display-name"
+          [value]="user.displayName">
+      </div>
+      <div>
+        <label>Bio</label>
+        <textarea
+          class="input"
+          rows="3"
+          placeholder="Tell the community what you contribute."
+          data-testid="settings-bio">{{ user.bio }}</textarea>
+      </div>
+      <div class="flex justify-end">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Security -->
+  <section
+    class="card p-6 max-w-2xl"
+    role="tabpanel"
+    data-testid="settings-panel"
+    data-panel-name="security"
+    [hidden]="activeTab() !== 'security'">
+    <h2 class="text-base font-semibold mb-5">Security</h2>
+    <div class="space-y-6">
+      <div>
+        <h3 class="text-sm font-medium mb-3">Change password</h3>
+        <form class="space-y-4" (ngSubmit)="savePassword()">
+          <div>
+            <label>Current password</label>
+            <input type="password" class="input" placeholder="••••••••">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label>New password</label>
+              <input type="password" class="input" placeholder="••••••••">
+            </div>
+            <div>
+              <label>Confirm new password</label>
+              <input type="password" class="input" placeholder="••••••••">
+            </div>
+          </div>
+          <div class="flex justify-end">
+            <button type="submit" class="btn btn-primary">Update password</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="pt-5 border-t" style="border-color: var(--border-subtle);">
+        <div class="flex items-center justify-between gap-4">
+          <div class="min-w-0">
+            <h3 class="text-sm font-medium">Two-factor authentication</h3>
+            <p class="text-xs text-slate-500 mt-0.5">TOTP app required for withdrawals &gt; $1,000.</p>
+          </div>
+          <button
+            type="button"
+            class="switch"
+            role="switch"
+            data-testid="settings-2fa-toggle"
+            [attr.aria-checked]="twoFactorEnabled()"
+            (click)="toggle2FA()">
+            <span class="sr-only">Two-factor authentication</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="pt-5 border-t" style="border-color: var(--border-subtle);">
+        <div class="flex items-center justify-between gap-4">
+          <div class="min-w-0">
+            <h3 class="text-sm font-medium">Active sessions</h3>
+            <p class="text-xs text-slate-500 mt-0.5">2 sessions · this browser (SF), Firefox (mobile).</p>
+          </div>
+          <button type="button" class="btn btn-ghost text-xs" (click)="signOutOthers()">Sign out others</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Notifications -->
+  <section
+    class="card p-6 max-w-2xl"
+    role="tabpanel"
+    data-testid="settings-panel"
+    data-panel-name="notifications"
+    [hidden]="activeTab() !== 'notifications'">
+    <h2 class="text-base font-semibold mb-5">Notifications</h2>
+    <div class="space-y-4">
+      <div class="flex items-center justify-between gap-4">
+        <div class="min-w-0">
+          <div class="text-sm font-medium">In-app notifications</div>
+          <div class="text-xs text-slate-500 mt-0.5">Votes, payouts, execution updates</div>
+        </div>
+        <button
+          type="button"
+          class="switch"
+          role="switch"
+          [attr.aria-checked]="notifInApp()"
+          (click)="toggleNotifInApp()">
+          <span class="sr-only">In-app notifications</span>
+        </button>
+      </div>
+      <div class="flex items-center justify-between gap-4">
+        <div class="min-w-0">
+          <div class="text-sm font-medium">Email digest</div>
+          <div class="text-xs text-slate-500 mt-0.5">Daily summary of pool activity</div>
+        </div>
+        <button
+          type="button"
+          class="switch"
+          role="switch"
+          [attr.aria-checked]="notifEmail()"
+          (click)="toggleNotifEmail()">
+          <span class="sr-only">Email digest</span>
+        </button>
+      </div>
+      <div class="flex items-center justify-between gap-4">
+        <div class="min-w-0">
+          <div class="text-sm font-medium">Push notifications</div>
+          <div class="text-xs text-slate-500 mt-0.5">Real-time alerts on your devices</div>
+        </div>
+        <button
+          type="button"
+          class="switch"
+          role="switch"
+          [attr.aria-checked]="notifPush()"
+          (click)="toggleNotifPush()">
+          <span class="sr-only">Push notifications</span>
+        </button>
+      </div>
+      <div>
+        <label>Digest frequency</label>
+        <select
+          class="input max-w-xs"
+          data-testid="settings-digest-frequency"
+          [value]="digestFrequency()">
+          @for (freq of digestFrequencies; track freq) {
+            <option [value]="freq">{{ freq }}</option>
+          }
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Appearance -->
+  <section
+    class="card p-6 max-w-2xl"
+    role="tabpanel"
+    data-testid="settings-panel"
+    data-panel-name="appearance"
+    [hidden]="activeTab() !== 'appearance'">
+    <h2 class="text-base font-semibold mb-5">Appearance</h2>
+    <div class="space-y-6">
+      <div>
+        <h3 class="text-sm font-medium mb-3">Theme</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            type="button"
+            class="card card-hover p-5 text-left"
+            data-testid="settings-theme-choice"
+            data-theme-choice="light"
+            (click)="setTheme('light')">
+            <div class="flex items-center justify-between mb-3">
+              <ui-icon name="sun" class="w-5 h-5 text-amber-400"></ui-icon>
+              <ui-icon
+                name="check"
+                class="w-4 h-4 text-emerald-400"
+                data-testid="settings-theme-check"
+                [style.opacity]="isThemeCurrent('light') ? 1 : 0"></ui-icon>
+            </div>
+            <div class="text-sm font-medium">Light</div>
+            <div class="text-xs text-slate-500 mt-0.5">Clean and bright</div>
+          </button>
+          <button
+            type="button"
+            class="card card-hover p-5 text-left"
+            data-testid="settings-theme-choice"
+            data-theme-choice="dark"
+            (click)="setTheme('dark')">
+            <div class="flex items-center justify-between mb-3">
+              <ui-icon name="moon" class="w-5 h-5 text-violet-400"></ui-icon>
+              <ui-icon
+                name="check"
+                class="w-4 h-4 text-emerald-400"
+                data-testid="settings-theme-check"
+                [style.opacity]="isThemeCurrent('dark') ? 1 : 0"></ui-icon>
+            </div>
+            <div class="text-sm font-medium">Dark</div>
+            <div class="text-xs text-slate-500 mt-0.5">Premium and focused</div>
+          </button>
+        </div>
+      </div>
+      <div class="pt-5 border-t" style="border-color: var(--border-subtle);">
+        <div class="flex items-center justify-between gap-4">
+          <div class="min-w-0">
+            <h3 class="text-sm font-medium">Compact tables</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Tighter density on list pages</p>
+          </div>
+          <button
+            type="button"
+            class="switch"
+            role="switch"
+            [attr.aria-checked]="compactTables()"
+            (click)="toggleCompactTables()">
+            <span class="sr-only">Compact tables</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</section>

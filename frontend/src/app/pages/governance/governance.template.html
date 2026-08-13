@@ -76,7 +76,7 @@
             </div>
             <span class="text-xs text-slate-500 whitespace-nowrap">{{ p.hoursLeft }}h left</span>
           </div>
-          <div class="flex items-center justify-between text-sm mb-2">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm mb-2 gap-1">
             <div>
               <span class="text-emerald-400 font-semibold" data-count-approve>{{ p.approve }}</span>
               <span class="text-slate-500">approve</span>
@@ -84,7 +84,7 @@
               <span class="text-rose-400 font-semibold" data-count-reject>{{ p.reject }}</span>
               <span class="text-slate-500">reject</span>
             </div>
-            <span class="text-xs text-slate-500">Required: {{ p.requiredVotes }} weighted votes</span>
+            <span class="text-xs text-slate-500 sm:whitespace-nowrap">Required: {{ p.requiredVotes }} weighted votes</span>
           </div>
           <div class="progress-track mb-4">
             <div class="progress-fill progress-fill-emerald" data-vote-bar [style.width.%]="(p.approve / (p.approve + p.reject)) * 100"></div>

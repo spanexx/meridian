@@ -62,16 +62,16 @@ describe('ShellComponent', () => {
     expect(items.length).toBeGreaterThanOrEqual(ANGULAR_NAV_ITEMS.length);
   });
 
-  it('renders nav-section headings for each section (Platform + Community + Quick Actions, no Account)', async () => {
+  it('renders nav-section headings for each section (Platform + Community + Account)', async () => {
     const fixture = await renderShell();
     const sections = fixture.nativeElement.querySelectorAll('.nav-section');
     const labels = Array.from(sections).map((s) => s.textContent?.trim());
     expect(labels).toContain('Platform');
     expect(labels).toContain('Community');
     expect(labels).toContain('Quick Actions');
-    // Per PR #20 the Account section was removed — its items (Notifications,
-    // Settings, Your Profile) are covered by the bottom-row icon buttons.
-    expect(labels).not.toContain('Account');
+    // Settings lives in the Account section (added in PR #53 so the
+    // /settings route is reachable from the sidebar nav).
+    expect(labels).toContain('Account');
   });
 
   it('marks the active nav-item based on current route', async () => {
@@ -232,7 +232,7 @@ describe('ShellComponent', () => {
 });
 
 describe('ANGULAR_NAV_ITEMS', () => {
-  it('contains each wireframe route (Platform + Community)', () => {
+  it('contains each wireframe route (Platform + Community + Account/Settings)', () => {
     const labels = ANGULAR_NAV_ITEMS.map((i) => i.label);
     expect(labels).toContain('Dashboard');
     expect(labels).toContain('Opportunities');
@@ -244,19 +244,20 @@ describe('ANGULAR_NAV_ITEMS', () => {
     expect(labels).not.toContain('Members');
     expect(labels).toContain('Governance');
     expect(labels).toContain('Payouts');
-    // Per PR #20 these live in the bottom-row icons instead:
-    expect(labels).not.toContain('Notifications');
-    expect(labels).not.toContain('Settings');
-    expect(labels).not.toContain('Your Profile');
+    // Settings was added back in PR #53 (Account section) so the
+    // /settings route is reachable from the sidebar nav. Notifications
+    // and Your Profile remain in the bottom-row icon buttons.
+    expect(labels).toContain('Settings');
   });
 
-  it('matches the wireframe NAV ordering (Platform then Community, no Account)', () => {
+  it('matches the wireframe NAV ordering (Platform, Community, then Account)', () => {
     const sections = ANGULAR_NAV_ITEMS.map((i) => i.section);
     // first item is Platform section
     expect(sections[0]).toBe('Platform');
     // at least one item belongs to each section
     expect(sections).toContain('Platform');
     expect(sections).toContain('Community');
-    expect(sections).not.toContain('Account');
+    // Account section comes after Community (added in PR #53 for Settings).
+    expect(sections.indexOf('Community')).toBeLessThan(sections.indexOf('Account'));
   });
 });
