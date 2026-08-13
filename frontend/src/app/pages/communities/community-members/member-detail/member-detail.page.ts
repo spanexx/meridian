@@ -162,7 +162,7 @@ export class MemberDetailPageComponent {
   });
 
   /** Hero gradient for the avatar (mirrors the wireframe's violet). */
-  readonly avatarGradient = 'var(--gradient-violet)';
+  readonly avatarGradient = 'var(--gradient-copper)';
 
   /** Follow toggle state. */
   private readonly _following = signal<boolean>(false);

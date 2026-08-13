@@ -148,7 +148,7 @@ const KPIS: ReadonlyArray<Kpi> = [
     key: 'roi',
     label: 'ROI (YTD)',
     value: '+18.4%',
-    valueClass: 'text-gradient-violet',
+    valueClass: 'text-gradient-copper',
     iconName: 'percent',
     delta: 'Target: 15%',
     deltaClass: 'text-emerald-400',
@@ -254,7 +254,7 @@ const SAFETY_RAILS: ReadonlyArray<string> = [
 ];
 
 const GRADIENT_VAR: Readonly<Record<CommunityData['avatarGradient'], string>> = {
-  violet: 'var(--gradient-violet)',
+  violet: 'var(--gradient-copper)',
   amber: 'var(--gradient-amber)',
   blue: 'var(--gradient-blue)',
 };

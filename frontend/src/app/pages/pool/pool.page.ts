@@ -339,7 +339,7 @@ function smoothPath(points: number[]): string {
                 <tr class="table-row">
                   <td>
                     <a class="flex items-center gap-2" [routerLink]="[memberUrl(c.name)]">
-                      <div class="avatar" style="background: var(--gradient-violet);">{{ c.initials }}</div>
+                      <div class="avatar" style="background: var(--gradient-copper);">{{ c.initials }}</div>
                       <span class="text-sm truncate min-w-0">{{ c.name }}</span>
                     </a>
                   </td>

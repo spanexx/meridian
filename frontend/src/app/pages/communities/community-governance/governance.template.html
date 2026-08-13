@@ -13,13 +13,16 @@
     <span class="text-slate-300">Governance</span>
   </nav>
 
-  <!-- header -->
-  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+  <!-- header
+       Lesson from PR #41 (community-settings): header with multi-line subtitle
+       + side button needs sm:items-start, not sm:items-center — otherwise the
+       button floats mid-subtitle at sm+ viewports. -->
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
     <div>
       <h1 class="page-title">Governance</h1>
       <p class="page-subtitle">Community-Governed Parameters — any member proposes, VETTER+ votes, weight from reputation.</p>
     </div>
-    <button type="button" class="btn btn-primary" data-action="open-propose-modal" (click)="openProposeModal()">
+    <button type="button" class="btn btn-primary w-full sm:w-auto justify-center" data-action="open-propose-modal" (click)="openProposeModal()">
       <ui-icon name="file-plus" class="w-4 h-4"></ui-icon>
       Propose change
     </button>

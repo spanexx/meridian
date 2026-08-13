@@ -173,7 +173,7 @@ describe('CommunityMembersPageComponent', () => {
     }
   });
 
-  it('reputation column uses gradient color (text-gradient-violet class)', async () => {
+  it('reputation column uses gradient color (text-gradient-copper class)', async () => {
     const f = await renderPage();
     const repCells = (f.nativeElement as HTMLElement).querySelectorAll('[data-testid="reputation-cell"]');
     expect(repCells.length).toBe(8);  // page 1 has 8 rows
