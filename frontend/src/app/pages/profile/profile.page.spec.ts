@@ -39,11 +39,14 @@ describe('ProfilePageComponent', () => {
   });
 
   // ─── Header / hero ─────────────────────────────────────────────────
-  it('renders the breadcrumb', async () => {
+  it('renders a single Profile label (no self-link, no name suffix)', async () => {
     const f = await renderPage();
-    const bc = (f.nativeElement as HTMLElement).textContent ?? '';
-    expect(bc).toContain('Profile');
-    expect(bc).toContain('Alex Chen');
+    const bc = f.nativeElement.querySelector('[data-testid=profile-breadcrumb]') as HTMLElement;
+    expect(bc?.textContent?.trim()).toBe('Profile');
+    // No anchor: the page IS the profile; a 'Profile' link would be self-referential.
+    expect(bc?.querySelector('a')).toBeNull();
+    // No name suffix: the user is on their own page, not navigating to themselves.
+    expect(bc?.textContent).not.toContain('Alex Chen');
   });
 
   it('renders the user name as h1', async () => {
