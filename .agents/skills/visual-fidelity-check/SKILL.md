@@ -166,10 +166,12 @@ Rule of thumb: every positioning fix MUST be visually verified at
 For dropdowns this is usually 375 (mobile) + 1280 (desktop).
 For navigation it is usually 375 + 768 + 1280.
 
-## 4. Grid breakpoints must respect the sidebar — `sm` is too early when a sidebar is at md+
+## 4. Fixed-layout hero strip with KPIs — never switch to single-column, scale the text instead
 
-The shell sidebar is hidden on mobile and slides in at `md` (≥768px), eating ~256px of horizontal space. So at `sm` (640px) the content has ~640px, but at `md` (768px) it shrinks to ~512px. A grid that uses `sm:grid-cols-3` will fit fine at 640px and break at 768-1024px (the "death zone") because the cells are too narrow for the KPI labels.
+For a hero strip like [Avatar + Name + 3 KPIs] that always wants 3 horizontal KPIs, **do NOT switch to `grid-cols-1` at any breakpoint**. Resilient pattern: keep `grid-cols-3` at all breakpoints and scale the value text — `text-base sm:text-lg lg:text-xl` (16 → 18 → 20px). Add `whitespace-nowrap` to the labels and `tracking-wide` (not `tracking-wider`) so the labels fit at 375px.
 
-For multi-column content inside the shell, snap horizontal layouts to `lg:grid-cols-*` (≥1024px), not `sm:grid-cols-*`. Below `lg`, fall back to single-column (stacked). The Meridian hero KPI grid in `pages/member-detail/member-detail.template.html` was fixed by changing `grid-cols-1 sm:grid-cols-3` to `grid-cols-1 lg:grid-cols-3` on 2026-08-13.
+The pattern I tried first (and which looked wrong at 768px in the original screenshot) was `grid-cols-1 sm:grid-cols-3` then `grid-cols-1 lg:grid-cols-3` — both approaches broke somewhere. The user asked specifically: "leave it horizontal, shrink the text". The third try with `grid-cols-3` everywhere + `text-base sm:text-lg lg:text-xl` worked at 375, 768, and 1280.
 
-Verify at all three breakpoints: 375 (mobile, stacked), 768 (tablet, stacked — death zone), 1280 (desktop, horizontal).
+Verify at 375 / 768 / 1280 — all three should show 3 KPI columns, never stacked.
+
+The shell sidebar is hidden on mobile and slides in at `md` (≥768px), eating ~256px. With `grid-cols-3` fixed, the cells rebalance automatically via min-width:0. Inside the shell, the sidebar at `md` is the reason 768px is the awkward middle.
