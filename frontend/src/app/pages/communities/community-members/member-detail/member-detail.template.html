@@ -1,9 +1,11 @@
 <section class="page">
 
-  <!-- breadcrumb -->
-  <nav class="flex items-center gap-2 text-xs text-slate-500 mb-4" data-testid="member-breadcrumb">
-    <a [routerLink]="['/communities']" class="hover:text-slate-300">Members</a>
-    <ui-icon name="chevron-right" [size]="12"></ui-icon>
+  <!-- breadcrumb — community-scoped (back-link / Members / name) -->
+  <nav class="breadcrumb text-xs text-slate-500 mb-4" data-testid="member-breadcrumb">
+    <a [routerLink]="['/community-detail', id()]" class="hover:text-slate-300">← {{ communityName() }}</a>
+    <span class="mx-2">/</span>
+    <a [routerLink]="['/community', id(), 'members']" class="hover:text-slate-300">Members</a>
+    <span class="mx-2">/</span>
     <span class="text-slate-300">{{ member().name }}</span>
   </nav>
 

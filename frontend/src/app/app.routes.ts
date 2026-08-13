@@ -177,9 +177,14 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'members/:name',
+    // Member is a member of a community, not a global resource.
+    // Matches the per-community decision made on 2026-08-12 (Members removed
+    // from top-level sidebar nav). The :id binds to MemberDetailPageComponent.id
+    // and :memberId binds to .memberId; both default so the page renders
+    // before the route binds.
+    path: 'community/:id/members/:memberId',
     loadComponent: () =>
-      import('./pages/member-detail/member-detail.page').then(
+      import('./pages/communities/community-members/member-detail/member-detail.page').then(
         (m) => m.MemberDetailPageComponent,
       ),
   },
