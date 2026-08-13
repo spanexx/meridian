@@ -4,7 +4,7 @@
   @owner   spanexx
   @reviewed 2026-08-12
 -->
-<section class="page">
+<section class="page" (document:click)="closeOnOutsideClick($event.target)">
 
   <!-- breadcrumb -->
   <nav class="breadcrumb text-xs text-slate-500 mb-4" data-testid="members-breadcrumb">
@@ -29,6 +29,7 @@
         (input)="setSearch($any($event.target).value)"
       />
       <div class="relative">
+        <div class="relative inline-block" data-menu-container>
         <button
           type="button"
           class="btn btn-secondary"
@@ -42,14 +43,14 @@
         @if (tierMenuOpen) {
           <div
             id="tierMenu"
-            class="menu absolute right-0 mt-1 z-10 w-48 bg-slate-800 border border-slate-700 rounded-md shadow-lg"
+            class="menu absolute mt-1 z-10 w-48 left-0 sm:right-0 sm:left-auto"
             data-testid="tier-menu"
           >
-            <div class="menu-head px-3 py-1.5 text-[10px] uppercase tracking-wide text-slate-500">Tier</div>
+            <div class="menu-head">Tier</div>
             @for (t of tiers; track t.value) {
               <button
                 type="button"
-                class="menu-item w-full text-left px-3 py-2 hover:bg-slate-700 flex items-center gap-2 text-sm"
+                class="menu-item w-full text-left px-3 py-2 flex items-center gap-2 text-sm"
                 [class.active]="activeTier === t.value"
                 [attr.data-filter-category]="t.value"
                 (click)="selectTier(t.value)"
@@ -64,12 +65,14 @@
             }
           </div>
         }
+        </div>
       </div>
     </div>
   </header>
 
   <!-- role dropdown (mobile < sm) -->
   <div class="sm:hidden mb-4">
+    <div class="relative" data-menu-container>
     <button
       type="button"
       class="btn btn-secondary w-full justify-between"
@@ -85,13 +88,13 @@
     </button>
     @if (roleMenuOpen) {
       <div
-        class="menu mt-1 bg-slate-800 border border-slate-700 rounded-md shadow-lg overflow-hidden"
+        class="menu mt-1 overflow-hidden"
         data-testid="role-menu"
       >
         @for (r of roles; track r.value) {
           <button
             type="button"
-            class="menu-item w-full text-left px-4 py-2 hover:bg-slate-700 flex items-center justify-between text-sm"
+            class="menu-item w-full text-left px-4 py-2 flex items-center justify-between text-sm"
             [class.active]="activeRole === r.value"
             [attr.data-filter-role]="r.value"
             (click)="selectRole(r.value)"
@@ -102,6 +105,7 @@
         }
       </div>
     }
+    </div>
   </div>
 
   <!-- role tabs (≥ sm) -->

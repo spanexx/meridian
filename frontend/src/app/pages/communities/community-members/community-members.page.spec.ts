@@ -535,4 +535,80 @@ describe('CommunityMembersPageComponent', () => {
     expect(tabs.length).toBe(4);
   });
 
+
+  // ─── Click-away / Escape close ─────────────────────────────────────
+  it('clicking outside the menu closes both role and tier dropdowns', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as {
+      openTierMenu: () => void;
+      openRoleMenu: () => void;
+      tierMenuOpen: boolean;
+      roleMenuOpen: boolean;
+      closeOnOutsideClick: (target: HTMLElement) => void;
+    };
+    c.openTierMenu();
+    c.openRoleMenu();
+    f.detectChanges();
+    expect(c.tierMenuOpen).toBe(true);
+    expect(c.roleMenuOpen).toBe(true);
+    // click on a button OUTSIDE both menus
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    c.closeOnOutsideClick(outside);
+    f.detectChanges();
+    expect(c.tierMenuOpen).toBe(false);
+    expect(c.roleMenuOpen).toBe(false);
+    document.body.removeChild(outside);
+  });
+
+  it('clicking inside the menu does NOT close it', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as {
+      openTierMenu: () => void;
+      tierMenuOpen: boolean;
+      closeOnOutsideClick: (target: HTMLElement) => void;
+    };
+    c.openTierMenu();
+    f.detectChanges();
+    // Pick the tier menu itself as the target
+    const inside = (f.nativeElement as HTMLElement).querySelector('[data-testid="tier-menu"]') as HTMLElement;
+    expect(inside).toBeTruthy();
+    c.closeOnOutsideClick(inside);
+    expect(c.tierMenuOpen).toBe(true);
+  });
+
+  it('clicking the role menu button does NOT close its own menu via the same handler (the click toggles it)', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as {
+      openRoleMenu: () => void;
+      roleMenuOpen: boolean;
+      closeOnOutsideClick: (target: HTMLElement) => void;
+    };
+    c.openRoleMenu();
+    f.detectChanges();
+    const btn = (f.nativeElement as HTMLElement).querySelector('[data-testid="role-menu-button"]') as HTMLElement;
+    c.closeOnOutsideClick(btn);
+    // Button is INSIDE the menu container, so should not be treated as outside
+    expect(c.roleMenuOpen).toBe(true);
+  });
+
+  it('Escape key closes both dropdowns', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as {
+      openTierMenu: () => void;
+      openRoleMenu: () => void;
+      tierMenuOpen: boolean;
+      roleMenuOpen: boolean;
+      closeAllMenus: () => void;
+    };
+    c.openTierMenu();
+    c.openRoleMenu();
+    f.detectChanges();
+    expect(c.tierMenuOpen).toBe(true);
+    expect(c.roleMenuOpen).toBe(true);
+    c.closeAllMenus();
+    expect(c.tierMenuOpen).toBe(false);
+    expect(c.roleMenuOpen).toBe(false);
+  });
+
 });
