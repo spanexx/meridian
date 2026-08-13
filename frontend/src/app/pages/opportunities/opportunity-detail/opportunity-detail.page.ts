@@ -35,7 +35,7 @@ type UserVote = 'approve' | 'reject' | null;
     <!-- breadcrumb -->
     <div class="flex items-center gap-2 text-xs text-slate-500 mb-4" data-testid="opportunity-breadcrumb">
       <a routerLink="/opportunities" class="hover:text-slate-300">Opportunities</a>
-      <ui-icon name="chevron-right"></ui-icon>
+      <ui-icon name="chevron-right" [size]="12"></ui-icon>
       <span class="text-slate-300">O-2049</span>
     </div>
 

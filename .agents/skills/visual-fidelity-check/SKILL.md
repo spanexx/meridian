@@ -166,6 +166,26 @@ Rule of thumb: every positioning fix MUST be visually verified at
 For dropdowns this is usually 375 (mobile) + 1280 (desktop).
 For navigation it is usually 375 + 768 + 1280.
 
+## 4. Breadcrumb chevron sits below the text — make the icon size match the host
+
+The icon component's host element is `display: inline-flex` with `vertical-align: middle; line-height: 0;` and the inner SVG is sized by a `[size]` input (default 18). When you write `<ui-icon class="w-3 h-3">` (12px host) and the icon's `[size]` is left at default 18, the SVG is 18px but the host is 12px — the SVG overflows 3px above AND below the host.
+
+The flex parent (`<nav class="flex items-center gap-2">`) centers the 12px HOST, but the visible SVG (18px) extends 3px below the host. From the user's perspective: the chevron sits at the bottom of the text, not centered.
+
+Right pattern (use this on every breadcrumb):
+```html
+<ui-icon name="chevron-right" [size]="12"></ui-icon>
+```
+
+Wrong (creates the misalignment):
+```html
+<ui-icon name="chevron-right" class="w-3 h-3"></ui-icon>   <!-- size defaults to 18 -->
+<ui-icon name="chevron-right"></ui-icon>                  <!-- size defaults to 18 -->
+```
+
+The fix: when an icon sits in a text-aligned row, always set `[size]` to match the visual height you want (here 12 for text-xs breadcrumbs). Don't rely on a CSS class on the host to size the SVG.
+
+
 ## 4. Fixed-layout hero strip with KPIs — never switch to single-column, scale the text instead
 
 For a hero strip like [Avatar + Name + 3 KPIs] that always wants 3 horizontal KPIs, **do NOT switch to `grid-cols-1` at any breakpoint**. Resilient pattern: keep `grid-cols-3` at all breakpoints and scale the value text — `text-base sm:text-lg lg:text-xl` (16 → 18 → 20px). Add `whitespace-nowrap` to the labels and `tracking-wide` (not `tracking-wider`) so the labels fit at 375px.
