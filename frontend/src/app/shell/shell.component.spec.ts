@@ -245,7 +245,13 @@ describe('ANGULAR_NAV_ITEMS', () => {
     expect(labels).toContain('Communities');
     // Members is no longer in the sidebar — members belong to a community
     expect(labels).not.toContain('Members');
-    expect(labels).toContain('Governance');
+    // Governance is no longer in the sidebar — after PR #54 moved it to
+    // /community/:id/governance, the only sane top-level entry is
+    // /communities; per-community pages belong to the community-detail
+    // page (which has its own "View governance" entry). The legacy
+    // sidebar entry was hardcoded to /community/alpha/governance, which
+    // always pointed at one specific community regardless of context.
+    expect(labels).not.toContain('Governance');
     expect(labels).toContain('Payouts');
     // Settings is NOT in the sidebar nav — the bottom-row gear icon
     // already opens /profile, and the Profile page links into /settings,
