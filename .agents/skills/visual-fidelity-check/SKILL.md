@@ -150,3 +150,18 @@ theme.css at `wireframe/meridian/kit/theme.css:32-35` defines `--gradient-emeral
 ### 2. Angular standalone component host attributes belong in `host` metadata
 
 Putting `[attr.data-foo]="value"` in the template attaches the attribute to the **inner content element**, not the component selector element. For tests that query `<my-component data-foo="bar">`, declare it in `@Component({ host: { '[attr.data-foo]': 'value' } })`.
+
+## 3. A fixed-position fix at one breakpoint is broken at another
+
+When you change a dropdown / popover / modal's CSS positioning to
+fix it at one viewport, **also verify the other breakpoints**. A
+positioning fix that works at 1280px can put the element off-screen
+at 375px, and vice versa. The community-members tier dropdown in
+this repo was "fixed" twice on 2026-08-13 — once with `right-0`
+(broke mobile), once with `left-0` (broke desktop) — before
+landing on the responsive `left-0 sm:right-0 sm:left-auto`.
+
+Rule of thumb: every positioning fix MUST be visually verified at
+**both the breakpoint you fixed AND the breakpoint you broke**.
+For dropdowns this is usually 375 (mobile) + 1280 (desktop).
+For navigation it is usually 375 + 768 + 1280.
