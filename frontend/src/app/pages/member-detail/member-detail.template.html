@@ -29,18 +29,18 @@
         <div class="text-sm text-slate-400 mb-4">
           {{ member().location }} · Member since {{ member().memberSince }}
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-4">
+        <div class="grid grid-cols-3 gap-2">
           <div>
-            <div class="text-xs uppercase tracking-wider text-slate-500">Overall</div>
-            <div class="text-xl sm:text-2xl font-light text-gradient-violet">{{ member().overall }}</div>
+            <div class="text-[10px] uppercase tracking-wide text-slate-500">Overall</div>
+            <div class="text-base sm:text-lg lg:text-xl font-light text-gradient-violet">{{ member().overall }}</div>
           </div>
           <div>
-            <div class="text-xs uppercase tracking-wider text-slate-500">Capital</div>
-            <div class="text-xl sm:text-2xl font-light">{{ formatUsd(member().capitalDeployed) }}</div>
+            <div class="text-[10px] uppercase tracking-wide text-slate-500">Capital</div>
+            <div class="text-base sm:text-lg lg:text-xl font-light">{{ formatUsd(member().capitalDeployed) }}</div>
           </div>
           <div>
-            <div class="text-xs uppercase tracking-wider text-slate-500 whitespace-nowrap">Lifetime earned</div>
-            <div class="text-xl sm:text-2xl font-light text-gradient-emerald">+{{ formatUsd(member().lifetimeEarned) }}</div>
+            <div class="text-[10px] uppercase tracking-wide text-slate-500 whitespace-nowrap">Lifetime earned</div>
+            <div class="text-base sm:text-lg lg:text-xl font-light text-gradient-emerald">+{{ formatUsd(member().lifetimeEarned) }}</div>
           </div>
         </div>
       </div>
