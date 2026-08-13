@@ -229,6 +229,27 @@ export class CommunityMembersPageComponent {
     this._tierMenuOpen = !this._tierMenuOpen;
     this.cdr.markForCheck();
   }
+
+  /** Close both dropdowns. Called on Escape and on outside click. */
+  closeAllMenus(): void {
+    this._tierMenuOpen = false;
+    this._roleMenuOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Document click handler: if the click target is outside any
+   * [data-menu-container], close everything. The two menus wrap
+   * their trigger button + panel in data-menu-container so clicks
+   * INSIDE the menu (on items, on the trigger) do not trigger close.
+   * Wired in the template via (document:click).
+   */
+  closeOnOutsideClick(target: EventTarget | HTMLElement | null): void {
+    if (!target) return;
+    const el = target as HTMLElement;
+    if (el.closest && el.closest('[data-menu-container]')) return;
+    this.closeAllMenus();
+  }
   selectTier(tier: 'all' | Tier): void {
     this._activeTier = tier;
     this._tierMenuOpen = false;
