@@ -139,6 +139,52 @@ it('clicking a reject vote currently flips to approve (known bug)', () => {
 | "TDD will slow me down" | TDD faster than debugging. |
 | "Existing code has no tests" | Retrofit per the policy above. |
 
+## Pitfall: the route-param triple — `input()` + `withComponentInputBinding()` + `name()` in template
+
+When a page reads data from the URL (e.g. `/community/:id/members/:memberId`),
+**all three of these must be in place** or the page silently renders the
+default values regardless of the URL:
+
+1. **`input()` signal** (not `@Input`) in the component, so the
+   `computed()` re-runs when the param changes.
+   ```ts
+   readonly id = input<string>('alpha');
+   readonly memberId = input<string>('dana-voss');
+   ```
+
+2. **`withComponentInputBinding()`** in `app.config.ts` so the router
+   actually pushes route params into the inputs.
+   ```ts
+   provideRouter(routes, withComponentInputBinding())
+   ```
+   Without this, the inputs are declared but never receive values.
+   The page will render the default. Tests pass (because `setInput`
+   in the testbed does what the router would do), the build passes,
+   but the live app silently shows the wrong data.
+
+3. **Read the input via the signal getter** in the template.
+   `id` is a function — you must call it.
+   ```html
+   <a [routerLink]="['/community-detail', id()]">...
+   ```
+   Forgetting the `()` makes Angular pass the function reference as
+   the route param, which renders as the function's string form
+   (e.g. `/community-detail/[Input%20Signal:...]`).
+
+**Diagnostic checklist** when a route-param-driven page seems to
+ignore the URL:
+- `grep "withComponentInputBinding" frontend/src/app/app.config.ts`
+- `grep "readonly id = input" frontend/src/app/pages/<page>/<page>.page.ts`
+- `grep "id()" frontend/src/app/pages/<page>/<page>.template.html`
+- visual probe with playwright-cli at `/<route>/<known-param>` and
+  confirm the page renders the expected entity, not the default
+
+This is the gotcha that bit member-detail on 2026-08-13: tests
+passed (testbed `setInput` worked), build passed, but navigating
+to `/community/alpha/members/mike-rivera` showed Dana Voss (the
+default) because the live router had `provideRouter(routes)`
+without `withComponentInputBinding()`. Fixed in PR #51.
+
 ## See also
 
 - `.github/workflows/ci.yml` — `precommit` job re-runs the policy on
