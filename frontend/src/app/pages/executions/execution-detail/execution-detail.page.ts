@@ -26,13 +26,7 @@
  * @owner   spanexx
  * @reviewed 2026-08-12
  */
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Input,
-  computed,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, computed, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
@@ -103,8 +97,8 @@ export class ExecutionDetailPageComponent {
     { label: 'Sold', date: '~Mar 19', state: 'pending' },
   ];
 
-  readonly currentStepIndex = computed<number>(
-    () => this.steps.findIndex((s) => s.state === 'current'),
+  readonly currentStepIndex = computed<number>(() =>
+    this.steps.findIndex((s) => s.state === 'current'),
   );
 
   /**
@@ -155,15 +149,60 @@ export class ExecutionDetailPageComponent {
 
   // ─── Event log ──────────────────────────────────────────────────
   readonly eventLog: readonly EventLog[] = [
-    { timestamp: 'Mar 9 14:22', code: 'execution.item_listed', text: 'Size US 12 · GOAT', variant: 'info' },
-    { timestamp: 'Mar 9 14:18', code: 'execution.item_sold', text: 'Size US 10.5 · GOAT · $2,880', variant: 'success' },
-    { timestamp: 'Mar 9 11:42', code: 'execution.item_listed', text: 'Size US 11.5 · StockX', variant: 'info' },
-    { timestamp: 'Mar 9 09:14', code: 'execution.item_listed', text: 'Size US 11 · eBay', variant: 'info' },
-    { timestamp: 'Mar 8 18:33', code: 'execution.item_sold', text: 'Size US 10 · StockX · $2,780', variant: 'success' },
-    { timestamp: 'Mar 8 16:02', code: 'execution.item_sold', text: 'Size US 10 · eBay · $2,620', variant: 'success' },
-    { timestamp: 'Mar 8 10:15', code: 'execution.acquired', text: 'All 8 pairs received · inspected', variant: 'warning' },
-    { timestamp: 'Mar 6 09:00', code: 'money.allocated', text: '$18,500 from 42 capital accounts', variant: 'info' },
-    { timestamp: 'Mar 5 17:32', code: 'opportunity.approved', text: 'Vetting closed · 3/3 approve', variant: 'success' },
+    {
+      timestamp: 'Mar 9 14:22',
+      code: 'execution.item_listed',
+      text: 'Size US 12 · GOAT',
+      variant: 'info',
+    },
+    {
+      timestamp: 'Mar 9 14:18',
+      code: 'execution.item_sold',
+      text: 'Size US 10.5 · GOAT · $2,880',
+      variant: 'success',
+    },
+    {
+      timestamp: 'Mar 9 11:42',
+      code: 'execution.item_listed',
+      text: 'Size US 11.5 · StockX',
+      variant: 'info',
+    },
+    {
+      timestamp: 'Mar 9 09:14',
+      code: 'execution.item_listed',
+      text: 'Size US 11 · eBay',
+      variant: 'info',
+    },
+    {
+      timestamp: 'Mar 8 18:33',
+      code: 'execution.item_sold',
+      text: 'Size US 10 · StockX · $2,780',
+      variant: 'success',
+    },
+    {
+      timestamp: 'Mar 8 16:02',
+      code: 'execution.item_sold',
+      text: 'Size US 10 · eBay · $2,620',
+      variant: 'success',
+    },
+    {
+      timestamp: 'Mar 8 10:15',
+      code: 'execution.acquired',
+      text: 'All 8 pairs received · inspected',
+      variant: 'warning',
+    },
+    {
+      timestamp: 'Mar 6 09:00',
+      code: 'money.allocated',
+      text: '$18,500 from 42 capital accounts',
+      variant: 'info',
+    },
+    {
+      timestamp: 'Mar 5 17:32',
+      code: 'opportunity.approved',
+      text: 'Vetting closed · 3/3 approve',
+      variant: 'success',
+    },
   ];
 
   // ─── Payout preview ────────────────────────────────────────────
@@ -189,14 +228,14 @@ export class ExecutionDetailPageComponent {
       name: 'Mike Rivera',
       role: 'Signal contributor',
       gradient: 'var(--gradient-amber)',
-      url: '/members/Mike%20Rivera',
+      url: '/community/alpha/members/mike-rivera',
     },
     {
       initials: 'SP',
       name: 'Sarah Park',
       role: 'Access contributor · Boston',
       gradient: 'var(--gradient-blue)',
-      url: '/members/Sarah%20Park',
+      url: '/community/alpha/members/sarah-park',
     },
     {
       initials: 'AC',

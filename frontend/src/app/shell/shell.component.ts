@@ -19,14 +19,7 @@
  * @owner   spanexx
  * @reviewed 2026-08-11
  */
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -50,12 +43,12 @@ export interface NavItem {
 }
 
 export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
-  { label: 'Dashboard',     icon: 'layout-dashboard',   path: '/dashboard',     section: 'Platform' },
-  { label: 'Opportunities', icon: 'lightbulb',          path: '/opportunities', section: 'Platform' },
-  { label: 'Executions',    icon: 'zap',                path: '/executions',    section: 'Platform' },
-  { label: 'Capital Pool',  icon: 'banknote',           path: '/pool',          section: 'Platform' },
-  { label: 'Communities',   icon: 'users',              path: '/communities',   section: 'Community' },
-  { label: 'Payouts',       icon: 'circle-dollar-sign', path: '/payouts',       section: 'Community' },
+  { label: 'Dashboard', icon: 'layout-dashboard', path: '/dashboard', section: 'Platform' },
+  { label: 'Opportunities', icon: 'lightbulb', path: '/opportunities', section: 'Platform' },
+  { label: 'Executions', icon: 'zap', path: '/executions', section: 'Platform' },
+  { label: 'Capital Pool', icon: 'banknote', path: '/pool', section: 'Platform' },
+  { label: 'Communities', icon: 'users', path: '/communities', section: 'Community' },
+  { label: 'Payouts', icon: 'circle-dollar-sign', path: '/payouts', section: 'Community' },
 ] as const);
 
 @Component({
@@ -67,37 +60,47 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
     <div class="app-shell" data-testid="shell">
       <!-- Mobile top bar (hidden >= 1280px via .mobile-bar CSS) -->
       <div class="mobile-bar">
-        <button type="button" class="icon-btn" data-sidebar-toggle aria-label="Open menu" (click)="toggleSidebar()">
+        <button
+          type="button"
+          class="icon-btn"
+          data-sidebar-toggle
+          aria-label="Open menu"
+          (click)="toggleSidebar()"
+        >
           <ui-icon name="menu"></ui-icon>
         </button>
         <a routerLink="/" class="flex items-center gap-2">
           <ui-logo [size]="26" ariaLabel="Meridian — go to dashboard"></ui-logo>
           <span class="brand-wordmark text-sm font-light tracking-[0.55em]">MERIDIAN</span>
         </a>
-        <button type="button" class="icon-btn" data-theme-toggle aria-label="Toggle theme" (click)="toggleTheme()">
+        <button
+          type="button"
+          class="icon-btn"
+          data-theme-toggle
+          aria-label="Toggle theme"
+          (click)="toggleTheme()"
+        >
           <ui-icon name="sun"></ui-icon>
         </button>
       </div>
 
       <!-- Mobile backdrop -->
       <div
-      class="sidebar-backdrop"
-      [hidden]="!sidebarOpen()"
-      data-sidebar-backdrop
-      (click)="closeSidebar()"
-    ></div>
+        class="sidebar-backdrop"
+        [hidden]="!sidebarOpen()"
+        data-sidebar-backdrop
+        (click)="closeSidebar()"
+      ></div>
 
       <!-- The actual sidebar — 260px wide, fixed left, full height -->
-      <aside
-        class="sidebar"
-        [class.open]="sidebarOpen()"
-        data-testid="sidebar"
-      >
+      <aside class="sidebar" [class.open]="sidebarOpen()" data-testid="sidebar">
         <a routerLink="/" class="flex items-center gap-2.5 mb-2 px-2">
           <ui-logo [size]="30" ariaLabel="Meridian — go to dashboard"></ui-logo>
           <div>
             <div class="brand-wordmark text-sm font-light tracking-[0.55em]">MERIDIAN</div>
-            <div class="text-[10px] uppercase tracking-widest text-slate-500">Collective Arbitrage</div>
+            <div class="text-[10px] uppercase tracking-widest text-slate-500">
+              Collective Arbitrage
+            </div>
           </div>
         </a>
 
@@ -127,27 +130,29 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
         <!-- Bottom-row: notifications / theme / avatar menu -->
         <div class="mt-auto pt-4 border-t" style="border-color: var(--border-subtle);">
           <div class="flex items-center justify-around px-2 py-1.5">
+            <button type="button" class="icon-btn" data-dropdown="notifMenu" title="Notifications">
+              <ui-icon name="bell"></ui-icon>
+            </button>
             <button
               type="button"
               class="icon-btn"
-              data-dropdown="notifMenu"
-              title="Notifications"
+              data-theme-toggle
+              title="Toggle theme"
+              (click)="toggleTheme()"
             >
-              <ui-icon name="bell"></ui-icon>
-            </button>
-            <button type="button" class="icon-btn" data-theme-toggle title="Toggle theme" (click)="toggleTheme()">
               <ui-icon name="sun"></ui-icon>
             </button>
             <a routerLink="/profile" class="icon-btn" title="Settings" data-nav="/profile">
               <ui-icon name="cog"></ui-icon>
             </a>
-
           </div>
           <a routerLink="/profile" class="nav-item mt-1">
             <div class="avatar" style="background: var(--gradient-copper);">AC</div>
             <div class="flex-1 min-w-0">
               <div class="text-sm truncate" style="color: var(--text-1);">Alex Chen</div>
-              <div class="text-[10px] uppercase tracking-wider" style="color: var(--v-300);">Vetter · T3</div>
+              <div class="text-[10px] uppercase tracking-wider" style="color: var(--v-300);">
+                Vetter · T3
+              </div>
             </div>
           </a>
         </div>
@@ -192,12 +197,15 @@ export class ShellComponent {
   readonly sidebarOpen = signal(false);
 
   /** Current theme key. */
-  private readonly theme = signal<'dark' | 'light'>('dark');
+  private readonly theme = signal<'dark' | 'light'>(
+    (localStorage.getItem('meridian-theme') as 'dark' | 'light') ?? 'dark',
+  );
 
   /** Toggles the page theme. Wired to the data-theme-toggle buttons. */
   toggleTheme(): void {
     this.theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
     document.documentElement.dataset['theme'] = this.theme();
+    localStorage.setItem('meridian-theme', this.theme());
   }
 
   /** Toggles the mobile sidebar. Called from the mobile-bar menu button. */
@@ -215,7 +223,7 @@ export class ShellComponent {
     this.sidebarOpen.set(false);
   }
 
-/** True if the given nav path matches the current URL segment. */
+  /** True if the given nav path matches the current URL segment. */
   isActive(path: string): boolean {
     const e = this.currentUrl();
     const url = e instanceof NavigationEnd ? e.urlAfterRedirects : '';

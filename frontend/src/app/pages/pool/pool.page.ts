@@ -21,11 +21,56 @@ import { UiIconComponent } from '../../ui/icon/icon.component';
 
 /** Top capital contributors (wireframe data). */
 export const CONTRIBUTORS = [
-  { initials: 'DV', name: 'Dana Voss', tier: 'Capital · T4', premium: true, tenure: '2y 4m', balance: '$284,500', share: 20.0, fill: 90 },
-  { initials: 'RK', name: 'Ravi Kumar', tier: 'Capital · T4', premium: true, tenure: '1y 11m', balance: '$198,200', share: 13.9, fill: 63 },
-  { initials: 'LM', name: 'Lena Moreau', tier: 'Capital · T3', premium: false, tenure: '1y 2m', balance: '$142,000', share: 10.0, fill: 45 },
-  { initials: 'TA', name: 'Tomás Alves', tier: 'Capital · T3', premium: false, tenure: '9m', balance: '$96,500', share: 6.8, fill: 31 },
-  { initials: 'YN', name: 'Yuki Nakamura', tier: 'Capital · T3', premium: false, tenure: '7m', balance: '$78,300', share: 5.5, fill: 25 },
+  {
+    initials: 'DV',
+    name: 'Dana Voss',
+    tier: 'Capital · T4',
+    premium: true,
+    tenure: '2y 4m',
+    balance: '$284,500',
+    share: 20.0,
+    fill: 90,
+  },
+  {
+    initials: 'RK',
+    name: 'Ravi Kumar',
+    tier: 'Capital · T4',
+    premium: true,
+    tenure: '1y 11m',
+    balance: '$198,200',
+    share: 13.9,
+    fill: 63,
+  },
+  {
+    initials: 'LM',
+    name: 'Lena Moreau',
+    tier: 'Capital · T3',
+    premium: false,
+    tenure: '1y 2m',
+    balance: '$142,000',
+    share: 10.0,
+    fill: 45,
+  },
+  {
+    initials: 'TA',
+    name: 'Tomás Alves',
+    tier: 'Capital · T3',
+    premium: false,
+    tenure: '9m',
+    balance: '$96,500',
+    share: 6.8,
+    fill: 31,
+  },
+  {
+    initials: 'YN',
+    name: 'Yuki Nakamura',
+    tier: 'Capital · T3',
+    premium: false,
+    tenure: '7m',
+    balance: '$78,300',
+    share: 5.5,
+    fill: 25,
+  },
 ] as const;
 
 /** Pool history series: available / locked / reserve (0-100 scale). */
@@ -79,7 +124,9 @@ function smoothPath(points: number[]): string {
     <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
       <div>
         <h1 class="page-title">Capital Pool</h1>
-        <p class="page-subtitle">Pool health, reserve ratio, liquidity, and member contributions.</p>
+        <p class="page-subtitle">
+          Pool health, reserve ratio, liquidity, and member contributions.
+        </p>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
         <button type="button" class="btn btn-secondary">
@@ -102,7 +149,12 @@ function smoothPath(points: number[]): string {
             <h2 class="modal-title">Deposit capital</h2>
             <p class="text-xs text-slate-500 mt-1">Funds become available immediately.</p>
           </div>
-          <button type="button" class="icon-btn" (click)="depositOpen.set(false)" aria-label="Close">
+          <button
+            type="button"
+            class="icon-btn"
+            (click)="depositOpen.set(false)"
+            aria-label="Close"
+          >
             <ui-icon name="x" [size]="16"></ui-icon>
           </button>
         </div>
@@ -119,15 +171,25 @@ function smoothPath(points: number[]): string {
               <option>USDC (crypto)</option>
             </select>
           </div>
-          <div class="card p-4 text-xs text-slate-500" style="background: rgba(96,165,250,0.04); border-color: rgba(96,165,250,0.2);">
+          <div
+            class="card p-4 text-xs text-slate-500"
+            style="background: rgba(96,165,250,0.04); border-color: rgba(96,165,250,0.2);"
+          >
             <div class="flex items-start gap-2">
               <ui-icon name="info" class="text-blue-400 mt-0.5" [size]="16"></ui-icon>
-              <div>Deposits are tracked transactionally — every dollar accounted for in the daily reconciliation.</div>
+              <div>
+                Deposits are tracked transactionally — every dollar accounted for in the daily
+                reconciliation.
+              </div>
             </div>
           </div>
           <div class="flex gap-3 justify-end">
-            <button type="button" class="btn btn-ghost" (click)="depositOpen.set(false)">Cancel</button>
-            <button type="submit" class="btn btn-primary"><ui-icon name="plus" [size]="16"></ui-icon>Deposit</button>
+            <button type="button" class="btn btn-ghost" (click)="depositOpen.set(false)">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <ui-icon name="plus" [size]="16"></ui-icon>Deposit
+            </button>
           </div>
         </form>
       </div>
@@ -141,7 +203,12 @@ function smoothPath(points: number[]): string {
             <h2 class="modal-title">Request withdrawal</h2>
             <p class="text-xs text-slate-500 mt-1">Available balance $12,500.00.</p>
           </div>
-          <button type="button" class="icon-btn" (click)="withdrawOpen.set(false)" aria-label="Close">
+          <button
+            type="button"
+            class="icon-btn"
+            (click)="withdrawOpen.set(false)"
+            aria-label="Close"
+          >
             <ui-icon name="x" [size]="16"></ui-icon>
           </button>
         </div>
@@ -158,15 +225,25 @@ function smoothPath(points: number[]): string {
               <option>USDC · 0x8f2a…9c1e</option>
             </select>
           </div>
-          <div class="card p-4 text-xs text-slate-500" style="background: rgba(245,158,11,0.04); border-color: rgba(245,158,11,0.2);">
+          <div
+            class="card p-4 text-xs text-slate-500"
+            style="background: rgba(245,158,11,0.04); border-color: rgba(245,158,11,0.2);"
+          >
             <div class="flex items-start gap-2">
               <ui-icon name="info" class="text-amber-400 mt-0.5" [size]="16"></ui-icon>
-              <div>Withdrawals settle in 1–2 business days. Locked capital (in executions) is unavailable until released.</div>
+              <div>
+                Withdrawals settle in 1–2 business days. Locked capital (in executions) is
+                unavailable until released.
+              </div>
             </div>
           </div>
           <div class="flex gap-3 justify-end">
-            <button type="button" class="btn btn-ghost" (click)="withdrawOpen.set(false)">Cancel</button>
-            <button type="submit" class="btn btn-primary"><ui-icon name="arrow-down-to-line" [size]="16"></ui-icon>Request</button>
+            <button type="button" class="btn btn-ghost" (click)="withdrawOpen.set(false)">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <ui-icon name="arrow-down-to-line" [size]="16"></ui-icon>Request
+            </button>
           </div>
         </form>
       </div>
@@ -201,7 +278,9 @@ function smoothPath(points: number[]): string {
       <section class="card p-6 lg:col-span-2">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h2 class="text-base font-semibold">Pool · <span>{{ chartLabel() }}</span></h2>
+            <h2 class="text-base font-semibold">
+              Pool · <span>{{ chartLabel() }}</span>
+            </h2>
             <p class="text-xs text-slate-500 mt-0.5">Available, deployed, and reserve</p>
           </div>
           <div class="tabs" role="tablist">
@@ -219,7 +298,13 @@ function smoothPath(points: number[]): string {
             }
           </div>
         </div>
-        <svg class="w-full" preserveAspectRatio="none" viewBox="0 0 600 220" role="img" aria-label="Pool chart">
+        <svg
+          class="w-full"
+          preserveAspectRatio="none"
+          viewBox="0 0 600 220"
+          role="img"
+          aria-label="Pool chart"
+        >
           <defs>
             <linearGradient id="avail" x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"></stop>
@@ -234,21 +319,72 @@ function smoothPath(points: number[]): string {
               <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"></stop>
             </linearGradient>
           </defs>
-          <line stroke="var(--border-subtle)" stroke-dasharray="2 4" stroke-width="1" x1="0" x2="600" y1="55" y2="55"></line>
-          <line stroke="var(--border-subtle)" stroke-dasharray="2 4" stroke-width="1" x1="0" x2="600" y1="110" y2="110"></line>
-          <line stroke="var(--border-subtle)" stroke-dasharray="2 4" stroke-width="1" x1="0" x2="600" y1="165" y2="165"></line>
+          <line
+            stroke="var(--border-subtle)"
+            stroke-dasharray="2 4"
+            stroke-width="1"
+            x1="0"
+            x2="600"
+            y1="55"
+            y2="55"
+          ></line>
+          <line
+            stroke="var(--border-subtle)"
+            stroke-dasharray="2 4"
+            stroke-width="1"
+            x1="0"
+            x2="600"
+            y1="110"
+            y2="110"
+          ></line>
+          <line
+            stroke="var(--border-subtle)"
+            stroke-dasharray="2 4"
+            stroke-width="1"
+            x1="0"
+            x2="600"
+            y1="165"
+            y2="165"
+          ></line>
           @for (s of chartSeries(); track s.name) {
             <path [attr.d]="s.area" [attr.fill]="'url(#' + s.gradient + ')'"></path>
             <path [attr.d]="s.line" fill="none" [attr.stroke]="s.color" stroke-width="2"></path>
           }
           <text fill="var(--text-3)" font-family="Inter" font-size="9" x="0" y="215">Dec 9</text>
-          <text fill="var(--text-3)" font-family="Inter" font-size="9" text-anchor="middle" x="270" y="215">Feb 9</text>
-          <text fill="var(--text-3)" font-family="Inter" font-size="9" text-anchor="end" x="600" y="215">Mar 9</text>
+          <text
+            fill="var(--text-3)"
+            font-family="Inter"
+            font-size="9"
+            text-anchor="middle"
+            x="270"
+            y="215"
+          >
+            Feb 9
+          </text>
+          <text
+            fill="var(--text-3)"
+            font-family="Inter"
+            font-size="9"
+            text-anchor="end"
+            x="600"
+            y="215"
+          >
+            Mar 9
+          </text>
         </svg>
         <div class="mt-4 flex items-center gap-6 text-xs">
-          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: var(--e-500);"></span><span class="text-slate-400">Available</span></div>
-          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: var(--v-400);"></span><span class="text-slate-400">Locked</span></div>
-          <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full" style="background: var(--a-400);"></span><span class="text-slate-400">Reserve</span></div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full" style="background: var(--e-500);"></span
+            ><span class="text-slate-400">Available</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full" style="background: var(--v-400);"></span
+            ><span class="text-slate-400">Locked</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full" style="background: var(--a-400);"></span
+            ><span class="text-slate-400">Reserve</span>
+          </div>
         </div>
       </section>
 
@@ -257,7 +393,12 @@ function smoothPath(points: number[]): string {
         <h2 class="text-base font-semibold mb-2">Reserve Ratio</h2>
         <p class="text-xs text-slate-500 mb-6">Healthy ≥ 12% · Warn &lt; 10% · Critical &lt; 5%</p>
         <div class="flex items-center justify-center">
-          <svg class="w-full max-w-[200px]" viewBox="0 0 200 110" role="img" aria-label="Reserve ratio gauge">
+          <svg
+            class="w-full max-w-[200px]"
+            viewBox="0 0 200 110"
+            role="img"
+            aria-label="Reserve ratio gauge"
+          >
             <defs>
               <linearGradient id="gauge" x1="0" x2="1" y1="0" y2="0">
                 <stop offset="0%" stop-color="var(--r-500)"></stop>
@@ -265,8 +406,20 @@ function smoothPath(points: number[]): string {
                 <stop offset="100%" stop-color="var(--e-500)"></stop>
               </linearGradient>
             </defs>
-            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--bg-overlay)" stroke-linecap="round" stroke-width="14"></path>
-            <path d="M 20 100 A 80 80 0 0 1 165 50" fill="none" stroke="url(#gauge)" stroke-linecap="round" stroke-width="14"></path>
+            <path
+              d="M 20 100 A 80 80 0 0 1 180 100"
+              fill="none"
+              stroke="var(--bg-overlay)"
+              stroke-linecap="round"
+              stroke-width="14"
+            ></path>
+            <path
+              d="M 20 100 A 80 80 0 0 1 165 50"
+              fill="none"
+              stroke="url(#gauge)"
+              stroke-linecap="round"
+              stroke-width="14"
+            ></path>
             <line stroke="var(--text-1)" stroke-width="2" x1="100" x2="100" y1="20" y2="32"></line>
           </svg>
         </div>
@@ -287,21 +440,27 @@ function smoothPath(points: number[]): string {
               <span class="text-xs text-slate-400">Reserve ratio</span>
               <span class="text-sm font-semibold text-emerald-400">18.2%</span>
             </div>
-            <div class="progress-track"><div class="progress-fill progress-fill-emerald" style="width: 72%;"></div></div>
+            <div class="progress-track">
+              <div class="progress-fill progress-fill-emerald" style="width: 72%;"></div>
+            </div>
           </div>
           <div>
             <div class="flex justify-between items-baseline mb-2">
               <span class="text-xs text-slate-400">Liquidity</span>
               <span class="text-sm font-semibold">62.4%</span>
             </div>
-            <div class="progress-track"><div class="progress-fill progress-fill-violet" style="width: 62%;"></div></div>
+            <div class="progress-track">
+              <div class="progress-fill progress-fill-violet" style="width: 62%;"></div>
+            </div>
           </div>
           <div>
             <div class="flex justify-between items-baseline mb-2">
               <span class="text-xs text-slate-400">Deployment</span>
               <span class="text-sm font-semibold">34.2%</span>
             </div>
-            <div class="progress-track"><div class="progress-fill progress-fill-blue" style="width: 34%;"></div></div>
+            <div class="progress-track">
+              <div class="progress-fill progress-fill-blue" style="width: 34%;"></div>
+            </div>
             <div class="text-[10px] text-slate-500 mt-1.5">In band 20–40% · Cap 50%</div>
           </div>
           <div>
@@ -309,7 +468,9 @@ function smoothPath(points: number[]): string {
               <span class="text-xs text-slate-400">Pending withdrawals</span>
               <span class="text-sm font-semibold">$8,400</span>
             </div>
-            <div class="progress-track"><div class="progress-fill progress-fill-amber" style="width: 6%;"></div></div>
+            <div class="progress-track">
+              <div class="progress-fill progress-fill-amber" style="width: 6%;"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -318,7 +479,10 @@ function smoothPath(points: number[]): string {
       <section class="card p-6 lg:col-span-2">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-base font-semibold">Top Capital Contributors</h2>
-          <a class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1" routerLink="/community/alpha/members">
+          <a
+            class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1"
+            routerLink="/community/alpha/members"
+          >
             All members<ui-icon name="arrow-right" [size]="12"></ui-icon>
           </a>
         </div>
@@ -339,17 +503,37 @@ function smoothPath(points: number[]): string {
                 <tr class="table-row">
                   <td>
                     <a class="flex items-center gap-2" [routerLink]="[memberUrl(c.name)]">
-                      <div class="avatar" style="background: var(--gradient-copper);">{{ c.initials }}</div>
+                      <div class="avatar" style="background: var(--gradient-copper);">
+                        {{ c.initials }}
+                      </div>
                       <span class="text-sm truncate min-w-0">{{ c.name }}</span>
                     </a>
                   </td>
                   <td class="hidden sm:table-cell">
-                    <span class="badge" [class.badge-premium]="c.premium" [class.badge-info]="!c.premium">{{ c.tier }}</span>
+                    <span
+                      class="badge"
+                      [class.badge-premium]="c.premium"
+                      [class.badge-info]="!c.premium"
+                      >{{ c.tier }}</span
+                    >
                   </td>
-                  <td class="hidden md:table-cell"><span class="text-xs text-slate-400">{{ c.tenure }}</span></td>
-                  <td><span class="text-sm font-semibold">{{ c.balance }}</span></td>
-                  <td class="hidden xl:table-cell"><span class="text-xs text-slate-300">{{ c.share }}%</span></td>
-                  <td class="hidden xl:table-cell"><div class="w-24 progress-track"><div class="progress-fill progress-fill-violet" style="width: {{ c.fill }}%;"></div></div></td>
+                  <td class="hidden md:table-cell">
+                    <span class="text-xs text-slate-400">{{ c.tenure }}</span>
+                  </td>
+                  <td>
+                    <span class="text-sm font-semibold">{{ c.balance }}</span>
+                  </td>
+                  <td class="hidden xl:table-cell">
+                    <span class="text-xs text-slate-300">{{ c.share }}%</span>
+                  </td>
+                  <td class="hidden xl:table-cell">
+                    <div class="w-24 progress-track">
+                      <div
+                        class="progress-fill progress-fill-violet"
+                        style="width: {{ c.fill }}%;"
+                      ></div>
+                    </div>
+                  </td>
                 </tr>
               }
             </tbody>
@@ -374,11 +558,21 @@ export class PoolPageComponent {
 
   /** Label for the chart heading ("90 days"). */
   chartLabel(): string {
-    return this.chartRange() === '7d' ? '7 days' : this.chartRange() === '1y' ? '1 year' : '90 days';
+    return this.chartRange() === '7d'
+      ? '7 days'
+      : this.chartRange() === '1y'
+        ? '1 year'
+        : '90 days';
   }
 
   /** Series paths for the active range. */
-  chartSeries(): Array<{ name: string; gradient: string; color: string; area: string; line: string }> {
+  chartSeries(): Array<{
+    name: string;
+    gradient: string;
+    color: string;
+    area: string;
+    line: string;
+  }> {
     const data = SERIES[this.chartRange()];
     const build = (key: 'available' | 'locked' | 'reserve', gradient: string, color: string) => {
       const line = smoothPath(data[key]);
@@ -393,17 +587,19 @@ export class PoolPageComponent {
   }
 
   /**
-   * Slug-ify a member name for the /members/:name URL.
+   * Slug-ify a member name for the canonical /community/alpha/members/<slug> URL.
    * Mirrors the helper in community-members.page.ts so the links match.
    */
   memberUrl(name: string): string {
+    // Canonical member route is per-community (PR #51); the pool page is a
+    // global page, so member links use the default-community pattern
+    // (same precedent as /governance -> /community/alpha/governance).
     const slug = name
       .toLowerCase()
       .normalize('NFD')
       .replace(/[̀-ͯ]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
-    return `/members/${slug}`;
+    return `/community/alpha/members/${slug}`;
   }
-
 }

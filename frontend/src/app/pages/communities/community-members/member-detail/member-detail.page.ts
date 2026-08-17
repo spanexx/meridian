@@ -13,20 +13,14 @@
  *   - Access Credentials card: 1 credential row
  *   - Recent Activity table (Date / Event / Result / Impact) with 4 rows
  *
- * Route: /members/:name — defaults to "dana-voss" so the page renders
+ * Route: /community/:id/members/:memberId — defaults to "dana-voss" so the page renders
  * before the route binds (matches the project-wide pattern from
  * community-detail).
  *
  * @owner   spanexx
  * @reviewed 2026-08-13
  */
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DecimalPipe, TitleCasePipe } from '@angular/common';
 import { UiIconComponent } from '../../../../ui/icon/icon.component';
@@ -103,10 +97,42 @@ export class MemberDetailPageComponent {
       capitalDeployed: 284500,
       lifetimeEarned: 38240,
       reputation: [
-        { key: 'signal', label: 'Signal', sub: 'Accuracy', score: 64, color: 'violet', icon: 'lightbulb', note: '4 submitted · 3 approved' },
-        { key: 'capital', label: 'Capital', sub: 'Stability', score: 97, color: 'emerald', icon: 'banknote', note: '2y 4m tenure · never a missed window' },
-        { key: 'access', label: 'Access', sub: 'Utilization', score: 38, color: 'blue', icon: 'key', note: '1 credential · warehouse' },
-        { key: 'community', label: 'Community', sub: 'Participation', score: 88, color: 'amber', icon: 'users', note: '214 votes · 93% alignment' },
+        {
+          key: 'signal',
+          label: 'Signal',
+          sub: 'Accuracy',
+          score: 64,
+          color: 'violet',
+          icon: 'lightbulb',
+          note: '4 submitted · 3 approved',
+        },
+        {
+          key: 'capital',
+          label: 'Capital',
+          sub: 'Stability',
+          score: 97,
+          color: 'emerald',
+          icon: 'banknote',
+          note: '2y 4m tenure · never a missed window',
+        },
+        {
+          key: 'access',
+          label: 'Access',
+          sub: 'Utilization',
+          score: 38,
+          color: 'blue',
+          icon: 'key',
+          note: '1 credential · warehouse',
+        },
+        {
+          key: 'community',
+          label: 'Community',
+          sub: 'Participation',
+          score: 88,
+          color: 'amber',
+          icon: 'users',
+          note: '214 votes · 93% alignment',
+        },
       ],
       contribution: [
         { label: 'Capital deployed', value: '$284,500' },
@@ -115,13 +141,50 @@ export class MemberDetailPageComponent {
         { label: 'Privileges', value: 'Vote · Propose · Operate', accent: 'violet' },
       ],
       credentials: [
-        { icon: 'warehouse', name: 'Düsseldorf warehouse', status: 'Verified · next available now', badge: 'success' },
+        {
+          icon: 'warehouse',
+          name: 'Düsseldorf warehouse',
+          status: 'Verified · next available now',
+          badge: 'success',
+        },
       ],
       activity: [
-        { date: 'Mar 13', event: 'Capital allocation · E-1042', link: '/executions/E-1042', result: '$3,700', resultVariant: 'info', impact: 'locked', impactVariant: 'neutral' },
-        { date: 'Mar 9', event: 'Vote · ROI floor proposal', link: '/governance', result: 'Approve', resultVariant: 'success', impact: '+rep', impactVariant: 'positive' },
-        { date: 'Mar 4', event: 'Payout · E-1030', link: '/payouts', result: '+$1,890', resultVariant: 'success', impact: '+rep', impactVariant: 'positive' },
-        { date: 'Feb 27', event: 'Capital deposit', link: '/pool', result: '+$25,000', resultVariant: 'info', impact: '—', impactVariant: 'neutral' },
+        {
+          date: 'Mar 13',
+          event: 'Capital allocation · E-1042',
+          link: '/executions/E-1042',
+          result: '$3,700',
+          resultVariant: 'info',
+          impact: 'locked',
+          impactVariant: 'neutral',
+        },
+        {
+          date: 'Mar 9',
+          event: 'Vote · ROI floor proposal',
+          link: '/governance',
+          result: 'Approve',
+          resultVariant: 'success',
+          impact: '+rep',
+          impactVariant: 'positive',
+        },
+        {
+          date: 'Mar 4',
+          event: 'Payout · E-1030',
+          link: '/payouts',
+          result: '+$1,890',
+          resultVariant: 'success',
+          impact: '+rep',
+          impactVariant: 'positive',
+        },
+        {
+          date: 'Feb 27',
+          event: 'Capital deposit',
+          link: '/pool',
+          result: '+$25,000',
+          resultVariant: 'info',
+          impact: '—',
+          impactVariant: 'neutral',
+        },
       ],
     },
   ];
@@ -194,20 +257,28 @@ export class MemberDetailPageComponent {
   /** Per-color CSS var for the reputation score text. */
   reputationColor(color: 'violet' | 'emerald' | 'blue' | 'amber'): string {
     switch (color) {
-      case 'violet': return 'var(--v-400)';
-      case 'emerald': return 'var(--e-400)';
-      case 'blue': return 'var(--b-400)';
-      case 'amber': return 'var(--a-400)';
+      case 'violet':
+        return 'var(--v-400)';
+      case 'emerald':
+        return 'var(--e-400)';
+      case 'blue':
+        return 'var(--b-400)';
+      case 'amber':
+        return 'var(--a-400)';
     }
   }
 
   /** Per-color icon background tint. */
   reputationTint(color: 'violet' | 'emerald' | 'blue' | 'amber'): string {
     switch (color) {
-      case 'violet': return 'rgba(201,138,66,0.12)';
-      case 'emerald': return 'rgba(16,185,129,0.12)';
-      case 'blue': return 'rgba(96,165,250,0.12)';
-      case 'amber': return 'rgba(245,158,11,0.12)';
+      case 'violet':
+        return 'rgba(201,138,66,0.12)';
+      case 'emerald':
+        return 'rgba(16,185,129,0.12)';
+      case 'blue':
+        return 'rgba(96,165,250,0.12)';
+      case 'amber':
+        return 'rgba(245,158,11,0.12)';
     }
   }
 

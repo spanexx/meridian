@@ -65,12 +65,7 @@ describe('PoolPageComponent', () => {
     const root = fixture.nativeElement as HTMLElement;
     const cards = Array.from(root.querySelectorAll('.kpi-label'));
     const labels = cards.map((c) => c.textContent?.trim());
-    expect(labels).toEqual([
-      'Total Available',
-      'Total Locked',
-      'Reserve',
-      'Pending',
-    ]);
+    expect(labels).toEqual(['Total Available', 'Total Locked', 'Reserve', 'Pending']);
     expect(root.textContent).toContain('$1,423,580');
     expect(root.textContent).toContain('$487,230');
     expect(root.textContent).toContain('$258,952');
@@ -108,9 +103,7 @@ describe('PoolPageComponent', () => {
   it('switching the chart tab changes the active tab', async () => {
     const fixture = await renderPool();
     fixture.detectChanges();
-    const tabs = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll('.tab'),
-    );
+    const tabs = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.tab'));
     (tabs[0] as HTMLButtonElement).click();
     fixture.detectChanges();
     expect(tabs[0].classList.contains('active')).toBe(true);
@@ -145,12 +138,7 @@ describe('PoolPageComponent', () => {
     const fixture = await renderPool();
     const root = fixture.nativeElement as HTMLElement;
     expect(root.textContent).toContain('Health Metrics');
-    for (const label of [
-      'Reserve ratio',
-      'Liquidity',
-      'Deployment',
-      'Pending withdrawals',
-    ]) {
+    for (const label of ['Reserve ratio', 'Liquidity', 'Deployment', 'Pending withdrawals']) {
       expect(root.textContent).toContain(label);
     }
     expect(root.textContent).toContain('18.2%');
@@ -192,9 +180,7 @@ describe('PoolPageComponent', () => {
       expect(root.textContent).toContain(c.name);
       expect(root.textContent).toContain(c.balance);
     }
-    const headers = Array.from(root.querySelectorAll('th')).map((th) =>
-      th.textContent?.trim(),
-    );
+    const headers = Array.from(root.querySelectorAll('th')).map((th) => th.textContent?.trim());
     expect(headers).toContain('Member');
     expect(headers).toContain('Tier');
     expect(headers).toContain('Balance');
@@ -255,13 +241,12 @@ describe('PoolPageComponent', () => {
     expect(modal?.textContent).toContain('Request withdrawal');
   });
 
-  it('memberUrl() slugifies member names and produces /members/<slug>', async () => {
+  it('memberUrl() slugifies member names to the canonical /community/alpha/members/<slug>', async () => {
     const f = await renderPool();
     const c = f.componentInstance as unknown as { memberUrl: (n: string) => string };
-    expect(c.memberUrl('Dana Voss')).toBe('/members/dana-voss');
-    expect(c.memberUrl('Tomás Alves')).toBe('/members/tomas-alves');
+    expect(c.memberUrl('Dana Voss')).toBe('/community/alpha/members/dana-voss');
+    expect(c.memberUrl('Tomás Alves')).toBe('/community/alpha/members/tomas-alves');
   });
-
 });
 
 describe('CONTRIBUTORS', () => {
@@ -270,5 +255,4 @@ describe('CONTRIBUTORS', () => {
     const shares = CONTRIBUTORS.map((c) => c.share);
     expect(shares).toEqual([20.0, 13.9, 10.0, 6.8, 5.5]);
   });
-
 });

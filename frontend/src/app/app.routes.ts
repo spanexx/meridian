@@ -190,4 +190,10 @@ export const routes: Routes = [
         (m) => m.MemberDetailPageComponent,
       ),
   },
+  {
+    // Wildcard — every unknown URL shows the 404 page instead of a blank shell.
+    path: '**',
+    loadComponent: () =>
+      import('./pages/not-found/not-found.page').then((m) => m.NotFoundPageComponent),
+  },
 ];

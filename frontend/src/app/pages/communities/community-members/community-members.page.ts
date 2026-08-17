@@ -12,7 +12,7 @@
  *   - Pagination: "Showing 8 of 124" + Prev/Next + "1 / 16"
  *   - Empty state
  *
- * NOTE: each row links to /members/<name> (the existing placeholder route).
+ * NOTE: each row links to /community/:id/members/<slug> (per-community route).
  * Each row carries data-category (tier) + data-status (role) attributes for the
  * tier filter and role-tab filters in the wireframe.
  *
@@ -20,7 +20,13 @@
  * @reviewed 2026-08-12
  */
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  Input,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
 
@@ -33,23 +39,123 @@ export interface Member {
   readonly role: Role;
   readonly tier: Tier;
   readonly reputation: number;
-  readonly contributionText: string;  // formatted: "$284,500" or "3 creds"
+  readonly contributionText: string; // formatted: "$284,500" or "3 creds"
   readonly signalsCount: number;
-  readonly signalsPctChange: number | null;  // null for "—"
+  readonly signalsPctChange: number | null; // null for "—"
   readonly avatarBg: 'violet' | 'emerald' | 'amber' | 'blue';
 }
 
 const MEMBERS: ReadonlyArray<Member> = [
-  { name: 'Dana Voss',     location: 'Düsseldorf, DE', role: 'capital', tier: 't4', reputation: 92, contributionText: '$284,500', signalsCount: 4, signalsPctChange: 28, avatarBg: 'violet' },
-  { name: 'Ravi Kumar',    location: 'London, UK',     role: 'capital', tier: 't4', reputation: 88, contributionText: '$198,200', signalsCount: 6, signalsPctChange: 22, avatarBg: 'emerald' },
-  { name: 'Mike Rivera',   location: 'Boston, US',     role: 'signal',  tier: 't3', reputation: 78, contributionText: '$3,200',   signalsCount: 14, signalsPctChange: 24.6, avatarBg: 'amber' },
-  { name: 'Sarah Park',    location: 'Seoul, KR',      role: 'signal',  tier: 't3', reputation: 81, contributionText: '$1,500',   signalsCount: 11, signalsPctChange: 31, avatarBg: 'violet' },
-  { name: 'Jules Tan',     location: 'Singapore, SG',  role: 'access',  tier: 't3', reputation: 74, contributionText: '3 creds',  signalsCount: 7, signalsPctChange: 19, avatarBg: 'blue' },
-  { name: 'Lena Moreau',   location: 'Paris, FR',      role: 'capital', tier: 't3', reputation: 69, contributionText: '$142,000', signalsCount: 3, signalsPctChange: 16, avatarBg: 'amber' },
-  { name: 'Kenji Honda',   location: 'Osaka, JP',      role: 'signal',  tier: 't2', reputation: 55, contributionText: '$800',     signalsCount: 9, signalsPctChange: 12, avatarBg: 'amber' },
-  { name: 'Tomás Alves',   location: 'Lisbon, PT',     role: 'capital', tier: 't3', reputation: 64, contributionText: '$96,500',  signalsCount: 5, signalsPctChange: 14, avatarBg: 'blue' },
-  { name: 'Yuki Nakamura', location: 'Tokyo, JP',      role: 'access',  tier: 't2', reputation: 48, contributionText: '1 cred',   signalsCount: 2, signalsPctChange: 8,  avatarBg: 'violet' },
-  { name: 'Omar Nasser',   location: 'Cairo, EG',      role: 'signal',  tier: 't1', reputation: 22, contributionText: '$250',     signalsCount: 1, signalsPctChange: null, avatarBg: 'emerald' },
+  {
+    name: 'Dana Voss',
+    location: 'Düsseldorf, DE',
+    role: 'capital',
+    tier: 't4',
+    reputation: 92,
+    contributionText: '$284,500',
+    signalsCount: 4,
+    signalsPctChange: 28,
+    avatarBg: 'violet',
+  },
+  {
+    name: 'Ravi Kumar',
+    location: 'London, UK',
+    role: 'capital',
+    tier: 't4',
+    reputation: 88,
+    contributionText: '$198,200',
+    signalsCount: 6,
+    signalsPctChange: 22,
+    avatarBg: 'emerald',
+  },
+  {
+    name: 'Mike Rivera',
+    location: 'Boston, US',
+    role: 'signal',
+    tier: 't3',
+    reputation: 78,
+    contributionText: '$3,200',
+    signalsCount: 14,
+    signalsPctChange: 24.6,
+    avatarBg: 'amber',
+  },
+  {
+    name: 'Sarah Park',
+    location: 'Seoul, KR',
+    role: 'signal',
+    tier: 't3',
+    reputation: 81,
+    contributionText: '$1,500',
+    signalsCount: 11,
+    signalsPctChange: 31,
+    avatarBg: 'violet',
+  },
+  {
+    name: 'Jules Tan',
+    location: 'Singapore, SG',
+    role: 'access',
+    tier: 't3',
+    reputation: 74,
+    contributionText: '3 creds',
+    signalsCount: 7,
+    signalsPctChange: 19,
+    avatarBg: 'blue',
+  },
+  {
+    name: 'Lena Moreau',
+    location: 'Paris, FR',
+    role: 'capital',
+    tier: 't3',
+    reputation: 69,
+    contributionText: '$142,000',
+    signalsCount: 3,
+    signalsPctChange: 16,
+    avatarBg: 'amber',
+  },
+  {
+    name: 'Kenji Honda',
+    location: 'Osaka, JP',
+    role: 'signal',
+    tier: 't2',
+    reputation: 55,
+    contributionText: '$800',
+    signalsCount: 9,
+    signalsPctChange: 12,
+    avatarBg: 'amber',
+  },
+  {
+    name: 'Tomás Alves',
+    location: 'Lisbon, PT',
+    role: 'capital',
+    tier: 't3',
+    reputation: 64,
+    contributionText: '$96,500',
+    signalsCount: 5,
+    signalsPctChange: 14,
+    avatarBg: 'blue',
+  },
+  {
+    name: 'Yuki Nakamura',
+    location: 'Tokyo, JP',
+    role: 'access',
+    tier: 't2',
+    reputation: 48,
+    contributionText: '1 cred',
+    signalsCount: 2,
+    signalsPctChange: 8,
+    avatarBg: 'violet',
+  },
+  {
+    name: 'Omar Nasser',
+    location: 'Cairo, EG',
+    role: 'signal',
+    tier: 't1',
+    reputation: 22,
+    contributionText: '$250',
+    signalsCount: 1,
+    signalsPctChange: null,
+    avatarBg: 'emerald',
+  },
 ];
 
 const PAGE_SIZE = 8;
@@ -71,11 +177,14 @@ export class CommunityMembersPageComponent {
   /** Display name for the community (derived from id; v1 mapping). */
   get communityName(): string {
     const map: Readonly<Record<string, string>> = {
-      'alpha': 'Alpha Syndicate',
+      alpha: 'Alpha Syndicate',
       'meridian-prime': 'Meridian Prime',
       'long-tail': 'Long Tail',
     };
-    return map[this.id] ?? (this.id ? this.id.charAt(0).toUpperCase() + this.id.slice(1) : 'Alpha Syndicate');
+    return (
+      map[this.id] ??
+      (this.id ? this.id.charAt(0).toUpperCase() + this.id.slice(1) : 'Alpha Syndicate')
+    );
   }
 
   /** Capitalised single-line scope tag for the header. */
@@ -95,22 +204,33 @@ export class CommunityMembersPageComponent {
     return r?.count ?? this.counts.total;
   }
 
-
   private _activeTier: 'all' | Tier = 'all';
   private _activeRole: 'all' | Role = 'all';
   private _search = '';
   private _page = 1;
 
-  get activeTier(): 'all' | Tier { return this._activeTier; }
-  get activeRole(): 'all' | Role { return this._activeRole; }
-  get searchQuery(): string { return this._search; }
-  get currentPage(): number { return this._page; }
+  get activeTier(): 'all' | Tier {
+    return this._activeTier;
+  }
+  get activeRole(): 'all' | Role {
+    return this._activeRole;
+  }
+  get searchQuery(): string {
+    return this._search;
+  }
+  get currentPage(): number {
+    return this._page;
+  }
 
   private _tierMenuOpen = false;
-  get tierMenuOpen(): boolean { return this._tierMenuOpen; }
+  get tierMenuOpen(): boolean {
+    return this._tierMenuOpen;
+  }
 
   private _roleMenuOpen = false;
-  get roleMenuOpen(): boolean { return this._roleMenuOpen; }
+  get roleMenuOpen(): boolean {
+    return this._roleMenuOpen;
+  }
 
   // Role counts (displayed in tabs; mock-only; could come from the data layer later).
   readonly counts = {
@@ -122,22 +242,24 @@ export class CommunityMembersPageComponent {
 
   readonly tiers: ReadonlyArray<{ value: 'all' | Tier; label: string }> = [
     { value: 'all', label: 'All tiers' },
-    { value: 't4',  label: 'Top contributors' },
-    { value: 't3',  label: 'Vetters' },
-    { value: 't2',  label: 'Contributors' },
-    { value: 't1',  label: 'New' },
+    { value: 't4', label: 'Top contributors' },
+    { value: 't3', label: 'Vetters' },
+    { value: 't2', label: 'Contributors' },
+    { value: 't1', label: 'New' },
   ];
 
   /** Role options for the mobile dropdown (matches the inline tabs). */
   readonly roles: ReadonlyArray<{ value: 'all' | Role; label: string; count: number }> = [
-    { value: 'all',     label: 'All',     count: this.counts.total },
+    { value: 'all', label: 'All', count: this.counts.total },
     { value: 'capital', label: 'Capital', count: this.counts.capital },
-    { value: 'signal',  label: 'Signal',  count: this.counts.signal },
-    { value: 'access',  label: 'Access',  count: this.counts.access },
+    { value: 'signal', label: 'Signal', count: this.counts.signal },
+    { value: 'access', label: 'Access', count: this.counts.access },
   ];
 
   // ─── Core data accessors ──────────────────────────────────────────────
-  members(): ReadonlyArray<Member> { return MEMBERS; }
+  members(): ReadonlyArray<Member> {
+    return MEMBERS;
+  }
 
   /**
    * Members after tier + role + search filters (used by the template).
@@ -148,7 +270,8 @@ export class CommunityMembersPageComponent {
     return MEMBERS.filter((m) => {
       if (this._activeTier !== 'all' && m.tier !== this._activeTier) return false;
       if (this._activeRole !== 'all' && m.role !== this._activeRole) return false;
-      if (q && !m.name.toLowerCase().includes(q) && !m.location.toLowerCase().includes(q)) return false;
+      if (q && !m.name.toLowerCase().includes(q) && !m.location.toLowerCase().includes(q))
+        return false;
       return true;
     });
   }
@@ -159,15 +282,19 @@ export class CommunityMembersPageComponent {
     return this.filteredMembers().slice(start, start + PAGE_SIZE);
   }
 
-  maxPage(): number { return Math.max(1, Math.ceil(TOTAL_COUNT / PAGE_SIZE)); }
-  pageSize(): number { return PAGE_SIZE; }
+  maxPage(): number {
+    return Math.max(1, Math.ceil(TOTAL_COUNT / PAGE_SIZE));
+  }
+  pageSize(): number {
+    return PAGE_SIZE;
+  }
 
-  /** Slug-ify a member name into the URL-safe form used by /members/:name. */
+  /** Slug-ify a member name into the URL-safe form used by /community/:id/members/:memberId. */
   slugForName(name: string): string {
     return name
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')   // strip diacritics (Lena = lena, Tomás = tomas)
+      .replace(/[\u0300-\u036f]/g, '') // strip diacritics (Lena = lena, Tomás = tomas)
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
   }
