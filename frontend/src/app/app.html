@@ -1,3 +1,7 @@
-<ui-shell>
+@if (authRoute()) {
   <router-outlet />
-</ui-shell>
+} @else {
+  <ui-shell>
+    <router-outlet />
+  </ui-shell>
+}
