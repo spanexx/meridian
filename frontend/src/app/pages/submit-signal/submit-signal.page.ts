@@ -21,6 +21,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
+import { UiIconComponent } from '../../ui/icon/icon.component';
 
 interface ToastState {
   readonly title: string;
@@ -32,7 +33,7 @@ interface ToastState {
   selector: 'app-submit-signal-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UiToastComponent],
+  imports: [UiToastComponent, UiIconComponent],
   templateUrl: './submit-signal.template.html',
 })
 export class SubmitSignalPageComponent {

@@ -23,6 +23,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
+import { UiIconComponent } from '../../ui/icon/icon.component';
 
 interface ToastState {
   readonly title: string;
@@ -34,7 +35,7 @@ interface ToastState {
   selector: 'app-register-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, UiToastComponent],
+  imports: [FormsModule, RouterLink, UiToastComponent, UiIconComponent],
   template: `
     <div class="min-h-screen flex flex-col">
       <!-- Top bar -->
@@ -49,7 +50,7 @@ interface ToastState {
             class="w-8 h-8 rounded-lg flex items-center justify-center"
             style="background: var(--gradient-violet);"
           >
-            <i data-lucide="diamond" class="w-4 h-4 text-white"></i>
+            <ui-icon name="diamond" [size]="16" class="text-white"></ui-icon>
           </div>
           <div>
             <div class="text-sm font-semibold tracking-tight">MERIDIAN</div>
@@ -66,7 +67,7 @@ interface ToastState {
           title="Toggle theme"
           (click)="toggleTheme()"
         >
-          <i data-lucide="moon" class="w-4 h-4"></i>
+          <ui-icon name="moon" [size]="16"></ui-icon>
         </button>
       </div>
 
@@ -133,7 +134,7 @@ interface ToastState {
               class="btn btn-primary w-full justify-center"
               data-testid="create-account"
             >
-              <i data-lucide="user-plus" class="w-4 h-4"></i>Create account
+              <ui-icon name="user-plus" [size]="16"></ui-icon>Create account
             </button>
           </form>
 

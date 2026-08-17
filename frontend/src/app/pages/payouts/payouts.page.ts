@@ -20,6 +20,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { PAYOUTS, type Payout, type PayoutStatus, type PayoutType } from './payouts.data';
+import { UiIconComponent } from '../../ui/icon/icon.component';
 
 const STATUS_COUNT = {
   pending: PAYOUTS.filter((p) => p.status === 'pending').length,
@@ -30,7 +31,7 @@ const STATUS_COUNT = {
   selector: 'app-payouts-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, UiIconComponent],
   template: `
     <section class="page">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
@@ -57,7 +58,7 @@ const STATUS_COUNT = {
               aria-label="Type"
               (click)="toggleTypeMenu()"
             >
-              <i class="w-4 h-4" data-lucide="filter"></i>Type
+              <ui-icon name="filter" [size]="16"></ui-icon>Type
             </button>
             @if (typeOpen()) {
               <div class="fixed inset-0 z-40" data-click-away (click)="closeTypeMenu()"></div>
@@ -72,7 +73,7 @@ const STATUS_COUNT = {
                   [attr.data-filter-category]="t.key"
                   (click)="selectType(t.key)"
                 >
-                  <i class="w-4 h-4" [attr.data-lucide]="t.icon"></i>{{ t.label }}
+                  <ui-icon [name]="t.icon" [size]="16"></ui-icon>{{ t.label }}
                 </button>
               }
             </div>
@@ -130,7 +131,7 @@ const STATUS_COUNT = {
           <a
             class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1"
             [routerLink]="['/community/alpha/governance']"
-            >Governance<i class="w-3 h-3" data-lucide="arrow-right"></i
+            >Governance<ui-icon name="arrow-right" [size]="12"></ui-icon
           ></a>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -161,7 +162,7 @@ const STATUS_COUNT = {
       <div class="card p-0 overflow-hidden">
         @if (pagedRows().length === 0) {
           <div class="empty" data-testid="empty">
-            <i class="w-10 h-10 mx-auto" data-lucide="circle-dollar-sign"></i>
+            <ui-icon name="circle-dollar-sign" [size]="40" class="mx-auto"></ui-icon>
             <p class="text-sm font-medium text-slate-400 mb-1">No payouts match</p>
             <p class="text-xs">Try a different status, type, or search term.</p>
           </div>
@@ -241,7 +242,7 @@ const STATUS_COUNT = {
                 [disabled]="page() === 1"
                 (click)="prev()"
               >
-                <i class="w-3 h-3" data-lucide="chevron-left"></i>
+                <ui-icon name="chevron-left" [size]="12"></ui-icon>
               </button>
               <span data-page-num>{{ page() }} / {{ totalPages() }}</span>
               <button
@@ -251,7 +252,7 @@ const STATUS_COUNT = {
                 [disabled]="page() === totalPages()"
                 (click)="next()"
               >
-                <i class="w-3 h-3" data-lucide="chevron-right"></i>
+                <ui-icon name="chevron-right" [size]="12"></ui-icon>
               </button>
             </div>
           </div>

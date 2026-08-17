@@ -19,6 +19,7 @@
  */
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { UiIconComponent } from '../../ui/icon/icon.component';
 
 interface Submitter {
   initials: string;
@@ -59,7 +60,7 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
   selector: 'app-opportunities-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, UiIconComponent],
   template: `
     <section class="page">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
@@ -81,10 +82,10 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
               data-dropdown="catMenu"
               aria-label="Category"
             >
-              <i class="w-4 h-4" data-lucide="filter"></i>Category
+              <ui-icon name="filter" [size]="16"></ui-icon>Category
             </button>
             <a class="btn btn-primary" [routerLink]="['/submit-signal']">
-              <i class="w-4 h-4" data-lucide="plus"></i>Submit Signal
+              <ui-icon name="plus" [size]="16"></ui-icon>Submit Signal
             </a>
           </div>
         </div>
@@ -94,22 +95,22 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
       <div class="menu" id="catMenu" hidden>
         <div class="menu-head">Category</div>
         <button class="menu-item active" data-filter-category="all">
-          <i class="w-4 h-4" data-lucide="layout-grid"></i>All categories
+          <ui-icon name="layout-grid" [size]="16"></ui-icon>All categories
         </button>
         <button class="menu-item" data-filter-category="apparel">
-          <i class="w-4 h-4" data-lucide="shirt"></i>Apparel
+          <ui-icon name="shirt" [size]="16"></ui-icon>Apparel
         </button>
         <button class="menu-item" data-filter-category="collectibles">
-          <i class="w-4 h-4" data-lucide="package"></i>Collectibles
+          <ui-icon name="package" [size]="16"></ui-icon>Collectibles
         </button>
         <button class="menu-item" data-filter-category="electronics">
-          <i class="w-4 h-4" data-lucide="cpu"></i>Electronics
+          <ui-icon name="cpu" [size]="16"></ui-icon>Electronics
         </button>
         <button class="menu-item" data-filter-category="equipment">
-          <i class="w-4 h-4" data-lucide="wrench"></i>Equipment
+          <ui-icon name="wrench" [size]="16"></ui-icon>Equipment
         </button>
         <button class="menu-item" data-filter-category="furniture">
-          <i class="w-4 h-4" data-lucide="armchair"></i>Furniture
+          <ui-icon name="armchair" [size]="16"></ui-icon>Furniture
         </button>
       </div>
 
@@ -207,7 +208,7 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
                   </td>
                   <td>
                     <a [routerLink]="['/opportunities', opp.ref]">
-                      <i class="w-4 h-4 text-slate-500" data-lucide="arrow-right"></i>
+                      <ui-icon name="arrow-right" [size]="16" class="text-slate-500"></ui-icon>
                     </a>
                   </td>
                 </tr>

@@ -5,9 +5,7 @@
   <!-- Top bar -->
   <div class="relative z-10 flex items-center justify-between px-6 sm:px-10 py-5">
     <a [routerLink]="['/']" class="flex items-center gap-3">
-      <div class="logo-mark">
-        <i data-lucide="diamond" class="w-4 h-4 text-white relative z-10"></i>
-      </div>
+      <ui-logo [size]="36" ariaLabel="Meridian — go to dashboard"></ui-logo>
       <div>
         <div class="text-sm font-semibold tracking-tight">MERIDIAN</div>
         <div class="text-[10px] uppercase tracking-[0.18em] text-muted">Collective Arbitrage</div>
@@ -26,7 +24,7 @@
         >Sign in</a
       >
       <a [routerLink]="['/register']" class="btn btn-primary text-sm pulse-halo"
-        ><i data-lucide="user-plus" class="w-4 h-4"></i>Join</a
+        ><ui-icon name="user-plus" [size]="16"></ui-icon>Join</a
       >
       <button
         type="button"
@@ -35,7 +33,7 @@
         title="Toggle theme"
         (click)="toggleTheme()"
       >
-        <i data-lucide="moon" class="w-4 h-4"></i>
+        <ui-icon name="moon" [size]="16"></ui-icon>
       </button>
     </div>
   </div>
@@ -67,11 +65,11 @@
             [routerLink]="['/register']"
             class="btn btn-primary justify-center text-base px-6 py-3 pulse-halo"
           >
-            <i data-lucide="user-plus" class="w-5 h-5"></i>
+            <ui-icon name="user-plus" [size]="20"></ui-icon>
             Join the community
           </a>
           <a href="#live" class="btn btn-secondary justify-center text-base px-6 py-3">
-            <i data-lucide="play-circle" class="w-5 h-5"></i>
+            <ui-icon name="play-circle" [size]="20"></ui-icon>
             See it live
           </a>
         </div>
@@ -79,17 +77,19 @@
         <!-- Mini social proof -->
         <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted">
           <span class="flex items-center gap-1.5"
-            ><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>KYC at
+            ><ui-icon name="shield-check" [size]="14" class="text-emerald-400"></ui-icon>KYC at
             join</span
           >
           <span class="flex items-center gap-1.5"
-            ><i data-lucide="lock" class="w-3.5 h-3.5 text-violet-400"></i>Audited event log</span
+            ><ui-icon name="lock" [size]="14" class="text-violet-400"></ui-icon>Audited event
+            log</span
           >
           <span class="flex items-center gap-1.5"
-            ><i data-lucide="ban" class="w-3.5 h-3.5 text-rose-400"></i>No ponzi mechanics</span
+            ><ui-icon name="ban" [size]="14" class="text-rose-400"></ui-icon>No ponzi
+            mechanics</span
           >
           <span class="flex items-center gap-1.5"
-            ><i data-lucide="bot" class="w-3.5 h-3.5 text-blue-400"></i>AI assists · humans
+            ><ui-icon name="bot" [size]="14" class="text-blue-400"></ui-icon>AI assists · humans
             decide</span
           >
         </div>
@@ -156,13 +156,13 @@
             style="border-color: var(--border-subtle)"
           >
             <span class="text-muted flex items-center gap-1.5"
-              ><i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>streaming · 47 ops
-              today</span
+              ><ui-icon name="activity" [size]="14" class="text-emerald-400"></ui-icon>streaming ·
+              47 ops today</span
             >
             <a
               [routerLink]="['/opportunities']"
               class="text-soft hover-text-1 flex items-center gap-1"
-              >Open feed <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i
+              >Open feed <ui-icon name="arrow-up-right" [size]="14"></ui-icon
             ></a>
           </div>
         </div>
@@ -230,7 +230,7 @@
           class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
           style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25)"
         >
-          <i data-lucide="banknote" class="w-7 h-7 text-emerald-400"></i>
+          <ui-icon name="banknote" [size]="28" class="text-emerald-400"></ui-icon>
         </div>
         <div class="text-[10px] uppercase tracking-widest text-emerald-400 mb-2">
           Capital · 60% share
@@ -258,7 +258,7 @@
           class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
           style="background: rgba(201, 138, 66, 0.12); border: 1px solid rgba(201, 138, 66, 0.25)"
         >
-          <i data-lucide="radar" class="w-7 h-7 text-violet-400"></i>
+          <ui-icon name="radar" [size]="28" class="text-violet-400"></ui-icon>
         </div>
         <div class="text-[10px] uppercase tracking-widest mb-2" style="color: var(--v-400)">
           Signals · 25% share
@@ -286,7 +286,7 @@
           class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
           style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25)"
         >
-          <i data-lucide="key-round" class="w-7 h-7 text-amber-400"></i>
+          <ui-icon name="key-round" [size]="28" class="text-amber-400"></ui-icon>
         </div>
         <div class="text-[10px] uppercase tracking-widest text-amber-400 mb-2">
           Access · 15% share
@@ -348,7 +348,7 @@
       </h2>
     </div>
     <a [routerLink]="['/opportunities']" class="btn btn-secondary text-sm"
-      ><i data-lucide="arrow-right" class="w-4 h-4"></i>View all signals</a
+      ><ui-icon name="arrow-right" [size]="16"></ui-icon>View all signals</a
     >
   </div>
 
@@ -519,15 +519,16 @@
         </p>
         <div class="space-y-3 text-sm">
           <div class="flex items-center gap-2 text-soft">
-            <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>Daily reconciliation:
-            BALANCED
+            <ui-icon name="check" [size]="16" class="text-emerald-400"></ui-icon>Daily
+            reconciliation: BALANCED
           </div>
           <div class="flex items-center gap-2 text-soft">
-            <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>Reserve ratio: 18.2% (target
-            18%)
+            <ui-icon name="check" [size]="16" class="text-emerald-400"></ui-icon>Reserve ratio:
+            18.2% (target 18%)
           </div>
           <div class="flex items-center gap-2 text-soft">
-            <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>Liquidity: 62% (healthy)
+            <ui-icon name="check" [size]="16" class="text-emerald-400"></ui-icon>Liquidity: 62%
+            (healthy)
           </div>
         </div>
       </div>
@@ -544,7 +545,7 @@
               </div>
             </div>
             <span class="badge badge-success text-[10px]"
-              ><i data-lucide="trending-up" class="w-3 h-3"></i>Healthy</span
+              ><ui-icon name="trending-up" [size]="12"></ui-icon>Healthy</span
             >
           </div>
           <svg class="spark" viewBox="0 0 200 48" preserveAspectRatio="none">
@@ -686,7 +687,7 @@
             class="w-14 h-14 rounded-full flex items-center justify-center"
             style="background: rgba(20, 184, 166, 0.18); border: 1px solid rgba(20, 184, 166, 0.45)"
           >
-            <i data-lucide="radar" class="w-6 h-6 text-emerald-400"></i>
+            <ui-icon name="radar" [size]="24" class="text-emerald-400"></ui-icon>
           </div>
           <div class="text-xs font-medium">Signal</div>
           <div class="text-[10px] text-muted">Submitted</div>
@@ -697,7 +698,7 @@
             class="w-14 h-14 rounded-full flex items-center justify-center"
             style="background: rgba(201, 138, 66, 0.18); border: 1px solid rgba(201, 138, 66, 0.45)"
           >
-            <i data-lucide="bot" class="w-6 h-6 text-violet-400"></i>
+            <ui-icon name="bot" [size]="24" class="text-violet-400"></ui-icon>
           </div>
           <div class="text-xs font-medium">Auto-checks</div>
           <div class="text-[10px] text-muted">LLM + OCR</div>
@@ -708,7 +709,7 @@
             class="w-14 h-14 rounded-full flex items-center justify-center"
             style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.45)"
           >
-            <i data-lucide="vote" class="w-6 h-6 text-amber-400"></i>
+            <ui-icon name="vote" [size]="24" class="text-amber-400"></ui-icon>
           </div>
           <div class="text-xs font-medium">Vetting</div>
           <div class="text-[10px] text-muted">Reputation vote</div>
@@ -719,7 +720,7 @@
             class="w-14 h-14 rounded-full flex items-center justify-center"
             style="background: rgba(96, 165, 250, 0.18); border: 1px solid rgba(96, 165, 250, 0.45)"
           >
-            <i data-lucide="zap" class="w-6 h-6 text-blue-400"></i>
+            <ui-icon name="zap" [size]="24" class="text-blue-400"></ui-icon>
           </div>
           <div class="text-xs font-medium">Execution</div>
           <div class="text-[10px] text-muted">Acquire + list</div>
@@ -730,7 +731,7 @@
             class="w-14 h-14 rounded-full flex items-center justify-center"
             style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.45)"
           >
-            <i data-lucide="circle-dollar-sign" class="w-6 h-6 text-emerald-400"></i>
+            <ui-icon name="circle-dollar-sign" [size]="24" class="text-emerald-400"></ui-icon>
           </div>
           <div class="text-xs font-medium">Payout</div>
           <div class="text-[10px] text-muted">Split 60:25:15</div>
@@ -744,7 +745,7 @@
             class="w-10 h-10 rounded-full flex items-center justify-center"
             style="background: rgba(20, 184, 166, 0.18)"
           >
-            <i data-lucide="radar" class="w-5 h-5 text-emerald-400"></i>
+            <ui-icon name="radar" [size]="20" class="text-emerald-400"></ui-icon>
           </div>
           <div>
             <div class="text-sm font-medium">Signal submitted</div>
@@ -756,7 +757,7 @@
             class="w-10 h-10 rounded-full flex items-center justify-center"
             style="background: rgba(201, 138, 66, 0.18)"
           >
-            <i data-lucide="bot" class="w-5 h-5 text-violet-400"></i>
+            <ui-icon name="bot" [size]="20" class="text-violet-400"></ui-icon>
           </div>
           <div>
             <div class="text-sm font-medium">Auto-checks</div>
@@ -768,7 +769,7 @@
             class="w-10 h-10 rounded-full flex items-center justify-center"
             style="background: rgba(245, 158, 11, 0.18)"
           >
-            <i data-lucide="vote" class="w-5 h-5 text-amber-400"></i>
+            <ui-icon name="vote" [size]="20" class="text-amber-400"></ui-icon>
           </div>
           <div>
             <div class="text-sm font-medium">Reputation-weighted vote</div>
@@ -780,7 +781,7 @@
             class="w-10 h-10 rounded-full flex items-center justify-center"
             style="background: rgba(96, 165, 250, 0.18)"
           >
-            <i data-lucide="zap" class="w-5 h-5 text-blue-400"></i>
+            <ui-icon name="zap" [size]="20" class="text-blue-400"></ui-icon>
           </div>
           <div>
             <div class="text-sm font-medium">Execution</div>
@@ -792,7 +793,7 @@
             class="w-10 h-10 rounded-full flex items-center justify-center"
             style="background: rgba(16, 185, 129, 0.18)"
           >
-            <i data-lucide="circle-dollar-sign" class="w-5 h-5 text-emerald-400"></i>
+            <ui-icon name="circle-dollar-sign" [size]="20" class="text-emerald-400"></ui-icon>
           </div>
           <div>
             <div class="text-sm font-medium">Payout</div>
@@ -897,7 +898,7 @@
         <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight mt-3">Why members stay</h2>
       </div>
       <a [routerLink]="['/community/alpha/members']" class="btn btn-ghost text-sm"
-        >Browse members <i data-lucide="arrow-right" class="w-4 h-4"></i
+        >Browse members <ui-icon name="arrow-right" [size]="16"></ui-icon
       ></a>
     </div>
 
@@ -990,27 +991,29 @@
 
       <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
         <a [routerLink]="['/register']" class="btn btn-primary text-base px-7 py-3 pulse-halo">
-          <i data-lucide="user-plus" class="w-5 h-5"></i>
+          <ui-icon name="user-plus" [size]="20"></ui-icon>
           Create your account
         </a>
         <a [routerLink]="['/opportunities']" class="btn btn-secondary text-base px-7 py-3">
-          <i data-lucide="eye" class="w-5 h-5"></i>
+          <ui-icon name="eye" [size]="20"></ui-icon>
           View live opportunities
         </a>
       </div>
 
       <div class="flex items-center justify-center gap-6 mt-8 text-xs text-muted flex-wrap">
         <span class="flex items-center gap-1.5"
-          ><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>KYC required</span
+          ><ui-icon name="shield-check" [size]="14" class="text-emerald-400"></ui-icon>KYC
+          required</span
         >
         <span class="flex items-center gap-1.5"
-          ><i data-lucide="lock" class="w-3.5 h-3.5 text-violet-400"></i>Audited event log</span
+          ><ui-icon name="lock" [size]="14" class="text-violet-400"></ui-icon>Audited event
+          log</span
         >
         <span class="flex items-center gap-1.5"
-          ><i data-lucide="users" class="w-3.5 h-3.5 text-amber-400"></i>Member-owned</span
+          ><ui-icon name="users" [size]="14" class="text-amber-400"></ui-icon>Member-owned</span
         >
         <span class="flex items-center gap-1.5"
-          ><i data-lucide="ban" class="w-3.5 h-3.5 text-rose-400"></i>No unearned returns</span
+          ><ui-icon name="ban" [size]="14" class="text-rose-400"></ui-icon>No unearned returns</span
         >
       </div>
     </div>
@@ -1023,9 +1026,7 @@
     <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
       <div class="col-span-2">
         <a [routerLink]="['/']" class="flex items-center gap-3 mb-4">
-          <div class="logo-mark">
-            <i data-lucide="diamond" class="w-4 h-4 text-white relative z-10"></i>
-          </div>
+          <ui-logo [size]="36" ariaLabel="Meridian — go to dashboard"></ui-logo>
           <div>
             <div class="text-sm font-semibold tracking-tight">MERIDIAN</div>
             <div class="text-[10px] uppercase tracking-[0.18em] text-muted">
@@ -1039,13 +1040,13 @@
         </p>
         <div class="flex items-center gap-2 mt-5">
           <a href="#" class="icon-btn" title="GitHub"
-            ><i data-lucide="github" class="w-4 h-4"></i
+            ><ui-icon name="github" [size]="16"></ui-icon
           ></a>
           <a href="#" class="icon-btn" title="Discord"
-            ><i data-lucide="message-circle" class="w-4 h-4"></i
+            ><ui-icon name="message-circle" [size]="16"></ui-icon
           ></a>
           <a href="#" class="icon-btn" title="Twitter"
-            ><i data-lucide="twitter" class="w-4 h-4"></i
+            ><ui-icon name="twitter" [size]="16"></ui-icon
           ></a>
         </div>
       </div>

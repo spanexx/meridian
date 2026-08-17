@@ -8,10 +8,10 @@
     </div>
     <div class="flex items-center gap-2 flex-wrap">
       <button type="button" class="btn btn-secondary" data-mark-read (click)="markAllRead()">
-        <i data-lucide="check-check" class="w-4 h-4"></i>Mark all read
+        <ui-icon name="check-check" [size]="16"></ui-icon>Mark all read
       </button>
       <button type="button" class="btn btn-primary" (click)="openPrefs()">
-        <i data-lucide="settings" class="w-4 h-4"></i>Preferences
+        <ui-icon name="settings" [size]="16"></ui-icon>Preferences
       </button>
     </div>
   </header>
@@ -25,7 +25,7 @@
           <p class="text-xs text-slate-500 mt-1">Choose what reaches you.</p>
         </div>
         <button type="button" class="icon-btn" aria-label="Close" (click)="closePrefs()">
-          <i data-lucide="x" class="w-4 h-4"></i>
+          <ui-icon name="x" [size]="16"></ui-icon>
         </button>
       </div>
       <div class="space-y-4">
@@ -88,7 +88,7 @@
               class="w-10 h-10 rounded-lg flex items-center justify-center"
               [style.background]="n.bg"
             >
-              <i class="w-5 h-5" [attr.data-lucide]="n.icon" [class]="n.color"></i>
+              <ui-icon [name]="n.icon" [size]="20" [class]="n.color"></ui-icon>
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between gap-3">
@@ -105,7 +105,7 @@
       </div>
     } @else {
       <div class="empty" data-empty>
-        <i data-lucide="bell-off" class="w-10 h-10 mx-auto"></i>
+        <ui-icon name="bell-off" [size]="40" class="mx-auto"></ui-icon>
         <p class="text-sm font-medium text-slate-400 mb-1">You're all caught up</p>
         <p class="text-xs">No notifications in this view.</p>
       </div>

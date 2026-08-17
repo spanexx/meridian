@@ -25,6 +25,7 @@
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
+import { UiIconComponent } from '../../ui/icon/icon.component';
 
 /** One notification row, ported verbatim from the wireframe. */
 export interface NotificationItem {
@@ -150,7 +151,7 @@ export const NOTIFICATIONS: NotificationItem[] = [
   selector: 'app-notifications-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, UiToastComponent],
+  imports: [RouterLink, UiToastComponent, UiIconComponent],
   templateUrl: './notifications.template.html',
 })
 export class NotificationsPageComponent {
