@@ -51,8 +51,10 @@ export class App {
   }
 
   private isShellLessUrl(url: string): boolean {
+    // Strip fragment (hash) since router.url may include it during navigation
+    const urlWithoutHash = url.split('#')[0];
     return SHELL_LESS_PATHS.some(
-      (path) => url === path || (path !== '/' && url.startsWith(path + '/')),
+      (path) => urlWithoutHash === path || (path !== '/' && urlWithoutHash.startsWith(path + '/')),
     );
   }
 }
