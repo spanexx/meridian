@@ -1,0 +1,475 @@
+<section class="page">
+  <header class="mb-8">
+    <h1 class="page-title">Submit Signal</h1>
+    <p class="page-subtitle">An arbitrage opportunity for the community to vet.</p>
+  </header>
+
+  <!-- Stepper: indicators only. Raw markup mirrors the wireframe — the
+       ui-stepper primitive makes steps clickable, which this page does not
+       (only prev/next buttons navigate). -->
+  <div class="stepper mb-8">
+    @for (step of steps; track step; let i = $index) {
+      <div class="step" [attr.data-step]="i" [class.active]="activeStep() === i">
+        <span class="step-num">{{ i + 1 }}</span
+        ><span>{{ step }}</span>
+      </div>
+      @if (!$last) {
+        <div class="step-divider"></div>
+      }
+    }
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+      <!-- Step 1: Details -->
+      <section class="card p-6" data-step-panel="0" [hidden]="activeStep() !== 0">
+        <h2 class="text-base font-semibold mb-1">Details</h2>
+        <p class="text-xs text-slate-500 mb-5">What is the opportunity?</p>
+        <div class="space-y-4">
+          <div>
+            <label>Title</label>
+            <input
+              type="text"
+              class="input"
+              data-field="title"
+              placeholder="e.g. Travis Scott × Nike Sneakers"
+              [value]="title()"
+              (input)="title.set($any($event.target).value)"
+            />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label>Category</label>
+              <select
+                class="input"
+                data-field="category"
+                [value]="category()"
+                (change)="category.set($any($event.target).value)"
+              >
+                <option>Apparel</option>
+                <option>Collectibles</option>
+                <option>Electronics</option>
+                <option>Equipment</option>
+                <option>Furniture</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label>Risk level</label>
+              <select
+                class="input"
+                data-field="risk"
+                [value]="risk()"
+                (change)="risk.set($any($event.target).value)"
+              >
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label>Description</label>
+            <textarea
+              class="input"
+              rows="4"
+              placeholder="Concise description of the opportunity, the source, and why it works."
+              [value]="description()"
+              (input)="description.set($any($event.target).value)"
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Acquisition -->
+      <section class="card p-6" data-step-panel="1" [hidden]="activeStep() !== 1">
+        <h2 class="text-base font-semibold mb-1">Acquisition</h2>
+        <p class="text-xs text-slate-500 mb-5">How and where will the asset be acquired?</p>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label>Source</label>
+              <input
+                type="text"
+                class="input"
+                data-field="source"
+                [value]="source()"
+                (input)="source.set($any($event.target).value)"
+              />
+            </div>
+            <div>
+              <label>Location</label>
+              <input
+                type="text"
+                class="input"
+                data-field="location"
+                [value]="location()"
+                (input)="location.set($any($event.target).value)"
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div>
+              <label>Estimated cost</label>
+              <div class="relative" data-field="cost">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"
+                  >$</span
+                >
+                <input
+                  type="text"
+                  class="input"
+                  style="padding-left: 1.75rem"
+                  [value]="costN().toLocaleString('en-US')"
+                  (input)="onNumInput('cost', $event)"
+                />
+              </div>
+            </div>
+            <div>
+              <label>Quantity</label>
+              <input
+                type="text"
+                class="input"
+                [value]="qty()"
+                (input)="qty.set($any($event.target).value)"
+              />
+            </div>
+            <div>
+              <label>Deadline</label>
+              <input
+                type="date"
+                class="input"
+                data-field="deadline"
+                [value]="deadline()"
+                (input)="deadline.set($any($event.target).value)"
+              />
+            </div>
+          </div>
+          <div>
+            <label>Access needed?</label>
+            <select
+              class="input"
+              data-field="access"
+              [value]="access()"
+              (change)="access.set($any($event.target).value)"
+            >
+              <option>Yes — boutique relationship</option>
+              <option>No</option>
+            </select>
+          </div>
+          <div>
+            <label>Skills needed</label>
+            <input
+              type="text"
+              class="input"
+              data-field="skills"
+              placeholder="e.g. authentication, photography"
+              [value]="skills()"
+              (input)="skills.set($any($event.target).value)"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3: Resale -->
+      <section class="card p-6" data-step-panel="2" [hidden]="activeStep() !== 2">
+        <h2 class="text-base font-semibold mb-1">Resale</h2>
+        <p class="text-xs text-slate-500 mb-5">Channels and projections.</p>
+        <div class="space-y-4">
+          <div>
+            <label>Channels</label>
+            <div class="flex flex-wrap gap-2 mt-1">
+              @for (ch of channels; track ch.name; let i = $index) {
+                <label
+                  class="flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer"
+                  [style.background]="'var(--bg-overlay)'"
+                  [style.border-color]="
+                    channelChecked()[i] ? 'var(--v-400)' : 'var(--border-subtle)'
+                  "
+                >
+                  <input
+                    type="checkbox"
+                    data-channel
+                    [checked]="channelChecked()[i]"
+                    (change)="selectType(ch.name)"
+                  />
+                  <span class="text-sm">{{ ch.name }}</span>
+                </label>
+              }
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div>
+              <label>Estimated value</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"
+                  >$</span
+                >
+                <input
+                  type="text"
+                  class="input"
+                  style="padding-left: 1.75rem"
+                  [value]="valueN().toLocaleString('en-US')"
+                  (input)="onNumInput('value', $event)"
+                />
+              </div>
+            </div>
+            <div>
+              <label>Time to liquidate</label>
+              <input
+                type="text"
+                class="input"
+                [value]="timeToLiquidate()"
+                (input)="timeToLiquidate.set($any($event.target).value)"
+              />
+            </div>
+            <div>
+              <label>Confidence</label>
+              <select
+                class="input"
+                [value]="confidence()"
+                (change)="confidence.set($any($event.target).value)"
+              >
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="card p-4" data-resale-summary>
+              <div class="kpi-label mb-1.5">Estimated profit</div>
+              <div class="text-2xl font-light text-gradient-emerald">{{ formatUsd(profit()) }}</div>
+            </div>
+            <div class="card p-4" data-resale-summary>
+              <div class="kpi-label mb-1.5">Estimated ROI</div>
+              <div class="text-2xl font-light text-gradient-emerald">
+                {{ formatRoi(profit() / costN()) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 4: Evidence -->
+      <section class="card p-6" data-step-panel="3" [hidden]="activeStep() !== 3">
+        <h2 class="text-base font-semibold mb-1">Evidence</h2>
+        <p class="text-xs text-slate-500 mb-5">Link proof of source, recent sales, market data.</p>
+        <div class="space-y-4">
+          <div>
+            <label>Upload images</label>
+            <input
+              type="file"
+              data-upload-input
+              hidden
+              accept="image/*"
+              multiple
+              #fileInput
+              (change)="onFileChange($event)"
+            />
+            <!-- jsdom throws on a real click of a hidden file input, so the
+                 unit test stubs input.click() (see submit-signal.page.spec.ts). -->
+            <div
+              class="card upload-zone p-8 text-center cursor-pointer"
+              style="border-style: dashed"
+              data-upload-zone
+              (click)="openFilePicker(fileInput)"
+            >
+              <i data-lucide="upload-cloud" class="w-10 h-10 mx-auto text-slate-500 mb-3"></i>
+              <div class="text-sm mb-1">Drop images here or click to upload</div>
+              <div class="text-xs text-slate-500">PNGs, JPGs · up to 10 MB each</div>
+            </div>
+            <p class="text-xs text-emerald-400 mt-2" data-upload-name>{{ uploadName() }}</p>
+          </div>
+          <div>
+            <label>Add links</label>
+            <div class="space-y-2" id="linksBox">
+              @for (link of links(); track $index) {
+                <input
+                  type="text"
+                  class="input"
+                  [placeholder]="link ? '' : 'https://'"
+                  [value]="link"
+                />
+              }
+              <button
+                type="button"
+                class="btn btn-ghost text-xs"
+                id="addLinkBtn"
+                (click)="addLink()"
+              >
+                <i data-lucide="plus" class="w-3 h-3"></i>Add another link
+              </button>
+            </div>
+          </div>
+          <div>
+            <label>Notes</label>
+            <textarea
+              class="input"
+              rows="3"
+              placeholder="Comparable recent sales, market commentary, anything else relevant."
+              [value]="notes()"
+              (input)="notes.set($any($event.target).value)"
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 5: Review -->
+      <section class="card p-6" data-step-panel="4" [hidden]="activeStep() !== 4">
+        <h2 class="text-base font-semibold mb-1">Review</h2>
+        <p class="text-xs text-slate-500 mb-5">Confirm and submit for vetting.</p>
+        <div class="space-y-4">
+          <div class="card p-4">
+            <div class="text-xs uppercase tracking-wider text-slate-500 mb-2">Opportunity</div>
+            <div class="text-lg font-semibold">{{ title() }}</div>
+            <div class="text-xs text-slate-500 mt-1">Apparel · Limited-drop resale</div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="card p-4">
+              <div class="kpi-label mb-1.5">Cost</div>
+              <div class="text-xl font-light">{{ formatUsd(costN()) }}</div>
+            </div>
+            <div class="card p-4">
+              <div class="kpi-label mb-1.5">Est. return</div>
+              <div class="text-xl font-light text-gradient-emerald">{{ formatUsd(valueN()) }}</div>
+            </div>
+            <div class="card p-4">
+              <div class="kpi-label mb-1.5">Est. profit</div>
+              <div class="text-xl font-light text-gradient-emerald">{{ formatUsd(profit()) }}</div>
+            </div>
+            <div class="card p-4">
+              <div class="kpi-label mb-1.5">Est. ROI</div>
+              <div class="text-xl font-light text-gradient-emerald">
+                {{ formatRoi(profit() / costN()) }}
+              </div>
+            </div>
+          </div>
+          <div
+            class="card p-4 text-xs text-slate-400"
+            style="background: rgba(96, 165, 250, 0.04); border-color: rgba(96, 165, 250, 0.2)"
+          >
+            <div class="flex items-start gap-2">
+              <i data-lucide="info" class="w-4 h-4 text-blue-400 mt-0.5"></i>
+              <div>
+                On submit, auto-checks will run (duplicate, fraud, math) and the opportunity will
+                enter the vetting queue. As a Vetter, your vote carries weight × 1.4.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Nav buttons -->
+      <div class="flex items-center justify-between mt-6">
+        <button
+          type="button"
+          class="btn btn-ghost"
+          data-step-prev
+          [disabled]="activeStep() === 0"
+          (click)="back()"
+        >
+          <i data-lucide="chevron-left" class="w-4 h-4"></i>Back
+        </button>
+        <div class="flex items-center gap-2">
+          <button type="button" class="btn btn-secondary" id="draftBtn" (click)="saveDraft()">
+            Save as draft
+          </button>
+          <button type="button" class="btn btn-primary" data-step-next (click)="next()">
+            {{ navLabel() }} <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Live Preview -->
+      <section class="card p-6" data-testid="live-preview">
+        <h2 class="text-base font-semibold mb-4">Live Preview</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between">
+            <span class="text-xs text-slate-400">Title</span
+            ><span class="text-xs text-right">{{ truncateTitle(title()) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-xs text-slate-400">Category</span
+            ><span class="text-xs">{{ category() }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-xs text-slate-400">Capital needed</span
+            ><span class="text-xs">{{ formatUsd(costN()) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-xs text-slate-400">Est. profit</span
+            ><span class="text-xs text-emerald-400">{{ formatUsd(profit()) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-xs text-slate-400">ROI</span
+            ><span class="text-xs text-emerald-400">{{ formatRoi(profit() / costN()) }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-xs text-slate-400">Channels</span
+            ><span class="text-xs">{{ channelsCount() }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tips -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Tips</h2>
+        <ul class="space-y-3 text-xs text-slate-400">
+          <li class="flex gap-2">
+            <i data-lucide="check" class="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5"></i>Link
+            real comparable sales to back your ROI estimate.
+          </li>
+          <li class="flex gap-2">
+            <i data-lucide="check" class="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5"></i
+            >Auto-checks flag duplicates and suspicious math — submit clean numbers.
+          </li>
+          <li class="flex gap-2">
+            <i data-lucide="check" class="w-3 h-3 text-emerald-400 flex-shrink-0 mt-0.5"></i>Higher
+            confidence ratings correlate with faster approvals.
+          </li>
+        </ul>
+      </section>
+
+      <!-- Auto-checks -->
+      <section class="card p-6">
+        <h2 class="text-base font-semibold mb-4">Auto-checks</h2>
+        <div class="space-y-2 text-xs">
+          <div
+            class="flex items-center justify-between p-2 rounded"
+            style="background: var(--bg-overlay)"
+          >
+            <span class="text-slate-400">Duplicate</span>
+            <span class="text-slate-500 opacity-50">pending</span>
+          </div>
+          <div
+            class="flex items-center justify-between p-2 rounded"
+            style="background: var(--bg-overlay)"
+          >
+            <span class="text-slate-400">Fraud</span>
+            <span class="text-slate-500 opacity-50">pending</span>
+          </div>
+          <div
+            class="flex items-center justify-between p-2 rounded"
+            style="background: var(--bg-overlay)"
+          >
+            <span class="text-slate-400">Math</span>
+            <span class="text-slate-500 opacity-50">pending</span>
+          </div>
+        </div>
+        <div class="text-[10px] text-slate-500 mt-3">Run automatically on submit.</div>
+      </section>
+    </div>
+  </div>
+
+  @if (toast(); as t) {
+    <ui-toast
+      [title]="t.title"
+      [message]="t.message"
+      [variant]="t.variant"
+      (dismiss)="toast.set(null)"
+    />
+  }
+</section>
