@@ -28,6 +28,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
+import { UiIconComponent } from '../../ui/icon/icon.component';
 
 interface ToastState {
   readonly title: string;
@@ -39,7 +40,7 @@ interface ToastState {
   selector: 'app-login-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, RouterLink, UiToastComponent],
+  imports: [FormsModule, RouterLink, UiToastComponent, UiIconComponent],
   template: `
     <div class="min-h-screen flex flex-col">
       <!-- Top bar -->
@@ -54,7 +55,7 @@ interface ToastState {
             class="w-8 h-8 rounded-lg flex items-center justify-center"
             style="background: var(--gradient-violet);"
           >
-            <i data-lucide="diamond" class="w-4 h-4 text-white"></i>
+            <ui-icon name="diamond" [size]="16" class="text-white"></ui-icon>
           </div>
           <div>
             <div class="text-sm font-semibold tracking-tight">MERIDIAN</div>
@@ -71,7 +72,7 @@ interface ToastState {
           title="Toggle theme"
           (click)="toggleTheme()"
         >
-          <i data-lucide="moon" class="w-4 h-4"></i>
+          <ui-icon name="moon" [size]="16"></ui-icon>
         </button>
       </div>
 
@@ -122,7 +123,7 @@ interface ToastState {
               class="btn btn-primary w-full justify-center"
               data-testid="sign-in"
             >
-              <i data-lucide="log-in" class="w-4 h-4"></i>Sign in
+              <ui-icon name="log-in" [size]="16"></ui-icon>Sign in
             </button>
           </form>
 
@@ -141,7 +142,7 @@ interface ToastState {
               data-testid="passkey"
               (click)="passkey()"
             >
-              <i data-lucide="fingerprint" class="w-4 h-4"></i>Passkey
+              <ui-icon name="fingerprint" [size]="16"></ui-icon>Passkey
             </button>
             <button
               type="button"
@@ -149,7 +150,7 @@ interface ToastState {
               data-testid="twofa"
               (click)="twoFA()"
             >
-              <i data-lucide="shield-check" class="w-4 h-4"></i>2FA code
+              <ui-icon name="shield-check" [size]="16"></ui-icon>2FA code
             </button>
           </div>
 

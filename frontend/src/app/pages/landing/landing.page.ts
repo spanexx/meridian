@@ -19,12 +19,14 @@
  */
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { UiIconComponent } from '../../ui/icon/icon.component';
+import { UiLogoComponent } from '../../ui/logo/ui-logo.component';
 
 @Component({
   selector: 'app-landing-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, UiIconComponent, UiLogoComponent],
   templateUrl: './landing.template.html',
   styles: [
     `
