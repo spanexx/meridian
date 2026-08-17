@@ -169,7 +169,9 @@ export class RegisterPageComponent {
   private readonly router = inject(Router);
 
   /** Current theme key — mirrors ShellComponent's private theme signal. */
-  private readonly theme = signal<'dark' | 'light'>('dark');
+  private readonly theme = signal<'dark' | 'light'>(
+    (localStorage.getItem('meridian-theme') as 'dark' | 'light') ?? 'dark',
+  );
 
   /** In-page toast state (ui-toast primitive rendered behind @if). */
   readonly toast = signal<ToastState | null>(null);
@@ -178,6 +180,7 @@ export class RegisterPageComponent {
   toggleTheme(): void {
     this.theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
     document.documentElement.dataset['theme'] = this.theme();
+    localStorage.setItem('meridian-theme', this.theme());
   }
 
   /** Create-account submit — success toast, then 900ms → /dashboard. */

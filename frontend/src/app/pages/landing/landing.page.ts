@@ -460,10 +460,13 @@ import { UiLogoComponent } from '../../ui/logo/ui-logo.component';
 })
 export class LandingPageComponent {
   /** Current theme key (page-level toggle; mirrors shell + auth pages). */
-  private readonly theme = signal<'dark' | 'light'>('dark');
+  private readonly theme = signal<'dark' | 'light'>(
+    (localStorage.getItem('meridian-theme') as 'dark' | 'light') ?? 'dark',
+  );
 
   toggleTheme(): void {
     this.theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
     document.documentElement.dataset['theme'] = this.theme();
+    localStorage.setItem('meridian-theme', this.theme());
   }
 }

@@ -36,6 +36,12 @@ export class App {
   protected readonly shellLess = signal(false);
 
   constructor() {
+    // Apply the persisted theme before first paint (mirrors the wireframe
+    // boot script; the shell/landing toggles write it on every change).
+    const stored = localStorage.getItem('meridian-theme');
+    if (stored === 'light' || stored === 'dark') {
+      document.documentElement.dataset['theme'] = stored;
+    }
     // Initialize from the current URL, then keep it fresh on every
     // NavigationEnd (fires on every navigation, including the same route).
     this.shellLess.set(this.isShellLessUrl(this.router.url));
