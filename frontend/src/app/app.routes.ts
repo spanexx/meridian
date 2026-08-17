@@ -10,43 +10,31 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'showcase' },
   {
     path: 'showcase',
-    loadComponent: () =>
-      import('./pages/showcase/showcase.page').then(
-        (m) => m.ShowcaseComponent,
-      ),
+    loadComponent: () => import('./pages/showcase/showcase.page').then((m) => m.ShowcaseComponent),
   },
   {
     path: 'dashboard',
     loadComponent: () =>
-      import('./pages/dashboard/dashboard.page').then(
-        (m) => m.DashboardPageComponent,
-      ),
+      import('./pages/dashboard/dashboard.page').then((m) => m.DashboardPageComponent),
   },
   {
     path: 'opportunities',
     loadComponent: () =>
-      import('./pages/opportunities/opportunities.page').then(
-        (m) => m.OpportunitiesPageComponent,
-      ),
+      import('./pages/opportunities/opportunities.page').then((m) => m.OpportunitiesPageComponent),
   },
   {
     path: 'executions',
     loadComponent: () =>
-      import('./pages/executions/executions.page').then(
-        (m) => m.ExecutionsPageComponent,
-      ),
+      import('./pages/executions/executions.page').then((m) => m.ExecutionsPageComponent),
   },
   {
     path: 'pool',
-    loadComponent: () =>
-      import('./pages/pool/pool.page').then((m) => m.PoolPageComponent),
+    loadComponent: () => import('./pages/pool/pool.page').then((m) => m.PoolPageComponent),
   },
   {
     path: 'communities',
     loadComponent: () =>
-      import('./pages/communities/communities.page').then(
-        (m) => m.CommunitiesPageComponent,
-      ),
+      import('./pages/communities/communities.page').then((m) => m.CommunitiesPageComponent),
   },
   {
     path: 'communities/:id',
@@ -116,24 +104,12 @@ export const routes: Routes = [
   },
   {
     path: 'payouts',
-    loadComponent: () =>
-      import('./pages/_placeholder/_placeholder.page').then(
-        (m) => m.PlaceholderPageComponent,
-      ),
-    data: {
-      title: 'Payouts',
-      subtitle:
-        'Member payouts and distribution ledger. Tied to the Execution engine payout flows.',
-      iconName: 'circle-dollar-sign',
-      packName: 'payouts-pack',
-    },
+    loadComponent: () => import('./pages/payouts/payouts.page').then((m) => m.PayoutsPageComponent),
   },
   {
     path: 'submit-signal',
     loadComponent: () =>
-      import('./pages/_placeholder/_placeholder.page').then(
-        (m) => m.PlaceholderPageComponent,
-      ),
+      import('./pages/_placeholder/_placeholder.page').then((m) => m.PlaceholderPageComponent),
     data: {
       title: 'Submit Signal',
       subtitle:
@@ -144,17 +120,12 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    loadComponent: () =>
-      import('./pages/profile/profile.page').then(
-        (m) => m.ProfilePageComponent,
-      ),
+    loadComponent: () => import('./pages/profile/profile.page').then((m) => m.ProfilePageComponent),
   },
   {
     path: 'settings',
     loadComponent: () =>
-      import('./pages/settings/settings.page').then(
-        (m) => m.SettingsPageComponent,
-      ),
+      import('./pages/settings/settings.page').then((m) => m.SettingsPageComponent),
   },
   {
     path: 'community/:id/settings',
