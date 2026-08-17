@@ -1,0 +1,123 @@
+<section class="page">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+    <div>
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-subtitle">
+        Everything happening across the pool — derived from the event stream.
+      </p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button type="button" class="btn btn-secondary" data-mark-read (click)="markAllRead()">
+        <i data-lucide="check-check" class="w-4 h-4"></i>Mark all read
+      </button>
+      <button type="button" class="btn btn-primary" (click)="openPrefs()">
+        <i data-lucide="settings" class="w-4 h-4"></i>Preferences
+      </button>
+    </div>
+  </header>
+
+  <!-- Preferences modal (raw markup mirrors the wireframe 1:1) -->
+  <div class="modal-overlay" [hidden]="!prefsOpen()" data-testid="prefs-modal">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title">Notification preferences</h2>
+          <p class="text-xs text-slate-500 mt-1">Choose what reaches you.</p>
+        </div>
+        <button type="button" class="icon-btn" aria-label="Close" (click)="closePrefs()">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        @for (p of prefs; track p.label; let i = $index) {
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm font-medium">{{ p.label }}</div>
+              <div class="text-xs text-slate-500">{{ p.desc }}</div>
+            </div>
+            <button
+              type="button"
+              class="switch"
+              role="switch"
+              [attr.aria-checked]="switches()[i]"
+              (click)="togglePref(i)"
+            ></button>
+          </div>
+        }
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" class="btn btn-ghost" (click)="closePrefs()">Cancel</button>
+          <button type="button" class="btn btn-primary" id="savePrefsBtn" (click)="savePrefs()">
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="tabs mb-6">
+    @for (t of tabs; track t.key) {
+      <button
+        type="button"
+        class="tab"
+        [class.active]="tab() === t.key"
+        [attr.aria-selected]="tab() === t.key"
+        [attr.data-filter-tab]="t.key"
+        (click)="setTab(t.key)"
+      >
+        {{ t.label }} <span class="text-slate-500">{{ t.count() }}</span>
+      </button>
+    }
+  </div>
+
+  <section class="card p-0 overflow-hidden">
+    @if (filtered().length > 0) {
+      <div
+        class="divide-y"
+        style="--tw-divide-y-reverse: 0; border-bottom: 1px solid var(--border-subtle)"
+      >
+        @for (n of filtered(); track n.id) {
+          <a
+            [routerLink]="n.link"
+            class="flex items-start gap-4 p-5 table-row"
+            [attr.data-status]="n.read ? 'read' : 'unread'"
+            data-notif-item
+            [attr.data-read]="n.read"
+          >
+            <div
+              class="w-10 h-10 rounded-lg flex items-center justify-center"
+              [style.background]="n.bg"
+            >
+              <i class="w-5 h-5" [attr.data-lucide]="n.icon" [class]="n.color"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-3">
+                <div class="text-sm font-medium">{{ n.title }}</div>
+                <span class="text-[11px] text-slate-500 whitespace-nowrap">{{ n.time }}</span>
+              </div>
+              <div class="text-xs text-slate-500 mt-1">{{ n.caption }}</div>
+            </div>
+            @if (!n.read) {
+              <span class="pulse-dot mt-2" [class]="n.dot" data-unread-dot></span>
+            }
+          </a>
+        }
+      </div>
+    } @else {
+      <div class="empty" data-empty>
+        <i data-lucide="bell-off" class="w-10 h-10 mx-auto"></i>
+        <p class="text-sm font-medium text-slate-400 mb-1">You're all caught up</p>
+        <p class="text-xs">No notifications in this view.</p>
+      </div>
+    }
+  </section>
+
+  @if (toast(); as t) {
+    <ui-toast
+      [title]="t.title"
+      [message]="t.message"
+      [variant]="t.variant"
+      (dismiss)="dismissToast()"
+    />
+  }
+</section>
