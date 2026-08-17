@@ -1,0 +1,1108 @@
+<section class="relative overflow-hidden">
+  <div class="mesh"></div>
+  <div class="grid-floor"></div>
+
+  <!-- Top bar -->
+  <div class="relative z-10 flex items-center justify-between px-6 sm:px-10 py-5">
+    <a [routerLink]="['/']" class="flex items-center gap-3">
+      <div class="logo-mark">
+        <i data-lucide="diamond" class="w-4 h-4 text-white relative z-10"></i>
+      </div>
+      <div>
+        <div class="text-sm font-semibold tracking-tight">MERIDIAN</div>
+        <div class="text-[10px] uppercase tracking-[0.18em] text-muted">Collective Arbitrage</div>
+      </div>
+    </a>
+    <nav class="hidden md:flex items-center gap-7 text-sm text-soft">
+      <a href="#how" class="hover-text-1 transition-colors">How it works</a>
+      <a href="#numbers" class="hover-text-1 transition-colors">Numbers</a>
+      <a href="#live" class="hover-text-1 transition-colors">Live</a>
+      <a href="#principles" class="hover-text-1 transition-colors">Principles</a>
+    </nav>
+    <div class="flex items-center gap-2">
+      <a
+        [routerLink]="['/login']"
+        class="text-sm text-soft hover-text-1 transition-colors hidden sm:block px-2"
+        >Sign in</a
+      >
+      <a [routerLink]="['/register']" class="btn btn-primary text-sm pulse-halo"
+        ><i data-lucide="user-plus" class="w-4 h-4"></i>Join</a
+      >
+      <button
+        type="button"
+        class="icon-btn"
+        data-theme-toggle
+        title="Toggle theme"
+        (click)="toggleTheme()"
+      >
+        <i data-lucide="moon" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Hero body -->
+  <div class="relative z-10 px-4 sm:px-6 pt-8 sm:pt-16 pb-24 sm:pb-32">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+      <!-- Copy -->
+      <div class="lg:col-span-7">
+        <div class="inline-flex items-center gap-2 badge badge-premium mb-6">
+          <span class="pulse-dot" style="background: var(--e-400)"></span>
+          <span>Live · 3 executions settling now</span>
+        </div>
+
+        <h1
+          class="text-[2.5rem] sm:text-6xl md:text-7xl font-semibold tracking-tight leading-[1.02] mb-6"
+        >
+          <span class="text-gradient">Profit together</span><br />
+          from <span class="text-soft">real arbitrage.</span>
+        </h1>
+
+        <p class="text-lg sm:text-xl text-soft max-w-xl mb-8 leading-relaxed">
+          Pool capital, signals, and access so members earn from real economic activity — none could
+          execute these deals alone. No recruitment dependency. No unearned returns.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-10">
+          <a
+            [routerLink]="['/register']"
+            class="btn btn-primary justify-center text-base px-6 py-3 pulse-halo"
+          >
+            <i data-lucide="user-plus" class="w-5 h-5"></i>
+            Join the community
+          </a>
+          <a href="#live" class="btn btn-secondary justify-center text-base px-6 py-3">
+            <i data-lucide="play-circle" class="w-5 h-5"></i>
+            See it live
+          </a>
+        </div>
+
+        <!-- Mini social proof -->
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted">
+          <span class="flex items-center gap-1.5"
+            ><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>KYC at
+            join</span
+          >
+          <span class="flex items-center gap-1.5"
+            ><i data-lucide="lock" class="w-3.5 h-3.5 text-violet-400"></i>Audited event log</span
+          >
+          <span class="flex items-center gap-1.5"
+            ><i data-lucide="ban" class="w-3.5 h-3.5 text-rose-400"></i>No ponzi mechanics</span
+          >
+          <span class="flex items-center gap-1.5"
+            ><i data-lucide="bot" class="w-3.5 h-3.5 text-blue-400"></i>AI assists · humans
+            decide</span
+          >
+        </div>
+      </div>
+
+      <!-- Terminal / live card -->
+      <div class="lg:col-span-5">
+        <div
+          class="card ring-glow p-0 overflow-hidden"
+          style="
+            background: linear-gradient(
+              180deg,
+              color-mix(in srgb, var(--bg-elevated) 92%, transparent),
+              color-mix(in srgb, var(--bg-elevated) 70%, transparent)
+            );
+          "
+        >
+          <div
+            class="flex items-center justify-between px-4 py-3 border-b"
+            style="border-color: var(--border-subtle)"
+          >
+            <div class="flex items-center gap-2 text-xs text-muted">
+              <span class="w-2 h-2 rounded-full bg-rose-500/80"></span>
+              <span class="w-2 h-2 rounded-full bg-amber-400/80"></span>
+              <span class="w-2 h-2 rounded-full bg-emerald-500/80"></span>
+              <span class="ml-2 font-mono">meridian.live</span>
+            </div>
+            <span class="text-[10px] uppercase tracking-widest text-muted">Live feed</span>
+          </div>
+          <div class="p-5 term space-y-1.5">
+            <div>
+              <span class="dim">[10:14:02]</span> <span class="ok">●</span> signal
+              <span class="acc">O-2051</span> submitted by @lin · <span class="dim">est. ROI</span>
+              <span class="pnk">+18.4%</span>
+            </div>
+            <div>
+              <span class="dim">[10:14:08]</span> auto-checks <span class="ok">3/3 PASS</span> ·
+              <span class="dim">recommender:</span> <span class="acc">approve</span>
+            </div>
+            <div>
+              <span class="dim">[10:14:14]</span> <span class="ok">●</span> vetter quorum
+              <span class="acc">5/5</span> reached · approved
+            </div>
+            <div>
+              <span class="dim">[10:14:21]</span> pool <span class="acc">$24,800</span> allocated ·
+              execution <span class="acc">E-1048</span>
+            </div>
+            <div>
+              <span class="dim">[10:14:22]</span> acquiring 6× Sony WH-1000XM5 ·
+              <span class="dim">vendor</span> BestBuy
+            </div>
+            <div>
+              <span class="dim">[10:14:34]</span> <span class="ok">●</span> listed on StockX, GOAT,
+              eBay
+            </div>
+            <div>
+              <span class="dim">[10:14:35]</span> settlement target
+              <span class="acc">14 days</span> · estimated payout <span class="pnk">$29,366</span>
+            </div>
+            <div class="pt-1"><span class="dim">$</span> <span class="caret"></span></div>
+          </div>
+          <div
+            class="px-5 py-3 border-t flex items-center justify-between text-xs"
+            style="border-color: var(--border-subtle)"
+          >
+            <span class="text-muted flex items-center gap-1.5"
+              ><i data-lucide="activity" class="w-3.5 h-3.5 text-emerald-400"></i>streaming · 47 ops
+              today</span
+            >
+            <a
+              [routerLink]="['/opportunities']"
+              class="text-soft hover-text-1 flex items-center gap-1"
+              >Open feed <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i
+            ></a>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
+          <div class="card p-3">
+            <div class="text-[10px] uppercase tracking-widest text-muted">Today</div>
+            <div class="text-lg font-semibold mt-1 text-gradient-emerald">+1.24%</div>
+          </div>
+          <div class="card p-3">
+            <div class="text-[10px] uppercase tracking-widest text-muted">Win-rate</div>
+            <div class="text-lg font-semibold mt-1">82%</div>
+          </div>
+          <div class="card p-3">
+            <div class="text-[10px] uppercase tracking-widest text-muted">Avg. ROI</div>
+            <div class="text-lg font-semibold mt-1 text-gradient-violet">+14.7%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero stat strip -->
+  <div class="relative z-10 border-y section-glass" style="border-color: var(--border-subtle)">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div>
+        <div class="text-[10px] uppercase tracking-widest text-muted mb-1">Pool capital</div>
+        <div class="text-2xl sm:text-3xl font-semibold text-gradient-emerald">$1.42M</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-widest text-muted mb-1">Members</div>
+        <div class="text-2xl sm:text-3xl font-semibold">124</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-widest text-muted mb-1">YTD ROI</div>
+        <div class="text-2xl sm:text-3xl font-semibold text-gradient-violet">+18.4%</div>
+      </div>
+      <div>
+        <div class="text-[10px] uppercase tracking-widest text-muted mb-1">Executions settled</div>
+        <div class="text-2xl sm:text-3xl font-semibold">47</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Three ways to contribute -->
+<section id="how" class="px-4 sm:px-6 py-20 sm:py-28">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-14">
+      <span class="eyebrow mb-4">How members participate</span>
+      <h2 class="text-3xl sm:text-5xl font-semibold tracking-tight mt-3 mb-5">
+        Three ways in.<br class="sm:hidden" />
+        <span class="text-soft">One pool.</span>
+      </h2>
+      <p class="text-soft max-w-2xl mx-auto">
+        Money isn't the only way to participate. A person with sharp eyes and no capital can earn as
+        much as a passive investor with deep pockets.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- Capital -->
+      <div class="card pillar ring-glow p-7">
+        <div
+          class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+          style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25)"
+        >
+          <i data-lucide="banknote" class="w-7 h-7 text-emerald-400"></i>
+        </div>
+        <div class="text-[10px] uppercase tracking-widest text-emerald-400 mb-2">
+          Capital · 60% share
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Bring capital</h3>
+        <p class="text-sm text-soft leading-relaxed mb-5">
+          Deposit into the pool. Funds vetted opportunities. Earn a share of profits proportional to
+          your contribution.
+        </p>
+        <div class="pt-4 border-t" style="border-color: var(--border-subtle)">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted">Min. contribution</span>
+            <span class="font-medium">$1,000</span>
+          </div>
+          <div class="flex items-center justify-between text-xs mt-2">
+            <span class="text-muted">Typical YTD ROI</span>
+            <span class="font-medium text-emerald-400">+18.4%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Signals -->
+      <div class="card pillar ring-glow p-7">
+        <div
+          class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+          style="background: rgba(201, 138, 66, 0.12); border: 1px solid rgba(201, 138, 66, 0.25)"
+        >
+          <i data-lucide="radar" class="w-7 h-7 text-violet-400"></i>
+        </div>
+        <div class="text-[10px] uppercase tracking-widest mb-2" style="color: var(--v-400)">
+          Signals · 25% share
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Find the deal</h3>
+        <p class="text-sm text-soft leading-relaxed mb-5">
+          Submit arbitrage opportunities with full breakdown. Reputation-weighted voting decides
+          what gets funded. Good signals earn, bad signals throttle.
+        </p>
+        <div class="pt-4 border-t" style="border-color: var(--border-subtle)">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted">Top submitter YTD</span>
+            <span class="font-medium">@lin · 14 wins</span>
+          </div>
+          <div class="flex items-center justify-between text-xs mt-2">
+            <span class="text-muted">Vetting window</span>
+            <span class="font-medium">72h avg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Access -->
+      <div class="card pillar ring-glow p-7">
+        <div
+          class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+          style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.25)"
+        >
+          <i data-lucide="key-round" class="w-7 h-7 text-amber-400"></i>
+        </div>
+        <div class="text-[10px] uppercase tracking-widest text-amber-400 mb-2">
+          Access · 15% share
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Hold the keys</h3>
+        <p class="text-sm text-soft leading-relaxed mb-5">
+          Wholesale accounts, licenses, regional presence — the resources that unlock deals others
+          can't execute. Your access is your contribution.
+        </p>
+        <div class="pt-4 border-t" style="border-color: var(--border-subtle)">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-muted">Active access providers</span>
+            <span class="font-medium">15 members</span>
+          </div>
+          <div class="flex items-center justify-between text-xs mt-2">
+            <span class="text-muted">Regions covered</span>
+            <span class="font-medium">12</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Distribution bar visualization -->
+    <div class="mt-10 card p-6">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-sm font-medium">Profit split (community-voted)</div>
+        <div class="text-xs text-muted">locked · governance-set</div>
+      </div>
+      <div class="stat-bar h-3"><span style="width: 100%"></span></div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4 text-center">
+        <div>
+          <div class="big-num text-gradient-emerald">
+            60<span class="text-base text-muted">%</span>
+          </div>
+          <div class="text-[10px] uppercase tracking-widest text-muted mt-1">Capital</div>
+        </div>
+        <div>
+          <div class="big-num text-gradient-violet">
+            25<span class="text-base text-muted">%</span>
+          </div>
+          <div class="text-[10px] uppercase tracking-widest text-muted mt-1">Signal</div>
+        </div>
+        <div>
+          <div class="big-num text-amber-400">15<span class="text-base text-muted">%</span></div>
+          <div class="text-[10px] uppercase tracking-widest text-muted mt-1">Access</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Live ticker -->
+<section id="live" class="py-16 border-y section-soft" style="border-color: var(--border-subtle)">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 mb-8 flex items-end justify-between gap-4 flex-wrap">
+    <div>
+      <span class="eyebrow mb-3">Right now</span>
+      <h2 class="text-2xl sm:text-3xl font-semibold tracking-tight mt-3">
+        Opportunities in flight
+      </h2>
+    </div>
+    <a [routerLink]="['/opportunities']" class="btn btn-secondary text-sm"
+      ><i data-lucide="arrow-right" class="w-4 h-4"></i>View all signals</a
+    >
+  </div>
+
+  <div class="ticker">
+    <div class="ticker-track py-2">
+      <!-- Card set A -->
+      <div class="card p-4 w-72 flex-shrink-0">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">O-2049</span>
+          <span class="badge badge-warning text-[9px]">In vetting</span>
+        </div>
+        <div class="text-sm font-medium mb-1">Travis Scott × Nike</div>
+        <div class="text-xs text-muted mb-3">Sneakers · 8 pairs · StockX / GOAT</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Est. ROI</span>
+          <span class="font-semibold text-amber-400">+22.4%</span>
+        </div>
+      </div>
+      <div class="card p-4 w-72 flex-shrink-0">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">E-1048</span>
+          <span class="badge badge-success text-[9px]">Executing</span>
+        </div>
+        <div class="text-sm font-medium mb-1">Sony WH-1000XM5 lot</div>
+        <div class="text-xs text-muted mb-3">6 units · BestBuy wholesale</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Deployed</span>
+          <span class="font-semibold">$24,800</span>
+        </div>
+      </div>
+      <div class="card p-4 w-72 flex-shrink-0">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">E-1039</span>
+          <span class="badge badge-info text-[9px]">Closing</span>
+        </div>
+        <div class="text-sm font-medium mb-1">Vintage Watch Liquidation</div>
+        <div class="text-xs text-muted mb-3">5 items · all sold</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Realized ROI</span>
+          <span class="font-semibold text-emerald-400">+18.7%</span>
+        </div>
+      </div>
+      <div class="card p-4 w-72 flex-shrink-0">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">O-2050</span>
+          <span class="badge badge-success text-[9px]">Approved</span>
+        </div>
+        <div class="text-sm font-medium mb-1">LEGO sealed-set bundle</div>
+        <div class="text-xs text-muted mb-3">12 sets · BrickLink / eBay</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Est. ROI</span>
+          <span class="font-semibold text-emerald-400">+11.2%</span>
+        </div>
+      </div>
+      <div class="card p-4 w-72 flex-shrink-0">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">E-1042</span>
+          <span class="badge badge-info text-[9px]">Closing</span>
+        </div>
+        <div class="text-sm font-medium mb-1">Limited Sneaker Resale</div>
+        <div class="text-xs text-muted mb-3">3 of 8 sold</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Realized ROI</span>
+          <span class="font-semibold text-emerald-400">+12.4%</span>
+        </div>
+      </div>
+      <div class="card p-4 w-72 flex-shrink-0">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">O-2051</span>
+          <span class="badge badge-warning text-[9px]">In vetting</span>
+        </div>
+        <div class="text-sm font-medium mb-1">Dyson V15 cordless lot</div>
+        <div class="text-xs text-muted mb-3">14 units · Costco liquidation</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Est. ROI</span>
+          <span class="font-semibold text-amber-400">+9.6%</span>
+        </div>
+      </div>
+      <!-- Card set B (duplicate for seamless loop) -->
+      <div class="card p-4 w-72 flex-shrink-0" aria-hidden="true">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">O-2049</span>
+          <span class="badge badge-warning text-[9px]">In vetting</span>
+        </div>
+        <div class="text-sm font-medium mb-1">Travis Scott × Nike</div>
+        <div class="text-xs text-muted mb-3">Sneakers · 8 pairs · StockX / GOAT</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Est. ROI</span>
+          <span class="font-semibold text-amber-400">+22.4%</span>
+        </div>
+      </div>
+      <div class="card p-4 w-72 flex-shrink-0" aria-hidden="true">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">E-1048</span>
+          <span class="badge badge-success text-[9px]">Executing</span>
+        </div>
+        <div class="text-sm font-medium mb-1">Sony WH-1000XM5 lot</div>
+        <div class="text-xs text-muted mb-3">6 units · BestBuy wholesale</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Deployed</span>
+          <span class="font-semibold">$24,800</span>
+        </div>
+      </div>
+      <div class="card p-4 w-72 flex-shrink-0" aria-hidden="true">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">E-1039</span>
+          <span class="badge badge-info text-[9px]">Closing</span>
+        </div>
+        <div class="text-sm font-medium mb-1">Vintage Watch Liquidation</div>
+        <div class="text-xs text-muted mb-3">5 items · all sold</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Realized ROI</span>
+          <span class="font-semibold text-emerald-400">+18.7%</span>
+        </div>
+      </div>
+      <div class="card p-4 w-72 flex-shrink-0" aria-hidden="true">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">O-2050</span>
+          <span class="badge badge-success text-[9px]">Approved</span>
+        </div>
+        <div class="text-sm font-medium mb-1">LEGO sealed-set bundle</div>
+        <div class="text-xs text-muted mb-3">12 sets · BrickLink / eBay</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Est. ROI</span>
+          <span class="font-semibold text-emerald-400">+11.2%</span>
+        </div>
+      </div>
+      <div class="card p-4 w-72 flex-shrink-0" aria-hidden="true">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">E-1042</span>
+          <span class="badge badge-info text-[9px]">Closing</span>
+        </div>
+        <div class="text-sm font-medium mb-1">Limited Sneaker Resale</div>
+        <div class="text-xs text-muted mb-3">3 of 8 sold</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Realized ROI</span>
+          <span class="font-semibold text-emerald-400">+12.4%</span>
+        </div>
+      </div>
+      <div class="card p-4 w-72 flex-shrink-0" aria-hidden="true">
+        <div class="flex items-center justify-between mb-2">
+          <span class="font-mono text-[10px] text-muted">O-2051</span>
+          <span class="badge badge-warning text-[9px]">In vetting</span>
+        </div>
+        <div class="text-sm font-medium mb-1">Dyson V15 cordless lot</div>
+        <div class="text-xs text-muted mb-3">14 units · Costco liquidation</div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted">Est. ROI</span>
+          <span class="font-semibold text-amber-400">+9.6%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- By the numbers -->
+<section id="numbers" class="px-4 sm:px-6 py-20 sm:py-28">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div class="lg:col-span-5 lg:sticky lg:top-24 sticky-head">
+        <span class="eyebrow mb-4">By the numbers</span>
+        <h2 class="text-3xl sm:text-5xl font-semibold tracking-tight mt-3 mb-5">
+          Real activity,<br /><span class="text-soft">measurable returns.</span>
+        </h2>
+        <p class="text-soft mb-6 leading-relaxed">
+          Every number on this page is drawn from the live event log. Pool health, win-rate, ROI —
+          all auditable, all on-chain-style transparent.
+        </p>
+        <div class="space-y-3 text-sm">
+          <div class="flex items-center gap-2 text-soft">
+            <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>Daily reconciliation:
+            BALANCED
+          </div>
+          <div class="flex items-center gap-2 text-soft">
+            <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>Reserve ratio: 18.2% (target
+            18%)
+          </div>
+          <div class="flex items-center gap-2 text-soft">
+            <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>Liquidity: 62% (healthy)
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-7 grid grid-cols-2 gap-4">
+        <div class="card p-6 col-span-2">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <div class="text-[10px] uppercase tracking-widest text-muted">
+                Pool capital · 90 days
+              </div>
+              <div class="text-2xl font-semibold mt-1 text-gradient-emerald">
+                $1.42M <span class="text-sm text-muted">+12.4%</span>
+              </div>
+            </div>
+            <span class="badge badge-success text-[10px]"
+              ><i data-lucide="trending-up" class="w-3 h-3"></i>Healthy</span
+            >
+          </div>
+          <svg class="spark" viewBox="0 0 200 48" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.45" />
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M0,38 L20,34 L40,36 L60,30 L80,28 L100,22 L120,24 L140,18 L160,16 L180,12 L200,8 L200,48 L0,48 Z"
+              fill="url(#g1)"
+            />
+            <path
+              d="M0,38 L20,34 L40,36 L60,30 L80,28 L100,22 L120,24 L140,18 L160,16 L180,12 L200,8"
+              fill="none"
+              stroke="#10b981"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
+
+        <div class="card p-6">
+          <div class="text-[10px] uppercase tracking-widest text-muted">Win-rate · 30d</div>
+          <div class="text-2xl font-semibold mt-1 mb-3">
+            82% <span class="text-sm text-muted">target 75%</span>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-muted">Profitable</span><span class="text-emerald-400">82%</span>
+              </div>
+              <div class="stat-bar h-1.5">
+                <span style="width: 82%; background: var(--gradient-emerald)"></span>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-muted">Break-even</span><span class="text-soft">11%</span>
+              </div>
+              <div class="stat-bar h-1.5">
+                <span style="width: 11%; background: var(--gradient-amber)"></span>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-muted">Loss</span><span class="text-rose-400">7%</span>
+              </div>
+              <div class="stat-bar h-1.5">
+                <span style="width: 7%; background: var(--gradient-rose)"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-6">
+          <div class="text-[10px] uppercase tracking-widest text-muted">Avg. execution ROI</div>
+          <div class="text-2xl font-semibold mt-1 mb-3 text-gradient-violet">+14.7%</div>
+          <svg class="spark" viewBox="0 0 120 48" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="g2" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#c98a42" stop-opacity="0.5" />
+                <stop offset="100%" stop-color="#c98a42" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M0,36 L15,30 L30,32 L45,22 L60,26 L75,18 L90,14 L105,16 L120,8 L120,48 L0,48 Z"
+              fill="url(#g2)"
+            />
+            <path
+              d="M0,36 L15,30 L30,32 L45,22 L60,26 L75,18 L90,14 L105,16 L120,8"
+              fill="none"
+              stroke="#c98a42"
+              stroke-width="1.5"
+              stroke-linecap="round"
+            />
+          </svg>
+          <div class="text-[10px] text-muted mt-2">Floor 15% · ceiling uncapped</div>
+        </div>
+
+        <div class="card p-6 col-span-2">
+          <div class="flex items-center justify-between mb-3">
+            <div class="text-[10px] uppercase tracking-widest text-muted">
+              Members by contribution type
+            </div>
+            <a [routerLink]="['/community/alpha/members']" class="text-xs text-soft hover-text-1"
+              >View all →</a
+            >
+          </div>
+          <div class="flex h-3 rounded-full overflow-hidden" style="background: var(--bg-overlay)">
+            <div style="width: 34%; background: var(--gradient-emerald)"></div>
+            <div style="width: 54%; background: var(--gradient-violet)"></div>
+            <div style="width: 12%; background: var(--gradient-amber)"></div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full" style="background: var(--gradient-emerald)"></span
+              ><span class="text-soft">Capital · 42</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full" style="background: var(--gradient-violet)"></span
+              ><span class="text-soft">Signals · 67</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full" style="background: var(--gradient-amber)"></span
+              ><span class="text-soft">Access · 15</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Process flow -->
+<section
+  id="flow"
+  class="px-4 sm:px-6 py-20 sm:py-28 border-y section-soft"
+  style="border-color: var(--border-subtle)"
+>
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-14">
+      <span class="eyebrow mb-4">The process</span>
+      <h2 class="text-3xl sm:text-5xl font-semibold tracking-tight mt-3 mb-5">
+        From signal to payout,<br class="sm:hidden" />
+        <span class="text-soft">fully auditable.</span>
+      </h2>
+      <p class="text-soft max-w-2xl mx-auto">
+        Every step is recorded as an event in the engine. Anyone can replay any execution from raw
+        history.
+      </p>
+    </div>
+
+    <div>
+      <div class="hidden md:flex items-start justify-between gap-3 mb-6">
+        <div class="flex flex-col items-center gap-2 flow-node n1">
+          <div
+            class="w-14 h-14 rounded-full flex items-center justify-center"
+            style="background: rgba(20, 184, 166, 0.18); border: 1px solid rgba(20, 184, 166, 0.45)"
+          >
+            <i data-lucide="radar" class="w-6 h-6 text-emerald-400"></i>
+          </div>
+          <div class="text-xs font-medium">Signal</div>
+          <div class="text-[10px] text-muted">Submitted</div>
+        </div>
+        <div class="connector"></div>
+        <div class="flex flex-col items-center gap-2 flow-node n2">
+          <div
+            class="w-14 h-14 rounded-full flex items-center justify-center"
+            style="background: rgba(201, 138, 66, 0.18); border: 1px solid rgba(201, 138, 66, 0.45)"
+          >
+            <i data-lucide="bot" class="w-6 h-6 text-violet-400"></i>
+          </div>
+          <div class="text-xs font-medium">Auto-checks</div>
+          <div class="text-[10px] text-muted">LLM + OCR</div>
+        </div>
+        <div class="connector"></div>
+        <div class="flex flex-col items-center gap-2 flow-node n3">
+          <div
+            class="w-14 h-14 rounded-full flex items-center justify-center"
+            style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.45)"
+          >
+            <i data-lucide="vote" class="w-6 h-6 text-amber-400"></i>
+          </div>
+          <div class="text-xs font-medium">Vetting</div>
+          <div class="text-[10px] text-muted">Reputation vote</div>
+        </div>
+        <div class="connector"></div>
+        <div class="flex flex-col items-center gap-2 flow-node n4">
+          <div
+            class="w-14 h-14 rounded-full flex items-center justify-center"
+            style="background: rgba(96, 165, 250, 0.18); border: 1px solid rgba(96, 165, 250, 0.45)"
+          >
+            <i data-lucide="zap" class="w-6 h-6 text-blue-400"></i>
+          </div>
+          <div class="text-xs font-medium">Execution</div>
+          <div class="text-[10px] text-muted">Acquire + list</div>
+        </div>
+        <div class="connector"></div>
+        <div class="flex flex-col items-center gap-2 flow-node n5">
+          <div
+            class="w-14 h-14 rounded-full flex items-center justify-center"
+            style="background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.45)"
+          >
+            <i data-lucide="circle-dollar-sign" class="w-6 h-6 text-emerald-400"></i>
+          </div>
+          <div class="text-xs font-medium">Payout</div>
+          <div class="text-[10px] text-muted">Split 60:25:15</div>
+        </div>
+      </div>
+
+      <!-- Mobile: vertical -->
+      <div class="md:hidden space-y-4">
+        <div class="flex items-center gap-4 card p-4">
+          <div
+            class="w-10 h-10 rounded-full flex items-center justify-center"
+            style="background: rgba(20, 184, 166, 0.18)"
+          >
+            <i data-lucide="radar" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <div>
+            <div class="text-sm font-medium">Signal submitted</div>
+            <div class="text-xs text-muted">Member posts the deal with full breakdown</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 card p-4">
+          <div
+            class="w-10 h-10 rounded-full flex items-center justify-center"
+            style="background: rgba(201, 138, 66, 0.18)"
+          >
+            <i data-lucide="bot" class="w-5 h-5 text-violet-400"></i>
+          </div>
+          <div>
+            <div class="text-sm font-medium">Auto-checks</div>
+            <div class="text-xs text-muted">LLM + OCR recommendations (advisory only)</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 card p-4">
+          <div
+            class="w-10 h-10 rounded-full flex items-center justify-center"
+            style="background: rgba(245, 158, 11, 0.18)"
+          >
+            <i data-lucide="vote" class="w-5 h-5 text-amber-400"></i>
+          </div>
+          <div>
+            <div class="text-sm font-medium">Reputation-weighted vote</div>
+            <div class="text-xs text-muted">VETTER+ members decide</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 card p-4">
+          <div
+            class="w-10 h-10 rounded-full flex items-center justify-center"
+            style="background: rgba(96, 165, 250, 0.18)"
+          >
+            <i data-lucide="zap" class="w-5 h-5 text-blue-400"></i>
+          </div>
+          <div>
+            <div class="text-sm font-medium">Execution</div>
+            <div class="text-xs text-muted">Acquire, list, track</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 card p-4">
+          <div
+            class="w-10 h-10 rounded-full flex items-center justify-center"
+            style="background: rgba(16, 185, 129, 0.18)"
+          >
+            <i data-lucide="circle-dollar-sign" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <div>
+            <div class="text-sm font-medium">Payout</div>
+            <div class="text-xs text-muted">Profit split by contribution</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Principles -->
+<section id="principles" class="px-4 sm:px-6 py-20 sm:py-28">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+      <div class="lg:col-span-5 lg:sticky lg:top-24 sticky-head">
+        <span class="eyebrow mb-4">What we believe</span>
+        <h2 class="text-3xl sm:text-5xl font-semibold tracking-tight mt-3 mb-5">
+          Five principles.<br /><span class="text-soft">No exceptions.</span>
+        </h2>
+        <p class="text-soft leading-relaxed">
+          These aren't aspirations. They're architecture. Every feature, every parameter, every rule
+          flows from one of these five commitments.
+        </p>
+      </div>
+
+      <div class="lg:col-span-7 space-y-4">
+        <div class="card p-6 flex gap-5">
+          <div class="text-3xl font-light text-gradient-emerald">01</div>
+          <div>
+            <h3 class="text-lg font-semibold mb-1">Real value creation</h3>
+            <p class="text-sm text-soft leading-relaxed">
+              Every dollar of profit comes from actual buy/sell transactions. The platform has no
+              obligation to pay returns it hasn't earned.
+            </p>
+          </div>
+        </div>
+        <div class="card p-6 flex gap-5">
+          <div class="text-3xl font-light text-gradient-violet">02</div>
+          <div>
+            <h3 class="text-lg font-semibold mb-1">Meritocratic reputation</h3>
+            <p class="text-sm text-soft leading-relaxed">
+              Signal quality matters. Contributors who find profitable opportunities earn more and
+              gain privileges. Bad signals lose reputation and get throttled.
+            </p>
+          </div>
+        </div>
+        <div class="card p-6 flex gap-5">
+          <div
+            class="text-3xl font-light text-blue-400"
+            style="
+              -webkit-background-clip: text;
+              background-clip: text;
+              color: transparent;
+              background-image: var(--gradient-blue);
+            "
+          >
+            03
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-1">Radical transparency</h3>
+            <p class="text-sm text-soft leading-relaxed">
+              Every opportunity is visible with full financial breakdown. Every action is recorded
+              as an event. No black-box accounting, ever.
+            </p>
+          </div>
+        </div>
+        <div class="card p-6 flex gap-5">
+          <div class="text-3xl font-light text-amber-400">04</div>
+          <div>
+            <h3 class="text-lg font-semibold mb-1">No recruitment dependency</h3>
+            <p class="text-sm text-soft leading-relaxed">
+              Growth comes from finding better opportunities, not recruiting more members. A smaller
+              group with better signals outperforms a larger group with mediocre ones.
+            </p>
+          </div>
+        </div>
+        <div class="card p-6 flex gap-5">
+          <div class="text-3xl font-light text-rose-400">05</div>
+          <div>
+            <h3 class="text-lg font-semibold mb-1">AI assists, humans decide</h3>
+            <p class="text-sm text-soft leading-relaxed">
+              Automated checks support vetting. The community votes. Money and reputation are never
+              handed to an algorithm — that's a hard architectural line.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section
+  class="px-4 sm:px-6 py-20 sm:py-28 border-y section-soft"
+  style="border-color: var(--border-subtle)"
+>
+  <div class="max-w-6xl mx-auto">
+    <div class="flex items-end justify-between gap-4 mb-12 flex-wrap">
+      <div>
+        <span class="eyebrow mb-4">In their words</span>
+        <h2 class="text-3xl sm:text-4xl font-semibold tracking-tight mt-3">Why members stay</h2>
+      </div>
+      <a [routerLink]="['/community/alpha/members']" class="btn btn-ghost text-sm"
+        >Browse members <i data-lucide="arrow-right" class="w-4 h-4"></i
+      ></a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="card quote-card p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="badge badge-premium text-[10px]">Vetter</span>
+          <span class="badge badge-success text-[10px]">Capital · Signal</span>
+        </div>
+        <p class="text-sm text-soft leading-relaxed mb-5">
+          "I came for the returns. I stayed for the audit trail. Every dollar I put in, I can trace
+          end-to-end. That's rarer than it sounds."
+        </p>
+        <div
+          class="flex items-center gap-3 pt-4 border-t"
+          style="border-color: var(--border-subtle)"
+        >
+          <div class="avatar" style="background: linear-gradient(135deg, #c98a42, #a86a2d)">SR</div>
+          <div>
+            <div class="text-sm font-medium">Sofia R.</div>
+            <div class="text-xs text-muted">Member since 2024 · 14 signals</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card quote-card p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="badge badge-info text-[10px]">Operator</span>
+          <span class="badge badge-warning text-[10px]">Access</span>
+        </div>
+        <p class="text-sm text-soft leading-relaxed mb-5">
+          "My wholesale accounts were collecting dust. Now they earn the same share as someone who
+          put in $50k. That's the model working as designed."
+        </p>
+        <div
+          class="flex items-center gap-3 pt-4 border-t"
+          style="border-color: var(--border-subtle)"
+        >
+          <div class="avatar" style="background: linear-gradient(135deg, #14b8a6, #0d9488)">MK</div>
+          <div>
+            <div class="text-sm font-medium">Marcus K.</div>
+            <div class="text-xs text-muted">Access provider · 3 regions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card quote-card p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="badge badge-premium text-[10px]">Vetter</span>
+          <span class="badge badge-neutral text-[10px]">Capital</span>
+        </div>
+        <p class="text-sm text-soft leading-relaxed mb-5">
+          "What sold me: every parameter I care about — ROI floor, reserve ratio, distribution
+          shares — is set by members voting, not by the platform."
+        </p>
+        <div
+          class="flex items-center gap-3 pt-4 border-t"
+          style="border-color: var(--border-subtle)"
+        >
+          <div class="avatar" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8)">AT</div>
+          <div>
+            <div class="text-sm font-medium">Amelia T.</div>
+            <div class="text-xs text-muted">Member since 2024 · proposer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="px-4 sm:px-6 py-20 sm:py-28">
+  <div class="max-w-5xl mx-auto">
+    <div class="card ring-glow p-8 sm:p-14 text-center relative overflow-hidden">
+      <div
+        class="absolute inset-0 -z-10 opacity-50"
+        style="
+          background: radial-gradient(60% 60% at 50% 0%, rgba(201, 138, 66, 0.18), transparent 70%);
+        "
+      ></div>
+
+      <span class="eyebrow mb-5">Join</span>
+      <h2 class="text-3xl sm:text-5xl font-semibold tracking-tight mt-3 mb-5">
+        Your capital. Your signal.<br /><span class="text-soft">Or your access. Pick one.</span>
+      </h2>
+      <p class="text-soft max-w-2xl mx-auto mb-8">
+        KYC at join. No minimum skill required. Earn from the day your contribution lands.
+        Member-owned, forever.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a [routerLink]="['/register']" class="btn btn-primary text-base px-7 py-3 pulse-halo">
+          <i data-lucide="user-plus" class="w-5 h-5"></i>
+          Create your account
+        </a>
+        <a [routerLink]="['/opportunities']" class="btn btn-secondary text-base px-7 py-3">
+          <i data-lucide="eye" class="w-5 h-5"></i>
+          View live opportunities
+        </a>
+      </div>
+
+      <div class="flex items-center justify-center gap-6 mt-8 text-xs text-muted flex-wrap">
+        <span class="flex items-center gap-1.5"
+          ><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>KYC required</span
+        >
+        <span class="flex items-center gap-1.5"
+          ><i data-lucide="lock" class="w-3.5 h-3.5 text-violet-400"></i>Audited event log</span
+        >
+        <span class="flex items-center gap-1.5"
+          ><i data-lucide="users" class="w-3.5 h-3.5 text-amber-400"></i>Member-owned</span
+        >
+        <span class="flex items-center gap-1.5"
+          ><i data-lucide="ban" class="w-3.5 h-3.5 text-rose-400"></i>No unearned returns</span
+        >
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="px-4 sm:px-6 pt-16 pb-10 border-t" style="border-color: var(--border-subtle)">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
+      <div class="col-span-2">
+        <a [routerLink]="['/']" class="flex items-center gap-3 mb-4">
+          <div class="logo-mark">
+            <i data-lucide="diamond" class="w-4 h-4 text-white relative z-10"></i>
+          </div>
+          <div>
+            <div class="text-sm font-semibold tracking-tight">MERIDIAN</div>
+            <div class="text-[10px] uppercase tracking-[0.18em] text-muted">
+              Collective Arbitrage
+            </div>
+          </div>
+        </a>
+        <p class="text-sm text-soft max-w-xs leading-relaxed">
+          Member-owned cooperative. Pool capital, signals, and access. Profit from real arbitrage —
+          together.
+        </p>
+        <div class="flex items-center gap-2 mt-5">
+          <a href="#" class="icon-btn" title="GitHub"
+            ><i data-lucide="github" class="w-4 h-4"></i
+          ></a>
+          <a href="#" class="icon-btn" title="Discord"
+            ><i data-lucide="message-circle" class="w-4 h-4"></i
+          ></a>
+          <a href="#" class="icon-btn" title="Twitter"
+            ><i data-lucide="twitter" class="w-4 h-4"></i
+          ></a>
+        </div>
+      </div>
+
+      <div>
+        <div class="foot-h">Product</div>
+        <ul class="space-y-2 text-sm">
+          <li>
+            <a [routerLink]="['/opportunities']" class="text-soft hover-text-1">Opportunities</a>
+          </li>
+          <li><a [routerLink]="['/executions']" class="text-soft hover-text-1">Executions</a></li>
+          <li><a [routerLink]="['/pool']" class="text-soft hover-text-1">Pool</a></li>
+          <li><a [routerLink]="['/payouts']" class="text-soft hover-text-1">Payouts</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="foot-h">Community</div>
+        <ul class="space-y-2 text-sm">
+          <li>
+            <a [routerLink]="['/community/alpha/members']" class="text-soft hover-text-1"
+              >Members</a
+            >
+          </li>
+          <li><a [routerLink]="['/communities']" class="text-soft hover-text-1">Communities</a></li>
+          <li>
+            <a [routerLink]="['/community/alpha/governance']" class="text-soft hover-text-1"
+              >Governance</a
+            >
+          </li>
+          <li>
+            <a [routerLink]="['/submit-signal']" class="text-soft hover-text-1">Submit signal</a>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="foot-h">Account</div>
+        <ul class="space-y-2 text-sm">
+          <li><a [routerLink]="['/login']" class="text-soft hover-text-1">Sign in</a></li>
+          <li><a [routerLink]="['/register']" class="text-soft hover-text-1">Create account</a></li>
+          <li><a [routerLink]="['/settings']" class="text-soft hover-text-1">Settings</a></li>
+          <li><a [routerLink]="['/profile']" class="text-soft hover-text-1">Profile</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div
+      class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t"
+      style="border-color: var(--border-subtle)"
+    >
+      <div class="text-xs text-muted">© 2026 MERIDIAN · member-owned cooperative</div>
+      <div class="flex items-center gap-5 text-xs text-muted">
+        <a href="#" class="hover-text-1">Terms</a>
+        <a href="#" class="hover-text-1">Privacy</a>
+        <a href="#" class="hover-text-1">Disclosure</a>
+      </div>
+    </div>
+  </div>
+</footer>

@@ -7,7 +7,13 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'showcase' },
+  // Root renders the shell-less marketing landing (wireframe index.html).
+  // /showcase remains reachable directly for the primitives showcase.
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./pages/landing/landing.page').then((m) => m.LandingPageComponent),
+  },
   {
     path: 'showcase',
     loadComponent: () => import('./pages/showcase/showcase.page').then((m) => m.ShowcaseComponent),
