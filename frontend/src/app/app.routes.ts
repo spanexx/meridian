@@ -125,6 +125,11 @@ export const routes: Routes = [
       import('./pages/register/register.page').then((m) => m.RegisterPageComponent),
   },
   {
+    path: 'notifications',
+    loadComponent: () =>
+      import('./pages/notifications/notifications.page').then((m) => m.NotificationsPageComponent),
+  },
+  {
     path: 'settings',
     loadComponent: () =>
       import('./pages/settings/settings.page').then((m) => m.SettingsPageComponent),
