@@ -109,14 +109,7 @@ export const routes: Routes = [
   {
     path: 'submit-signal',
     loadComponent: () =>
-      import('./pages/_placeholder/_placeholder.page').then((m) => m.PlaceholderPageComponent),
-    data: {
-      title: 'Submit Signal',
-      subtitle:
-        'Propose an opportunity for the Community to vet. Requires VETTER+ reputation tier to submit.',
-      iconName: 'plus-circle',
-      packName: 'submit-signal-pack',
-    },
+      import('./pages/submit-signal/submit-signal.page').then((m) => m.SubmitSignalPageComponent),
   },
   {
     path: 'profile',
