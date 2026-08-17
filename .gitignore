@@ -64,3 +64,6 @@ coverage/
 
 # playwright-cli tool workspace
 .playwright-cli/
+
+# cline-one one-shot subagent reports (orchestrator artifacts)
+.cline-one-reports/
