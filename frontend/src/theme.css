@@ -179,8 +179,18 @@ a { color: inherit; text-decoration: none; }
   border-right: 1px solid var(--border-subtle);
   padding: 1.5rem 1rem;
   display: flex; flex-direction: column; z-index: 10;
+  /* The sidebar is NOT the scroll container anymore — .sidebar-scroll is. */
+  overflow: hidden;
+}
+/* Only the brand + nav + Quick Actions wrapper scrolls. flex:1 + min-height:0
+   lets a flex child actually scroll inside a column; the pinned bottom-row is
+   a sibling (.sidebar-footer, flex-shrink:0) that never collapses. */
+.sidebar-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
+.sidebar-footer { flex-shrink: 0; }
 .nav-section {
   font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
   letter-spacing: 0.1em; color: var(--text-3);

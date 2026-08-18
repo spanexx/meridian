@@ -94,6 +94,9 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
 
       <!-- The actual sidebar — 260px wide, fixed left, full height -->
       <aside class="sidebar" [class.open]="sidebarOpen()" data-testid="sidebar">
+        <!-- Scrollable region: brand + nav sections + Quick Actions. Only this
+             wrapper scrolls, so the pinned bottom-row below stays visible. -->
+        <div class="sidebar-scroll">
         <a routerLink="/" class="flex items-center gap-2.5 mb-2 px-2">
           <ui-logo [size]="30" ariaLabel="Meridian — go to dashboard"></ui-logo>
           <div>
@@ -126,9 +129,11 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
           <ui-icon name="plus-circle"></ui-icon>
           Submit Signal
         </a>
+        </div>
 
-        <!-- Bottom-row: notifications / theme / avatar menu -->
-        <div class="mt-auto pt-4 border-t" style="border-color: var(--border-subtle);">
+        <!-- Bottom-row: notifications / theme / avatar menu (pinned, sibling
+             of .sidebar-scroll so it never scrolls out of view) -->
+        <div class="sidebar-footer mt-auto pt-4 border-t" style="border-color: var(--border-subtle);">
           <div class="flex items-center justify-around px-2 py-1.5">
             <button type="button" class="icon-btn" data-dropdown="notifMenu" title="Notifications">
               <ui-icon name="bell"></ui-icon>
