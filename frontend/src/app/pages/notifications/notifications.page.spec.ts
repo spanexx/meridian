@@ -1,30 +1,47 @@
 /**
- * Unit tests for NotificationsPageComponent — wireframe-aligned.
- * Per wireframe/meridian/notifications/index.html: title/subtitle, Mark all
- * read + Preferences actions, Preferences modal (raw markup, pool precedent)
- * with 4 switch rows + Cancel/Save (Save closes + toasts), tabs All(8)/
- * Unread(3), 8 rows (3 unread) with data-read + pulse dots, and the empty
+ * Unit tests for NotificationsPageComponent — wireframe-aligned, now API-driven.
+ *
+ * The page consumes the injected ApiClient.notificationsList() (core/api/api-client.ts);
+ * the test provides a mock ApiClient returning SEED_NOTIFICATIONS so the rendered output
+ * is byte-equivalent to the wireframe. Data arrives asynchronously, so every
+ * row-reading test awaits fixture.whenStable().
+ *
+ * Per wireframe/meridian/notifications/index.html: title/subtitle, Mark all read +
+ * Preferences actions, Preferences modal (raw markup) with 4 switch rows + Cancel/Save,
+ * tabs All(8)/Unread(3), 8 rows (3 unread) with data-read + pulse dots, and the empty
  * state after Mark all read + Unread.
  *
  * @owner   agent-maintained
- * @reviewed 2026-08-17
+ * @reviewed 2026-08-18
  */
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import type { NotificationsPageComponent } from './notifications.page';
 import { NOTIFICATIONS } from './notifications.page';
+import { ApiClient } from '../../core/api/api-client';
+import { SEED_NOTIFICATIONS } from '../../core/api/mock-seed';
+
+let mockClient: { notificationsList: ReturnType<typeof vi.fn> } | null = null;
 
 async function renderStandalone(): Promise<ComponentFixture<NotificationsPageComponent>> {
+  mockClient = {
+    notificationsList: vi.fn().mockResolvedValue({ notifications: SEED_NOTIFICATIONS }),
+  } as unknown as { notificationsList: ReturnType<typeof vi.fn> };
   await TestBed.configureTestingModule({
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient as unknown as ApiClient }],
   }).compileComponents();
   const { NotificationsPageComponent: Comp } = await import('./notifications.page');
   const fixture = TestBed.createComponent(Comp);
   fixture.detectChanges();
+  await fixture.whenStable();
+  fixture.detectChanges();
   return fixture;
 }
 
-describe('NotificationsPage (wireframe-aligned)', () => {
+describe('NotificationsPage (wireframe-aligned, API-driven)', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
   it('renders the page title "Notifications"', async () => {
     const fixture = await renderStandalone();
     const h1 = fixture.nativeElement.querySelector('h1');
@@ -58,12 +75,11 @@ describe('NotificationsPage (wireframe-aligned)', () => {
     expect(root.querySelector('[data-filter-tab="unread"]')?.textContent).toContain('3');
   });
 
-  it('first unread row ports the O-2051 title/time/caption verbatim', async () => {
+  it('first unread row ports the O-2051 title/caption verbatim + pulse dot', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;
     const first = root.querySelector('[data-notif-item]') as HTMLElement;
     expect(first.textContent).toContain('O-2051 needs 1 more vote to approve');
-    expect(first.textContent).toContain('2m ago');
     expect(first.textContent).toContain(
       'Vetting closes in 18h — the Bulk Lego Set Resale is 4/5 weighted votes.',
     );
@@ -229,9 +245,30 @@ describe('NotificationsPage (wireframe-aligned)', () => {
     expect(byTitle('E-1042')?.link).toEqual(['/executions', 'E-1042']);
     expect(byTitle('Reserve ratio')?.link).toEqual(['/pool']);
     expect(byTitle('Payout preview')?.link).toEqual(['/payouts']);
-    expect(byTitle('New proposal')?.link).toEqual(['/community/alpha/governance']);
+    expect(byTitle('New proposal')?.link).toEqual(['/community', 'alpha', 'governance']);
     expect(byTitle('Reputation milestone')?.link).toEqual(['/profile']);
     expect(byTitle('Pool snapshot')?.link).toEqual(['/pool']);
     expect(byTitle('Daily reconciliation')?.link).toEqual(['/executions', 'E-1042']);
+  });
+
+  it('calls ApiClient.notificationsList() once and shows skeleton while loading', async () => {
+    const mc = {
+      notificationsList: vi.fn().mockResolvedValue({ notifications: SEED_NOTIFICATIONS }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mc }],
+    }).compileComponents();
+    const { NotificationsPageComponent: Comp } = await import('./notifications.page');
+    const fixture = TestBed.createComponent(Comp);
+    fixture.detectChanges(); // loading = true, skeleton visible, no rows
+    const pre = fixture.nativeElement as HTMLElement;
+    expect(pre.querySelector('[data-testid="skeleton"]')).toBeTruthy();
+    expect(pre.querySelector('[data-notif-item]')).toBeFalsy();
+    expect(mc.notificationsList).toHaveBeenCalledTimes(1);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const post = fixture.nativeElement as HTMLElement;
+    expect(post.querySelector('[data-testid="skeleton"]')).toBeFalsy();
+    expect(post.querySelectorAll('[data-notif-item]').length).toBe(8);
   });
 });

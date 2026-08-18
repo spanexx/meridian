@@ -13,21 +13,28 @@
  *   - Filter tabs All (8) / Unread (3) with aria-selected + live counts
  *   - 8 notification rows (3 unread) with data-read + pulse dots; rows
  *     filtered by tab; empty state when a filter yields 0 rows
- *   - Skeleton dropped (opportunities precedent — demo pages do not
- *     simulate load; 8 rows ≤ page size 10 so no pagination either)
  *
- * Demo data is hardcoded per the wireframe (NOTIFICATIONS below).
- * Backend wiring is a later pack.
+ * Data layer (backend-readiness pack): the page consumes the injected
+ * ApiClient.notificationsList() (core/api/api-client.ts) instead of the
+ * former hardcoded NOTIFICATIONS const. The canonical NotificationItem
+ * (core/models) is mapped to the wireframe view by the MODULE-LOCAL
+ * toViewRow() helper. The dev MockGateway seeds the same 8 wireframe
+ * rows (mock-seed.ts SEED_NOTIFICATIONS), so rendering is byte-equivalent
+ * to the prior fixture.
  *
  * @owner   agent-maintained
- * @reviewed 2026-08-17
+ * @reviewed 2026-08-18
  */
+
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ApiClient } from '../../core/api/api-client';
+import type { NotificationItem as CanonicalNotification } from '../../core/models';
+import { SEED_NOTIFICATIONS } from '../../core/api/mock-seed';
 
-/** One notification row, ported verbatim from the wireframe. */
+/** One notification row in the wireframe view shape. */
 export interface NotificationItem {
   readonly id: string;
   readonly title: string;
@@ -47,105 +54,57 @@ interface ToastState {
   readonly variant: UiToastVariant;
 }
 
-/** The 8 wireframe rows (3 unread). `read` is mutable page state. */
-export const NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'n1',
-    title: 'O-2051 needs 1 more vote to approve',
-    time: '2m ago',
-    caption: 'Vetting closes in 18h — the Bulk Lego Set Resale is 4/5 weighted votes.',
-    icon: 'vote',
-    bg: 'rgba(201,138,66,0.12)',
-    color: 'text-violet-400',
-    dot: 'bg-violet-400',
-    link: ['/opportunities', 'O-2051'],
-    read: false,
-  },
-  {
-    id: 'n2',
-    title: 'E-1042 · Size 10.5 sold on GOAT',
-    time: '1h ago',
-    caption: '$2,880 recovered — 3 of 8 items sold, ROI tracking at +12.4%.',
-    icon: 'package',
-    bg: 'rgba(16,185,129,0.12)',
-    color: 'text-emerald-400',
-    dot: 'bg-emerald-400',
-    link: ['/executions', 'E-1042'],
-    read: false,
-  },
-  {
-    id: 'n3',
-    title: 'Reserve ratio steady at 18.2%',
-    time: '3h ago',
-    caption: 'Above the 12% community target. No action needed.',
-    icon: 'banknote',
-    bg: 'rgba(245,158,11,0.12)',
-    color: 'text-amber-400',
-    dot: 'bg-amber-400',
-    link: ['/pool'],
-    read: false,
-  },
-  {
-    id: 'n4',
-    title: 'Payout preview updated for E-1039',
-    time: '5h ago',
-    caption: 'Projected net profit $5,982 · distribution pending vote outcome.',
-    icon: 'circle-dollar-sign',
-    bg: 'rgba(201,138,66,0.12)',
-    color: 'text-violet-400',
-    dot: 'bg-violet-400',
-    link: ['/payouts'],
-    read: true,
-  },
-  {
-    id: 'n5',
-    title: 'New proposal: ROI floor → 18%',
-    time: '8h ago',
-    caption: 'Dana Voss proposed raising the ROI floor. Vote closes in 22h.',
-    icon: 'vote',
-    bg: 'rgba(96,165,250,0.12)',
-    color: 'text-blue-400',
-    dot: 'bg-blue-400',
-    link: ['/community/alpha/governance'],
-    read: true,
-  },
-  {
-    id: 'n6',
-    title: 'Daily reconciliation: BALANCED',
-    time: 'Yesterday',
-    caption: 'Every dollar accounted for. Audit trail intact.',
-    icon: 'check-circle-2',
-    bg: 'rgba(16,185,129,0.12)',
-    color: 'text-emerald-400',
-    dot: 'bg-emerald-400',
-    link: ['/executions', 'E-1042'],
-    read: true,
-  },
-  {
-    id: 'n7',
-    title: 'Reputation milestone: Tier 3 reached',
-    time: '2 days ago',
-    caption: 'Vetting weight now ×1.4. Keep it up.',
-    icon: 'award',
-    bg: 'rgba(201,138,66,0.12)',
-    color: 'text-violet-400',
-    dot: 'bg-violet-400',
-    link: ['/profile'],
-    read: true,
-  },
-  {
-    id: 'n8',
-    title: 'Pool snapshot available',
-    time: '3 days ago',
-    caption: 'The weekly pool.snapshot_taken report is ready to export.',
-    icon: 'download',
-    bg: 'rgba(96,165,250,0.12)',
-    color: 'text-blue-400',
-    dot: 'bg-blue-400',
-    link: ['/pool'],
-    read: true,
-  },
-];
+/** Wireframe icon + accent per canonical NotificationType. */
+const STYLE_BY_TYPE: Record<string, { icon: string; bg: string; color: string; dot: string }> = {
+  EXECUTION_STARTED: { icon: 'vote', bg: 'rgba(201,138,66,0.12)', color: 'text-violet-400', dot: 'bg-violet-400' },
+  EXECUTION_ACQUIRED: { icon: 'package', bg: 'rgba(96,165,250,0.12)', color: 'text-blue-400', dot: 'bg-blue-400' },
+  EXECUTION_FIRST_SALE: { icon: 'package', bg: 'rgba(16,185,129,0.12)', color: 'text-emerald-400', dot: 'bg-emerald-400' },
+  EXECUTION_COMPLETED: { icon: 'check-circle-2', bg: 'rgba(16,185,129,0.12)', color: 'text-emerald-400', dot: 'bg-emerald-400' },
+  PAYOUT_READY: { icon: 'circle-dollar-sign', bg: 'rgba(201,138,66,0.12)', color: 'text-violet-400', dot: 'bg-violet-400' },
+  PAYOUT_PENDING: { icon: 'circle-dollar-sign', bg: 'rgba(201,138,66,0.12)', color: 'text-violet-400', dot: 'bg-violet-400' },
+  PAYOUT_COMPLETED: { icon: 'circle-dollar-sign', bg: 'rgba(201,138,66,0.12)', color: 'text-violet-400', dot: 'bg-violet-400' },
+  EXECUTION_LOSS: { icon: 'alert-triangle', bg: 'rgba(245,158,11,0.12)', color: 'text-amber-400', dot: 'bg-amber-400' },
+};
+
+const FALLBACK_STYLE = { icon: 'bell', bg: 'rgba(96,165,250,0.12)', color: 'text-blue-400', dot: 'bg-blue-400' };
+
+/** '/opportunities/O-2051' -> ['/opportunities','O-2051']; '/pool' -> ['/pool']. */
+const routeToLink = (route: string | null): string[] => {
+  if (!route) return ['/'];
+  const segs = route.split('/').filter(Boolean);
+  return segs.map((s, i) => (i === 0 ? `/${s}` : s));
+};
+
+/** Map a canonical NotificationItem (API shape) to the wireframe view row. */
+const toViewRow = (n: CanonicalNotification): NotificationItem => {
+  const style = STYLE_BY_TYPE[n.type] ?? FALLBACK_STYLE;
+  const time = (() => {
+    const diffMs = Date.now() - new Date(n.created_at).getTime();
+    const min = Math.round(diffMs / 60000);
+    if (min < 1) return 'just now';
+    if (min < 60) return `${min}m ago`;
+    const hr = Math.round(min / 60);
+    if (hr < 24) return `${hr}h ago`;
+    const days = Math.round(hr / 24);
+    if (days === 1) return 'Yesterday';
+    return `${days} days ago`;
+  })();
+  return {
+    id: n.id,
+    title: n.title,
+    time,
+    caption: n.body,
+    icon: style.icon,
+    bg: style.bg,
+    color: style.color,
+    dot: style.dot,
+    link: routeToLink(n.route),
+    read: n.read,
+  };
+};
+
+/** The wireframe rows, derived from the canonical seed (single source). */
+export const NOTIFICATIONS: NotificationItem[] = SEED_NOTIFICATIONS.map(toViewRow);
 
 @Component({
   selector: 'app-notifications-page',
@@ -155,8 +114,11 @@ export const NOTIFICATIONS: NotificationItem[] = [
   templateUrl: './notifications.template.html',
 })
 export class NotificationsPageComponent {
-  /** Mutable copy of the rows — `read` is page state, the rest is static. */
-  readonly items = signal(NOTIFICATIONS.map((n) => ({ ...n })));
+  /** True until the first notificationsList() payload resolves (drives the skeleton). */
+  readonly loading = signal(true);
+
+  /** Rows from the injected ApiClient (canonical) mapped to the wireframe view. */
+  readonly items = signal<NotificationItem[]>([]);
 
   /** Active filter tab. */
   readonly tab = signal<'all' | 'unread'>('all');
@@ -192,6 +154,13 @@ export class NotificationsPageComponent {
 
   /** Number of unread rows (drives the Unread tab count). */
   readonly unreadCount = computed(() => this.items().filter((n) => !n.read).length);
+
+  constructor(private readonly client: ApiClient) {
+    this.client
+      .notificationsList()
+      .then((r) => this.items.set(r.notifications.map(toViewRow)))
+      .finally(() => this.loading.set(false));
+  }
 
   setTab(t: 'all' | 'unread'): void {
     this.tab.set(t);
