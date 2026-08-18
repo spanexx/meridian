@@ -29,13 +29,22 @@
  */
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
+import { ApiClient } from '../../core/api/api-client';
+import { SEED_OPPORTUNITIES, SEED_MEMBER } from '../../core/api/mock-seed';
 
 async function renderDashboard(): Promise<ComponentFixture<unknown>> {
+  const mockClient = {
+    me: vi.fn().mockResolvedValue(SEED_MEMBER),
+    opportunitiesList: vi.fn().mockResolvedValue({ opportunities: SEED_OPPORTUNITIES }),
+  } as unknown as ApiClient;
   await TestBed.configureTestingModule({
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
   }).compileComponents();
   const { DashboardPageComponent: Comp } = await import('./dashboard.page');
   const fixture = TestBed.createComponent(Comp);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
