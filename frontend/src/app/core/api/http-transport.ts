@@ -1,39 +1,38 @@
 /**
- * HttpTransport — fetch-based ApiTransport implementation.
+ * HttpTransport — HttpClient-based ApiTransport implementation.
  *
- * This is the production transport used when environment.useMock is false.
- * It wraps the native fetch API and applies the gateway wire conventions
+ * Production transport used when environment.useMock is false. Wraps
+ * Angular's HttpClient and applies the gateway wire conventions
  * (envelope shape, error codes, correlation headers) so ApiClient never
- * sees raw HTTP.
+ * sees raw HTTP. The interceptors (auth, correlation, error) handle
+ * cross-cutting concerns; this class focuses on the request/response
+ * envelope contract.
  *
  * @owner   agent-maintained
  * @reviewed 2026-08-18
  *
- * DISCOVERY 2026-08-18: this fetch-based transport replaces the
- * HttpClient-based approach described in docs/frontend/00-frontend-overview.md.
- * That doc is rewritten in the maintainability pack.
+ * DISCOVERY 2026-08-18: migrated from fetch-based to HttpClient-based
+ * to follow Angular 20 idiomatic patterns. The interceptors now handle
+ * auth, correlation IDs, and error mapping that were previously inline.
+ * Pointer: gateway wire conventions in docs/apis/00-api-conventions.md
+ * (§Response Format, §Error Format); design rationale tracked in
+ * sessions/decisions.md.
  */
+import { Injectable, inject, Inject, InjectionToken } from '@angular/core';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { ApiResponse, ApiError, isApiEnvelope } from './api-response';
 import { ApiTransport, RequestOptions } from './api-transport';
+import { HTTP_AUTH_TOKEN, HTTP_CORRELATION_ID, HTTP_IDEMPOTENCY_KEY, HTTP_SKIP_ERROR_HANDLING } from './http-context';
 
-const STATUS_CODE_MAP: Record<number, string> = {
-  401: 'AUTH_TOKEN_INVALID',
-  403: 'FORBIDDEN',
-  404: 'NOT_FOUND',
-  409: 'CONFLICT',
-  422: 'VALIDATION_ERROR',
-  429: 'RATE_LIMITED',
-};
+/** InjectionToken carrying the API base URL for the HttpClient-backed transport. */
+export const HTTP_BASE_URL = new InjectionToken<string>('HTTP_BASE_URL');
 
-export function newRequestId(): string {
-  return 'req_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
-}
-
+@Injectable()
 export class HttpTransport implements ApiTransport {
   constructor(
-    private readonly baseUrl: string,
-    private readonly getToken: () => string | null = () => null,
-    private readonly fetcher: typeof fetch = fetch,
+    private readonly http: HttpClient,
+    @Inject(HTTP_BASE_URL) private readonly baseUrl: string,
   ) {}
 
   async request<T>(
@@ -43,55 +42,42 @@ export class HttpTransport implements ApiTransport {
     options?: RequestOptions,
   ): Promise<ApiResponse<T>> {
     const url = this.baseUrl + path;
-    const requestId = newRequestId();
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'X-Request-ID': requestId,
-    };
-
-    const token = options?.token ?? this.getToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    let context = new HttpContext();
+    if (options?.token) {
+      context = context.set(HTTP_AUTH_TOKEN, options.token);
     }
-
     if (options?.idempotencyKey && method !== 'GET') {
-      headers['X-Idempotency-Key'] = options.idempotencyKey;
+      context = context.set(HTTP_IDEMPOTENCY_KEY, options.idempotencyKey);
     }
 
-    const fetchOptions: RequestInit = {
-      method,
-      headers,
-    };
-
-    if (body !== undefined) {
-      fetchOptions.body = JSON.stringify(body);
-    }
-
-    let response: Response;
     try {
-      response = await this.fetcher(url, fetchOptions);
-    } catch {
+      // http.request<T> returns the response BODY (the envelope) on success.
+      // The errorInterceptor converts non-2xx HttpErrorResponse into ApiError
+      // upstream, so this path only handles success payloads. A 204 has a null
+      // body, which we normalize to { data: undefined }.
+      const payload = await firstValueFrom(
+        this.http.request<ApiResponse<T>>(method, url, {
+          body: body ?? undefined,
+          context,
+          responseType: 'json',
+        }),
+      );
+
+      if (payload === null || payload === undefined) {
+        return { success: true, data: undefined as T };
+      }
+
+      if (!isApiEnvelope(payload)) {
+        throw new ApiError('INVALID_RESPONSE', 'Malformed response from server.', {});
+      }
+
+      return payload as ApiResponse<T>;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
       throw new ApiError('SERVICE_UNAVAILABLE', 'The server could not be reached. Please try again.', {});
     }
-
-    if (response.status === 204) {
-      return { success: true, data: undefined as T };
-    }
-
-    const payload = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      const errorBody = payload as { error?: { code?: string; message?: string; details?: unknown } };
-      const code = errorBody.error?.code ?? STATUS_CODE_MAP[response.status] ?? 'SERVICE_UNAVAILABLE';
-      const message = errorBody.error?.message ?? `Request failed (${response.status})`;
-      throw new ApiError(code, message, { status: response.status, details: errorBody.error?.details });
-    }
-
-    if (!isApiEnvelope(payload)) {
-      throw new ApiError('INVALID_RESPONSE', 'Malformed response from server.', {});
-    }
-
-    return payload as ApiResponse<T>;
   }
 }

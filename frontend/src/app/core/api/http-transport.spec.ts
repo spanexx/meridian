@@ -1,161 +1,212 @@
 /**
- * HttpTransport unit tests — fetch fake only, no real network.
+ * HttpTransport unit tests — HttpTestingController only, no real network.
  *
  * @owner   agent-maintained
  * @reviewed 2026-08-18
  */
-import { HttpTransport, newRequestId } from './http-transport';
+import { TestBed } from '@angular/core/testing';
+import { HttpClient, HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpTransport } from './http-transport';
 import { ApiError, ApiResponse } from './api-response';
-import { RequestOptions, ApiTransport } from './api-transport';
-
-interface CapturedRequest {
-  url: string;
-  init: RequestInit;
-}
+import { RequestOptions } from './api-transport';
+import { TokenStore } from '../auth/token-store';
+import { authInterceptor } from './auth.interceptor';
+import { correlationInterceptor } from './correlation.interceptor';
+import { errorInterceptor } from './error.interceptor';
+import { HTTP_AUTH_TOKEN, HTTP_CORRELATION_ID, HTTP_SKIP_ERROR_HANDLING } from './http-context';
+import { HTTP_BASE_URL } from './http-transport';
 
 describe('HttpTransport', () => {
+  let transport: HttpTransport;
+  let httpMock: HttpTestingController;
   const baseUrl = 'https://api.example.com';
 
-  const makeFetcher = (responses: Array<{ status: number; ok: boolean; body: unknown }>) => {
-    let idx = 0;
-    const captured: CapturedRequest[] = [];
-    const fetcher = async (url: string, init: RequestInit) => {
-      captured.push({ url, init });
-      const r = responses[idx++];
-      return {
-        status: r.status,
-        ok: r.ok,
-        json: async () => r.body,
-      } as Response;
-    };
-    return { fetcher, captured };
-  };
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([authInterceptor, correlationInterceptor, errorInterceptor])),
+        provideHttpClientTesting(),
+        HttpTransport,
+        TokenStore,
+        { provide: HTTP_BASE_URL, useValue: baseUrl },
+      ],
+    });
 
-  const makeTransport = (
-    fetcher: typeof fetch,
-    getToken: () => string | null = () => 'test-token',
-  ) => new HttpTransport(baseUrl, getToken, fetcher);
-
-  it('sends method + URL + JSON body + content-type', async () => {
-    const { fetcher, captured } = makeFetcher([{ status: 200, ok: true, body: { success: true, data: { foo: 'bar' } } }]);
-    const transport = makeTransport(fetcher);
-    await transport.request('POST', '/test', { hello: 'world' });
-
-    expect(captured.length).toBe(1);
-    expect(captured[0].url).toBe('https://api.example.com/test');
-    expect(captured[0].init.method).toBe('POST');
-    expect(captured[0].init.headers).toEqual(
-      expect.objectContaining({ 'Content-Type': 'application/json' }),
-    );
-    expect(captured[0].init.body).toBe(JSON.stringify({ hello: 'world' }));
+    transport = TestBed.inject(HttpTransport);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
-  it('adds Authorization from the token provider', async () => {
-    const { fetcher, captured } = makeFetcher([{ status: 200, ok: true, body: { success: true, data: null } }]);
-    const transport = makeTransport(fetcher, () => 'my-token');
-    await transport.request('GET', '/test');
-
-    expect(captured[0].init.headers).toEqual(
-      expect.objectContaining({ Authorization: 'Bearer my-token' }),
-    );
+  afterEach(() => {
+    httpMock.verify();
   });
 
-  it('no Authorization when provider returns null', async () => {
-    const { fetcher, captured } = makeFetcher([{ status: 200, ok: true, body: { success: true, data: null } }]);
-    const transport = makeTransport(fetcher, () => null);
-    await transport.request('GET', '/test');
+  it('sends method + URL + JSON body', async () => {
+    const envelope: ApiResponse<{ foo: string }> = { success: true, data: { foo: 'bar' }, meta: { request_id: 'req_1' } };
+    const promise = transport.request('POST', '/test', { hello: 'world' });
 
-    const headers = captured[0].init.headers as Record<string, string>;
-    expect(headers.Authorization).toBeUndefined();
+    const req = httpMock.expectOne(baseUrl + '/test');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ hello: 'world' });
+    req.flush(envelope);
+
+    const result = await promise;
+    expect(result).toEqual(envelope);
   });
 
-  it('adds X-Request-ID starting with req_', async () => {
-    const { fetcher, captured } = makeFetcher([{ status: 200, ok: true, body: { success: true, data: null } }]);
-    const transport = makeTransport(fetcher);
-    await transport.request('GET', '/test');
+  it('includes X-Request-ID via correlation interceptor', async () => {
+    const envelope: ApiResponse<null> = { success: true, data: null, meta: { request_id: 'req_1' } };
+    const promise = transport.request('GET', '/test');
 
-    const headers = captured[0].init.headers as Record<string, string>;
-    expect(headers['X-Request-ID']).toBeDefined();
-    expect(headers['X-Request-ID']?.startsWith('req_')).toBe(true);
+    const req = httpMock.expectOne(baseUrl + '/test');
+    expect(req.request.headers.get('X-Request-ID')).toBeTruthy();
+    const requestId = req.request.headers.get('X-Request-ID');
+    expect(requestId?.startsWith('req_')).toBeTruthy();
+    req.flush(envelope);
+
+    await promise;
   });
 
-  it('adds X-Idempotency-Key on POST when provided', async () => {
-    const { fetcher, captured } = makeFetcher([{ status: 200, ok: true, body: { success: true, data: null } }]);
-    const transport = makeTransport(fetcher);
-    await transport.request('POST', '/test', { a: 1 }, { idempotencyKey: 'idem-123' });
+  it('includes Authorization via auth interceptor when token exists', async () => {
+    const tokenStore = TestBed.inject(TokenStore);
+    tokenStore.set('test-token');
 
-    const headers = captured[0].init.headers as Record<string, string>;
-    expect(headers['X-Idempotency-Key']).toBe('idem-123');
+    const envelope: ApiResponse<null> = { success: true, data: null, meta: { request_id: 'req_1' } };
+    const promise = transport.request('GET', '/test');
+
+    const req = httpMock.expectOne(baseUrl + '/test');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer test-token');
+    req.flush(envelope);
+
+    await promise;
   });
 
-  it('does NOT add X-Idempotency-Key on GET', async () => {
-    const { fetcher, captured } = makeFetcher([{ status: 200, ok: true, body: { success: true, data: null } }]);
-    const transport = makeTransport(fetcher);
-    await transport.request('GET', '/test', undefined, { idempotencyKey: 'idem-123' });
+  it('omits Authorization when token is null', async () => {
+    const tokenStore = TestBed.inject(TokenStore);
+    tokenStore.clear();
 
-    const headers = captured[0].init.headers as Record<string, string>;
-    expect(headers['X-Idempotency-Key']).toBeUndefined();
+    const envelope: ApiResponse<null> = { success: true, data: null, meta: { request_id: 'req_1' } };
+    const promise = transport.request('GET', '/test');
+
+    const req = httpMock.expectOne(baseUrl + '/test');
+    expect(req.request.headers.has('Authorization')).toBeFalsy();
+    req.flush(envelope);
+
+    await promise;
+  });
+
+  it('uses context token override when provided', async () => {
+    const tokenStore = TestBed.inject(TokenStore);
+    tokenStore.set('store-token');
+
+    const envelope: ApiResponse<null> = { success: true, data: null, meta: { request_id: 'req_1' } };
+    const options: RequestOptions = { token: 'override-token' };
+    const promise = transport.request('GET', '/test', undefined, options);
+
+    const req = httpMock.expectOne(baseUrl + '/test');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer override-token');
+    req.flush(envelope);
+
+    await promise;
   });
 
   it('unwraps and returns the envelope on 200', async () => {
     const envelope: ApiResponse<{ x: number }> = { success: true, data: { x: 42 }, meta: { request_id: 'req_abc' } };
-    const { fetcher } = makeFetcher([{ status: 200, ok: true, body: envelope }]);
-    const transport = makeTransport(fetcher);
-    const result = await transport.request('GET', '/test');
+    const promise = transport.request('GET', '/test');
+
+    const req = httpMock.expectOne(baseUrl + '/test');
+    req.flush(envelope);
+
+    const result = await promise;
     expect(result).toEqual(envelope);
   });
 
   it('204 returns success with undefined data', async () => {
-    const { fetcher } = makeFetcher([{ status: 204, ok: true, body: {} }]);
-    const transport = makeTransport(fetcher);
-    const result = await transport.request('DELETE', '/test');
+    const promise = transport.request('DELETE', '/test');
+
+    const req = httpMock.expectOne(baseUrl + '/test');
+    req.flush(null, { status: 204, statusText: 'No Content' });
+
+    const result = await promise;
     expect(result).toEqual({ success: true, data: undefined });
   });
 
-  it('401 with body code AUTH_TOKEN_EXPIRED rejects ApiError code AUTH_TOKEN_EXPIRED', async () => {
-    const { fetcher } = makeFetcher([{
-      status: 401,
-      ok: false,
-      body: { success: false, error: { code: 'AUTH_TOKEN_EXPIRED', message: 'Token expired' } },
-    }]);
-    const transport = makeTransport(fetcher);
+  it('error interceptor maps 401 to ApiError and clears token', async () => {
+    const tokenStore = TestBed.inject(TokenStore);
+    tokenStore.set('existing-token');
 
-    await expect(transport.request('GET', '/test')).rejects.toMatchObject({
-      code: 'AUTH_TOKEN_EXPIRED',
-      message: 'Token expired',
-    });
+    const promise = transport.request('GET', '/test');
+
+    const req = httpMock.expectOne(baseUrl + '/test');
+    req.flush(
+      { success: false, error: { code: 'AUTH_TOKEN_EXPIRED', message: 'Token expired' } },
+      { status: 401, statusText: 'Unauthorized' }
+    );
+
+    await expect(promise).rejects.toMatchObject({ code: 'AUTH_TOKEN_EXPIRED', message: 'Token expired' });
+    expect(tokenStore.token).toBeNull();
   });
 
-  it('422 without body code -> ApiError code VALIDATION_ERROR via status map', async () => {
-    const { fetcher } = makeFetcher([{
-      status: 422,
-      ok: false,
-      body: { success: false, error: { message: 'Invalid input' } },
-    }]);
-    const transport = makeTransport(fetcher);
+  it('error interceptor maps 422 to VALIDATION_ERROR via status map', async () => {
+    const promise = transport.request('POST', '/test', {});
 
-    await expect(transport.request('POST', '/test', {})).rejects.toMatchObject({
-      code: 'VALIDATION_ERROR',
-    });
+    const req = httpMock.expectOne(baseUrl + '/test');
+    req.flush(
+      { success: false, error: { message: 'Invalid input' } },
+      { status: 422, statusText: 'Unprocessable Entity' }
+    );
+
+    await expect(promise).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
   });
 
-  it('fetcher rejection -> ApiError SERVICE_UNAVAILABLE', async () => {
-    const fetcher = async () => { throw new Error('network down'); };
-    const transport = makeTransport(fetcher);
+  it('error interceptor maps 404 to NOT_FOUND', async () => {
+    const promise = transport.request('GET', '/test');
 
-    await expect(transport.request('GET', '/test')).rejects.toMatchObject({
-      code: 'SERVICE_UNAVAILABLE',
-      message: 'The server could not be reached. Please try again.',
-    });
+    const req = httpMock.expectOne(baseUrl + '/test');
+    req.flush({}, { status: 404, statusText: 'Not Found' });
+
+    await expect(promise).rejects.toMatchObject({ code: 'NOT_FOUND' });
   });
 
-  it('newRequestId returns ids starting with req_ and unique across calls', () => {
-    const ids = new Set<string>();
-    for (let i = 0; i < 100; i++) {
-      const id = newRequestId();
-      expect(id.startsWith('req_')).toBe(true);
-      expect(ids.has(id)).toBe(false);
-      ids.add(id);
-    }
+  it('network error maps to SERVICE_UNAVAILABLE', async () => {
+    const promise = transport.request('GET', '/test');
+
+    const req = httpMock.expectOne(baseUrl + '/test');
+    req.error(new ErrorEvent('Network error'));
+
+    await expect(promise).rejects.toMatchObject({ code: 'SERVICE_UNAVAILABLE', message: 'The server could not be reached. Please try again.' });
+  });
+
+  it('invalid envelope throws INVALID_RESPONSE', async () => {
+    const promise = transport.request('GET', '/test');
+
+    const req = httpMock.expectOne(baseUrl + '/test');
+    req.flush({ not: 'an envelope' });
+
+    await expect(promise).rejects.toMatchObject({ code: 'INVALID_RESPONSE', message: 'Malformed response from server.' });
+  });
+
+  it('uses idempotency key as X-Idempotency-Key header on mutations', async () => {
+    const envelope: ApiResponse<null> = { success: true, data: null, meta: { request_id: 'req_1' } };
+    const options: RequestOptions = { idempotencyKey: 'idem-123' };
+    const promise = transport.request('POST', '/test', { a: 1 }, options);
+
+    const req = httpMock.expectOne(baseUrl + '/test');
+    expect(req.request.headers.get('X-Idempotency-Key')).toBe('idem-123');
+    req.flush(envelope);
+
+    await promise;
+  });
+
+  it('does NOT add X-Idempotency-Key on GET', async () => {
+    const envelope: ApiResponse<null> = { success: true, data: null, meta: { request_id: 'req_1' } };
+    const options: RequestOptions = { idempotencyKey: 'idem-123' };
+    const promise = transport.request('GET', '/test', undefined, options);
+
+    const req = httpMock.expectOne(baseUrl + '/test');
+    expect(req.request.headers.has('X-Idempotency-Key')).toBeFalsy();
+    req.flush(envelope);
+
+    await promise;
   });
 });
