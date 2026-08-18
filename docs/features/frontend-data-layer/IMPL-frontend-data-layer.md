@@ -138,16 +138,23 @@ Last reviewed: 2026-08-18
 Orchestration restarted per user direction (sessions/decisions.md
 2026-08-18): jobs delegated to cline-one (deep/long, serialized) and
 opencode-action (short); orchestrator sends job → preps while waiting →
-reviews → integrates → tests → commits per job.
+reviews → integrates → tests → commits per job. Parallel jobs only when
+file-disjoint.
 
 - Step 1 (environments) DONE + committed (`a18ba19`), specs green.
 - Step 2 (utils) DONE + committed (`a18ba19`), specs green.
-- Step 3 (models) IN PROGRESS — 6 of 9 files untracked (member, pool,
-  opportunity, execution, payout, community); governance + notification
-  delegated (opencode-action, job 1); barrel + models.spec.ts are
-  orchestrator-owned. Reference doc pinned:
-  api-models-reference.md in this directory.
-- Step 4 (envelope/transport/gateway) PARTIAL — api-response,
-  api-transport, mock-gateway, mock-transport + specs written,
-  untracked, specs not yet run. http-transport delegated (job 2).
-- Steps 5–7 (ApiClient, payouts rewire, verification/PR) pending jobs 3–6.
+- Step 3 (models) DONE + committed — 9 canonical files + barrel +
+  models.spec (17 tests). governance/notification via opencode-action
+  (job 1), reviewed + corrected; reference doc pinned
+  (api-models-reference.md).
+- Step 4 (envelope/transport/gateway) DONE + committed — api-response,
+  api-transport, MockGateway (+pattern routes), MockTransport,
+  HttpTransport (opencode job 2), MockGateway seed data via cline-one
+  (job 4: mock-seed.ts, 29 routes, full wireframe world as canonical
+  data). api-client.spec authored by orchestrator at integration
+  (job 3 delivered api-client.ts but its wrapper hung; spec completed
+  in-session). 60/60 api specs green.
+- Step 5 (ApiClient) DONE — 33 typed methods, envelope-unwrapped,
+  idempotency wired (opencode job 3).
+- Step 6 (payouts rewire) PENDING — cline-one job 5.
+- Step 7 (app.config wiring, verification, PR) PENDING — orchestrator.
