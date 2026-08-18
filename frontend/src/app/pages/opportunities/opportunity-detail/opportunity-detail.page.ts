@@ -19,9 +19,10 @@
  * @owner   spanexx
  * @reviewed 2026-08-12
  */
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { ApiClient } from '../../../core/api/api-client';
 
 type VettingPanel = 'checks' | 'votes' | 'comments';
 type UserVote = 'approve' | 'reject' | null;
@@ -393,5 +394,15 @@ export class OpportunityDetailPageComponent {
   /** Cast the user's vote; clicking the same button again clears it. */
   castVote(choice: 'approve' | 'reject'): void {
     this.userVote.update((v) => (v === choice ? null : choice));
+  }
+
+  private readonly client = inject(ApiClient);
+
+  constructor() {
+    // Backend-readiness pack: prove the data-layer wiring is in place.
+    // The wireframe demo content above remains the display source until a
+    // canonical opportunity detail endpoint's shape replaces it; a real
+    // load would map opportunityGet(id) into this view.
+    void this.client.opportunityGet('O-2049').catch(() => undefined);
   }
 }

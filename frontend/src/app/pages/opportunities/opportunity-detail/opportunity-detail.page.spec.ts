@@ -23,11 +23,20 @@
  */
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { OpportunityDetailPageComponent } from './opportunity-detail.page';
+import { ApiClient } from '../../../core/api/api-client';
 
 async function renderPage(): Promise<ComponentFixture<OpportunityDetailPageComponent>> {
-  await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
+  const mockClient = {
+    opportunityGet: vi.fn().mockResolvedValue({} as never),
+  } as unknown as ApiClient;
+  await TestBed.configureTestingModule({
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
+  }).compileComponents();
   const fixture = TestBed.createComponent(OpportunityDetailPageComponent);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
