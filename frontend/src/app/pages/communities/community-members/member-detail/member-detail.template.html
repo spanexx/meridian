@@ -9,6 +9,12 @@
     <span class="text-slate-300">{{ member().name }}</span>
   </nav>
 
+  @if (loading()) {
+    <div class="empty px-5 py-12 text-center" data-testid="skeleton">
+      <ui-icon name="activity" [size]="40" class="mx-auto mb-3 text-slate-500"></ui-icon>
+      <p class="text-sm font-medium text-slate-400 mb-1">Loading member…</p>
+    </div>
+  } @else {
   <!-- hero -->
   <section class="glass p-4 sm:p-6 mb-6 relative overflow-hidden">
     <div class="absolute -top-1/4 right-0 w-96 h-96 rounded-full"
@@ -160,5 +166,5 @@
       </table>
     </div>
   </section>
-
+  }
 </section>
