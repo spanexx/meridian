@@ -22,14 +22,22 @@
  */
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import type { OpportunitiesPageComponent } from './opportunities.page';
+import { ApiClient } from '../../core/api/api-client';
+import { SEED_OPPORTUNITIES } from '../../core/api/mock-seed';
 
 async function renderStandalone(): Promise<ComponentFixture<OpportunitiesPageComponent>> {
+  const mockClient = {
+    opportunitiesList: vi.fn().mockResolvedValue({ opportunities: SEED_OPPORTUNITIES }),
+  } as unknown as ApiClient;
   await TestBed.configureTestingModule({
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
   }).compileComponents();
   const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
   const fixture = TestBed.createComponent(Comp);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
@@ -305,7 +313,10 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   // Re-mount a fresh component so we have access to componentInstance for
   // method-level assertions.
   it('formatCapital() renders with thousands separator', async () => {
-    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
+    const mockClient = {
+      opportunitiesList: vi.fn().mockResolvedValue({ opportunities: SEED_OPPORTUNITIES }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }] }).compileComponents();
     const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
@@ -315,7 +326,10 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   });
 
   it('formatRoi() renders "+X.X%" with one decimal', async () => {
-    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
+    const mockClient = {
+      opportunitiesList: vi.fn().mockResolvedValue({ opportunities: SEED_OPPORTUNITIES }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }] }).compileComponents();
     const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
@@ -324,7 +338,10 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   });
 
   it('categoryLabel() capitalizes the category slug', async () => {
-    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
+    const mockClient = {
+      opportunitiesList: vi.fn().mockResolvedValue({ opportunities: SEED_OPPORTUNITIES }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }] }).compileComponents();
     const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
@@ -333,7 +350,10 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   });
 
   it('statusLabel() returns the wireframe label for each status', async () => {
-    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
+    const mockClient = {
+      opportunitiesList: vi.fn().mockResolvedValue({ opportunities: SEED_OPPORTUNITIES }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }] }).compileComponents();
     const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
@@ -345,7 +365,10 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   });
 
   it('statusVariant() maps each status to a badge color variant', async () => {
-    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
+    const mockClient = {
+      opportunitiesList: vi.fn().mockResolvedValue({ opportunities: SEED_OPPORTUNITIES }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }] }).compileComponents();
     const { OpportunitiesPageComponent: Comp } = await import('./opportunities.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;

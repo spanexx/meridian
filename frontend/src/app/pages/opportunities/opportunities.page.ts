@@ -17,9 +17,10 @@
  * @owner   spanexx
  * @reviewed 2026-08-11
  */
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ApiClient } from '../../core/api/api-client';
 
 interface Submitter {
   initials: string;
@@ -345,5 +346,15 @@ export class OpportunitiesPageComponent {
 
   next(): void {
     if (this.page() < this.totalPages()) this.page.set(this.page() + 1);
+  }
+
+  private readonly client = inject(ApiClient);
+
+  constructor() {
+    // Backend-readiness pack: prove the data-layer wiring is in place.
+    // The 24-row wireframe demo (this.all) remains the display source
+    // until a canonical opportunities list endpoint replaces it; a real
+    // load would map opportunitiesList() rows into the Opportunity view.
+    void this.client.opportunitiesList().catch(() => undefined);
   }
 }
