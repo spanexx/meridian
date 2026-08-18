@@ -719,7 +719,7 @@ const NOTIFICATION_SEED_ROWS: NotificationSeedRow[] = [
   { id: 'n8', title: 'Pool snapshot available', caption: 'The weekly pool.snapshot_taken report is ready to export.', link: '/pool', read: true, time: '3 days ago', type: 'EXECUTION_COMPLETED' },
 ];
 
-/** NotificationItem is a mock/UI extension until docs/apis/07-notifications-api.md (gap §4.3). */
+/** NotificationItem is a mock/UI extension; shape contract: docs/apis/08-notifications-api.md. */
 export const SEED_NOTIFICATIONS: NotificationItem[] = NOTIFICATION_SEED_ROWS.map((n) => ({
   id: n.id,
   type: n.type,
@@ -880,8 +880,6 @@ export function seedGateway(gateway: MockGateway): void {
   // ── Members + notifications ─────────────────────────────────────────
   gateway.register('GET', '/members/me', () => SEED_MEMBER);
   gateway.register('GET', '/members/me/settings', () => ({ settings: SEED_NOTIFICATION_PREFS }));
-  // DISCOVERY 2026-08-18: GET /notifications is mock-only until
-  // docs/apis/07-notifications-api.md exists (reference gap §4.3).
-  // See docs/features/frontend-data-layer/api-models-reference.md (gap §4.3).
+  // GET /notifications shape contract: docs/apis/08-notifications-api.md.
   gateway.register('GET', '/notifications', () => ({ notifications: SEED_NOTIFICATIONS }));
 }

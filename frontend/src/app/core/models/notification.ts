@@ -2,10 +2,9 @@
  * Notification models — canonical API shapes for the notifications system.
  *
  * Source: docs/features/frontend-data-layer/api-models-reference.md (Notification section).
- * No endpoints are documented yet (gap §4.3); only the type list and payload shape are
- * specified. The backend pack must write docs/apis/07-notifications-api.md. The
- * NotificationItem extension below is a mock/UI addition for the wireframe alerts page
- * until that doc exists.
+ * Endpoint contract: docs/apis/08-notifications-api.md. The NotificationItem extension
+ * below is a mock/UI addition for the wireframe alerts page; the API doc flags which
+ * fields (id/read/created_at/route) are frontend-only.
  *
  * @owner   agent-maintained
  * @reviewed 2026-08-18
@@ -40,9 +39,9 @@ export type { NotificationPrefs } from './member';
 /**
  * Mock/UI extension for the wireframe alerts page.
  *
- * DISCOVERY 2026-08-18: The API does not yet document id, read, created_at, or route
- * fields — they are added here solely for the frontend mock and wireframe display.
- * Remove or align once docs/apis/07-notifications-api.md is published.
+ * DISCOVERY 2026-08-18: The API (docs/apis/08-notifications-api.md) does not document
+ * id, read, created_at, or route fields — they are added here solely for the frontend
+ * mock and wireframe display. Align when the backend settles the notification schema.
  * See docs/features/frontend-data-layer/api-models-reference.md:243.
  */
 export interface NotificationItem extends NotificationPayload {

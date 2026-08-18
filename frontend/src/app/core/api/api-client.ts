@@ -284,7 +284,7 @@ export class ApiClient {
 
   // ===== Notifications =====
 
-  // Mock-only until docs/apis/07-notifications-api.md exists (gap §4.3)
+  // Shape contract: docs/apis/08-notifications-api.md.
   async notificationsList(): Promise<{ notifications: NotificationItem[] }> {
     const response = await this.transport.request<{ notifications: NotificationItem[] }>('GET', '/notifications');
     return response.data;
