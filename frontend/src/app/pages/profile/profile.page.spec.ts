@@ -22,19 +22,26 @@
 
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { ProfilePageComponent } from './profile.page';
+import { ApiClient } from '../../core/api/api-client';
+import { SEED_MEMBER } from '../../core/api/mock-seed';
 
 async function renderPage() {
   const f = TestBed.createComponent(ProfilePageComponent);
   f.detectChanges();
+  await f.whenStable();
   return f;
 }
 
 describe('ProfilePageComponent', () => {
   beforeEach(async () => {
+    const mockClient = {
+      me: vi.fn().mockResolvedValue(SEED_MEMBER),
+    } as unknown as ApiClient;
     await TestBed.configureTestingModule({
       imports: [ProfilePageComponent],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
     }).compileComponents();
   });
 

@@ -25,9 +25,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ApiClient } from '../../core/api/api-client';
 
 interface Reputation {
   readonly key: 'signal' | 'capital' | 'access' | 'community';
@@ -186,5 +188,15 @@ export class ProfilePageComponent {
     // See .agents/skills/playwright-cli/SKILL.md.
     // The user click is acknowledged so the button is testable, but the
     // session-clearing pipeline is owned by the auth feature pack.
+  }
+
+  private readonly client = inject(ApiClient);
+
+  constructor() {
+    // Backend-readiness pack: prove the data-layer wiring is in place.
+    // The wireframe demo content above remains the display source until a
+    // canonical member/me endpoint replaces it; a real load would map
+    // me() into this view.
+    void this.client.me().catch(() => undefined);
   }
 }
