@@ -133,15 +133,21 @@ Known gaps found during extraction (filled from the subagent):
 Owner: agent-maintained
 Last reviewed: 2026-08-18
 
-## Execution status 2026-08-18 — PARKED (plan-only day)
+## Execution status 2026-08-18 — ACTIVE (orchestrator workflow)
+
+Orchestration restarted per user direction (sessions/decisions.md
+2026-08-18): jobs delegated to cline-one (deep/long, serialized) and
+opencode-action (short); orchestrator sends job → preps while waiting →
+reviews → integrates → tests → commits per job.
 
 - Step 1 (environments) DONE + committed (`a18ba19`), specs green.
 - Step 2 (utils) DONE + committed (`a18ba19`), specs green.
-- Step 3 (models) PARTIAL — 6 of 9 model files written, untracked in
-  the tree (member, pool, opportunity, execution, payout, community);
-  governance, notification, barrel + model spec NOT written.
+- Step 3 (models) IN PROGRESS — 6 of 9 files untracked (member, pool,
+  opportunity, execution, payout, community); governance + notification
+  delegated (opencode-action, job 1); barrel + models.spec.ts are
+  orchestrator-owned. Reference doc pinned:
+  api-models-reference.md in this directory.
 - Step 4 (envelope/transport/gateway) PARTIAL — api-response,
   api-transport, mock-gateway, mock-transport + specs written,
-  untracked, specs not yet run. HttpTransport NOT written.
-- Steps 5–7 (ApiClient, payouts rewire, verification/PR) NOT started.
-- Resume only after plan approval (docs/frontend/01-frontend-backlog.md).
+  untracked, specs not yet run. http-transport delegated (job 2).
+- Steps 5–7 (ApiClient, payouts rewire, verification/PR) pending jobs 3–6.
