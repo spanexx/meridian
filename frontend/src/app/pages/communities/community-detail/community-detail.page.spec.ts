@@ -41,29 +41,36 @@
 
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { CommunityDetailPageComponent } from './community-detail.page';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { ApiClient } from '../../../core/api/api-client';
+import { SEED_COMMUNITY_DETAILS } from '../../../core/api/mock-seed';
+
+let mockClient: { communityGet: ReturnType<typeof vi.fn> } | null = null;
 
 async function renderPage(id?: string) {
+  mockClient = {
+    communityGet: vi.fn().mockImplementation((cid: string) =>
+      Promise.resolve(SEED_COMMUNITY_DETAILS.find((c) => c.id === cid) ?? null),
+    ),
+  } as unknown as { communityGet: ReturnType<typeof vi.fn> };
   await TestBed.configureTestingModule({
     imports: [CommunityDetailPageComponent, UiIconComponent],
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient as unknown as ApiClient }],
   }).compileComponents();
   const fixture = TestBed.createComponent(CommunityDetailPageComponent);
   if (id) {
     fixture.componentInstance.id = id;
   }
   fixture.detectChanges();
+  await fixture.whenStable();
+  fixture.detectChanges();
   return fixture;
 }
 
 describe('CommunityDetailPageComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [CommunityDetailPageComponent, UiIconComponent],
-      providers: [provideRouter([])],
-    }).compileComponents();
-  });
+  afterEach(() => TestBed.resetTestingModule());
 
   // ─────────────────────────────────────────────────────────────────────
   // BREADCRUMB
@@ -372,12 +379,26 @@ describe('CommunityDetailPageComponent', () => {
     expect(data?.status).toBe('active');
   });
 
-  it('loadCommunity(unknown) returns null', async () => {
-    const f = await renderPage('nope');
-    const c = f.componentInstance as unknown as {
-      loadCommunity: (id: string) => unknown;
-    };
-    expect(c.loadCommunity('nope')).toBeNull();
+  it('calls ApiClient.communityGet(id) and shows skeleton while loading', async () => {
+    const mc = {
+      communityGet: vi.fn().mockResolvedValue(SEED_COMMUNITY_DETAILS[0]),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({
+      imports: [CommunityDetailPageComponent, UiIconComponent],
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mc }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(CommunityDetailPageComponent);
+    fixture.componentInstance.id = 'alpha';
+    fixture.detectChanges(); // loading = true, skeleton visible, no header
+    const pre = fixture.nativeElement as HTMLElement;
+    expect(pre.querySelector('[data-testid="skeleton"]')).toBeTruthy();
+    expect(pre.querySelector('header')).toBeFalsy();
+    expect(mc.communityGet).toHaveBeenCalledWith('alpha');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const post = fixture.nativeElement as HTMLElement;
+    expect(post.querySelector('[data-testid="skeleton"]')).toBeFalsy();
+    expect(post.querySelector('header')).toBeTruthy();
   });
 
   it('kpis() returns 4 KPI data points (label/value/delta)', async () => {

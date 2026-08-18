@@ -12,6 +12,13 @@
     <span class="text-slate-300">{{ community()?.name }}</span>
   </div>
 
+  @if (loading()) {
+    <div class="empty" data-testid="skeleton">
+      <ui-icon name="activity" [size]="40" class="mx-auto"></ui-icon>
+      <p class="text-sm font-medium text-slate-400 mb-1">Loading community…</p>
+    </div>
+  } @else {
+
   <!-- header -->
   <header class="mb-8">
     <!-- status badge + actions row (so action buttons float to the right) -->
@@ -274,4 +281,5 @@
       </section>
     </div>
   </div>
+  }
 </section>
