@@ -21,14 +21,22 @@
  */
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import type { ExecutionsPageComponent } from './executions.page';
+import { ApiClient } from '../../core/api/api-client';
+import { SEED_EXECUTIONS } from '../../core/api/mock-seed';
 
 async function renderStandalone(): Promise<ComponentFixture<ExecutionsPageComponent>> {
+  const mockClient = {
+    executionsList: vi.fn().mockResolvedValue({ executions: SEED_EXECUTIONS }),
+  } as unknown as ApiClient;
   await TestBed.configureTestingModule({
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
   }).compileComponents();
   const { ExecutionsPageComponent: Comp } = await import('./executions.page');
   const fixture = TestBed.createComponent(Comp);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
@@ -152,7 +160,10 @@ describe('ExecutionsPage (wireframe-aligned)', () => {
 
   // ─── format helpers (unit) ─────────────────────────────────────────────
   it('formatMoney() renders with thousands separator', async () => {
-    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
+    const mockClient = {
+      executionsList: vi.fn().mockResolvedValue({ executions: SEED_EXECUTIONS }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }] }).compileComponents();
     const { ExecutionsPageComponent: Comp } = await import('./executions.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;
@@ -162,7 +173,10 @@ describe('ExecutionsPage (wireframe-aligned)', () => {
   });
 
   it('formatRoi() renders "+X.X%" / "-X.X%" / "0.0%"', async () => {
-    await TestBed.configureTestingModule({ providers: [provideRouter([])] }).compileComponents();
+    const mockClient = {
+      executionsList: vi.fn().mockResolvedValue({ executions: SEED_EXECUTIONS }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }] }).compileComponents();
     const { ExecutionsPageComponent: Comp } = await import('./executions.page');
     const fixture = TestBed.createComponent(Comp);
     const c = fixture.componentInstance;

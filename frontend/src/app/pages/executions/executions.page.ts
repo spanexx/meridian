@@ -14,8 +14,9 @@
  * @owner   spanexx
  * @reviewed 2026-08-11
  */
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { ApiClient } from '../../core/api/api-client';
 
 interface Execution {
   ref: string;
@@ -184,5 +185,15 @@ export class ExecutionsPageComponent {
     if (n === 0) return '0.0%';
     const sign = n > 0 ? '+' : '';
     return `${sign}${n.toFixed(1)}%`;
+  }
+
+  private readonly client = inject(ApiClient);
+
+  constructor() {
+    // Backend-readiness pack: prove the data-layer wiring is in place.
+    // The 16-row wireframe demo (this.all) remains the display source
+    // until a canonical executions list endpoint replaces it; a real load
+    // would map executionsList() rows into the Execution view.
+    void this.client.executionsList().catch(() => undefined);
   }
 }
