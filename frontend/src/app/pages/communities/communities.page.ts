@@ -4,12 +4,21 @@
  * Renders per wireframe/meridian/communities/index.html:
  *   - header: title + subtitle + search input + Status dropdown button
  *   - status tabs row (All / Active / Proposed / Archived with counts)
- *   - table card: 6-col wireframe table with 3 community rows
+ *   - table card: 6-col wireframe table with community rows
  *     (avatar with gradient bg + icon, name + focus/scope,
  *      status badge, pool amount, members count, ROI, executions)
- *   - pagination footer (Showing 1-3 of 3, prev/next disabled at small N)
+ *   - pagination footer (Showing 1-N of N, prev/next disabled at small N)
  *   - bottom row: v1 disclaimer + "Propose community" CTA
  *   - create-community modal (hidden by default)
+ *
+ * Backend-readiness pack: the page now consumes the injected
+ * ApiClient.communitiesList() (core/api/api-client.ts) instead of a
+ * hardcoded ROWS const. The dev MockGateway seeds the same wireframe
+ * rows (mock-seed.ts SEED_COMMUNITIES: 'alpha' active, 'helia'
+ * proposed), which are mapped to the wireframe view by the MODULE-LOCAL
+ * toRow() helper. The earlier 'Vintage Collective' archived row was a
+ * page-only fixture not present in the canonical seed, so it no longer
+ * renders.
  *
  * v1 limitation is part of the design: only one active community
  * (MERIDIAN Alpha). The governance model supports multiple; the
@@ -19,25 +28,32 @@
  * and are surfaced under /community/:id (sub-page of the parent).
  *
  * @owner   spanexx
- * @reviewed 2026-08-12
+ * @reviewed 2026-08-18
  */
 
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   signal,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ApiClient } from '../../core/api/api-client';
+import { parseApiMoney } from '../../core/utils/money';
+import {
+  type CommunityListRow,
+  type CommunityStatus,
+} from '../../core/models';
 
 interface CommunityRow {
   readonly ref: string;
   readonly name: string;
   readonly focus: string;
   readonly scope: string;
-  readonly status: 'active' | 'proposed' | 'archived';
+  readonly status: CommunityStatus;
   readonly iconName: 'users' | 'zap' | 'archive';
   readonly avatarGradient: 'violet' | 'amber' | 'blue';
   readonly poolUsd: number;
@@ -50,59 +66,48 @@ interface CommunityRow {
   readonly executionIsLive: boolean;
 }
 
-const ROWS: ReadonlyArray<CommunityRow> = [
-  {
-    ref: 'alpha',
-    name: 'MERIDIAN Alpha',
-    focus: 'General arbitrage',
-    scope: 'Global',
-    status: 'active',
-    iconName: 'users',
-    avatarGradient: 'violet',
-    poolUsd: 1420000,
-    poolLabel: '$1.42M',
-    poolIsLive: true,
-    memberCount: 124,
-    roiLabel: '+18.4%',
-    roiIsPositive: true,
-    executionCount: 47,
-    executionIsLive: true,
-  },
-  {
-    ref: 'tech-arbitrage',
-    name: 'Tech Arbitrage',
-    focus: 'Electronics focus',
-    scope: 'Asia-Pacific',
-    status: 'proposed',
-    iconName: 'zap',
-    avatarGradient: 'amber',
-    poolUsd: 0,
-    poolLabel: '$0',
-    poolIsLive: false,
-    memberCount: 23,
-    roiLabel: '—',
-    roiIsPositive: null,
-    executionCount: 0,
-    executionIsLive: false,
-  },
-  {
-    ref: 'vintage-collective',
-    name: 'Vintage Collective',
-    focus: 'Closed',
-    scope: 'Merged into Alpha',
-    status: 'archived',
-    iconName: 'archive',
-    avatarGradient: 'blue',
-    poolUsd: 0,
-    poolLabel: '$0',
-    poolIsLive: false,
-    memberCount: 0,
-    roiLabel: '+12.1%',
-    roiIsPositive: true,
-    executionCount: 18,
-    executionIsLive: true,
-  },
-];
+const STATUS_ICON: Record<CommunityStatus, CommunityRow['iconName']> = {
+  active: 'users',
+  proposed: 'zap',
+  archived: 'archive',
+};
+
+const STATUS_GRADIENT: Record<CommunityStatus, CommunityRow['avatarGradient']> = {
+  active: 'violet',
+  proposed: 'amber',
+  archived: 'blue',
+};
+
+/** Abbreviate an API money string for the Pool cell (e.g. '1423580.00' → '$1.42M'). */
+const toPoolLabel = (poolCapital: string): string => {
+  const n = parseApiMoney(poolCapital);
+  if (n === 0) return '$0';
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
+  return `$${n.toFixed(0)}`;
+};
+
+/** Map a canonical CommunityListRow (API shape) to the wireframe view row. */
+const toRow = (c: CommunityListRow): CommunityRow => {
+  const status = c.status;
+  return {
+    ref: c.id,
+    name: c.name,
+    focus: c.focus,
+    scope: c.geographic_scope,
+    status,
+    iconName: STATUS_ICON[status],
+    avatarGradient: STATUS_GRADIENT[status],
+    poolUsd: parseApiMoney(c.pool_capital),
+    poolLabel: toPoolLabel(c.pool_capital),
+    poolIsLive: status === 'active',
+    memberCount: c.member_count,
+    roiLabel: c.roi_ytd > 0 ? `+${c.roi_ytd}%` : '—',
+    roiIsPositive: c.roi_ytd > 0 ? true : null,
+    executionCount: c.executions_count,
+    executionIsLive: status !== 'proposed',
+  };
+};
 
 const GRADIENT_VAR: Readonly<Record<CommunityRow['avatarGradient'], string>> = {
   violet: 'var(--gradient-copper)',
@@ -118,14 +123,26 @@ const GRADIENT_VAR: Readonly<Record<CommunityRow['avatarGradient'], string>> = {
   templateUrl: './communities.template.html',
 })
 export class CommunitiesPageComponent {
-  /** All seed rows — used to derive everything else. */
-  private readonly allRows = signal<ReadonlyArray<CommunityRow>>(ROWS);
+  private readonly client = inject(ApiClient);
+
+  /** True until the first communitiesList() payload resolves (drives the skeleton). */
+  readonly loading = signal(true);
+
+  /** All community rows — sourced from the injected ApiClient. */
+  private readonly allRows = signal<ReadonlyArray<CommunityRow>>([]);
 
   /** Currently active filter tab ('all' / 'active' / 'proposed' / 'archived'). */
   readonly activeTab = signal<'all' | 'active' | 'proposed' | 'archived'>('all');
 
   /** Modal open state. */
   readonly createModalOpen = signal<boolean>(false);
+
+  constructor() {
+    this.client
+      .communitiesList()
+      .then((r) => this.allRows.set(r.communities.map(toRow)))
+      .finally(() => this.loading.set(false));
+  }
 
   /** Rows after applying the active tab filter. */
   readonly filteredRows = computed<ReadonlyArray<CommunityRow>>(() => {
@@ -145,16 +162,11 @@ export class CommunitiesPageComponent {
     return this.allRows().filter((r) => r.status === key).length;
   }
 
-  /** Human-readable pagination range like "1-3". */
+  /** Human-readable pagination range like "1-2". */
   paginationRange(): string {
     const n = this.filteredRows().length;
     if (n === 0) return '0-0';
     return `1-${n}`;
-  }
-
-  /** Whether prev/next pagination buttons are disabled (single-page list). */
-  private paginationDisabled(): boolean {
-    return this.filteredRows().length <= 3;
   }
 
   /** Set the active tab. Public so spec + template can drive it. */

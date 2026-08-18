@@ -102,6 +102,12 @@
   <div data-list data-page-size="6">
     <section class="card p-0 overflow-hidden" data-list-body>
       <div class="table-scroll">
+        @if (loading()) {
+          <div class="empty" data-testid="skeleton">
+            <ui-icon name="activity" [size]="40" class="mx-auto"></ui-icon>
+            <p class="text-sm font-medium text-slate-400 mb-1">Loading communities…</p>
+          </div>
+        } @else {
         <table>
           <thead>
             <tr>
@@ -180,6 +186,7 @@
             }
           </tbody>
         </table>
+        }
       </div>
 
       <!-- empty state (hidden by default since 3 rows present) -->
