@@ -68,18 +68,19 @@ describe('PoolPageComponent', () => {
   });
 
   // ─── KPI row ───────────────────────────────────────────────────────────
-  it('renders the 4 KPI cards with wireframe values', async () => {
+  it('renders the 4 KPI cards from the injected ApiClient (one-source)', async () => {
     const fixture = await renderPool();
     const root = fixture.nativeElement as HTMLElement;
     const cards = Array.from(root.querySelectorAll('.kpi-label'));
     const labels = cards.map((c) => c.textContent?.trim());
     expect(labels).toEqual(['Total Available', 'Total Locked', 'Reserve', 'Pending']);
-    expect(root.textContent).toContain('$1,423,580');
-    expect(root.textContent).toContain('$487,230');
-    expect(root.textContent).toContain('$258,952');
+    // Values come from ApiClient.poolStatus() (mock SEED_POOL_STATUS), not hardcoded.
+    expect(root.textContent).toContain(SEED_POOL_STATUS.totals.available_capital);
+    expect(root.textContent).toContain(SEED_POOL_STATUS.totals.deployed_capital);
+    expect(root.textContent).toContain(SEED_POOL_STATUS.totals.total_capital);
     expect(root.textContent).toContain('$42,100');
     expect(root.textContent).toContain('+2.4% week');
-    expect(root.textContent).toContain('18.2% of pool');
+    expect(root.textContent).toContain(`${SEED_POOL_STATUS.health.reserve_ratio}% of pool`);
   });
 
   // ─── chart card ────────────────────────────────────────────────────────

@@ -15,10 +15,11 @@
  * @owner   spanexx
  * @reviewed 2026-08-12
  */
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
 import { ApiClient } from '../../core/api/api-client';
+import type { PoolStatus } from '../../core/models';
 
 /** Top capital contributors (wireframe data). */
 export const CONTRIBUTORS = [
@@ -202,7 +203,7 @@ function smoothPath(points: number[]): string {
         <div class="modal-head">
           <div>
             <h2 class="modal-title">Request withdrawal</h2>
-            <p class="text-xs text-slate-500 mt-1">Available balance $12,500.00.</p>
+            <p class="text-xs text-slate-500 mt-1">Available balance {{ status()?.totals.available_capital }}.</p>
           </div>
           <button
             type="button"
@@ -254,18 +255,18 @@ function smoothPath(points: number[]): string {
     <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" data-testid="kpi-row">
       <div class="card p-5">
         <div class="kpi-label mb-2">Total Available</div>
-        <div class="kpi-number text-gradient-emerald">$1,423,580</div>
+        <div class="kpi-number text-gradient-emerald">{{ status()?.totals.available_capital }}</div>
         <div class="text-xs text-emerald-400 mt-2">+2.4% week</div>
       </div>
       <div class="card p-5">
         <div class="kpi-label mb-2">Total Locked</div>
-        <div class="kpi-number">$487,230</div>
-        <div class="text-xs text-slate-500 mt-2">3 executions</div>
+        <div class="kpi-number">{{ status()?.totals.deployed_capital }}</div>
+        <div class="text-xs text-slate-500 mt-2">{{ status()?.activity.active_executions }} executions</div>
       </div>
       <div class="card p-5">
         <div class="kpi-label mb-2">Reserve</div>
-        <div class="kpi-number">$258,952</div>
-        <div class="text-xs text-amber-400 mt-2">18.2% of pool</div>
+        <div class="kpi-number">{{ status()?.totals.total_capital }}</div>
+        <div class="text-xs text-amber-400 mt-2">{{ reservePct() }}% of pool</div>
       </div>
       <div class="card p-5">
         <div class="kpi-label mb-2">Pending</div>
@@ -425,7 +426,7 @@ function smoothPath(points: number[]): string {
           </svg>
         </div>
         <div class="text-center -mt-2">
-          <div class="text-4xl font-light text-gradient-emerald">18.2%</div>
+          <div class="text-4xl font-light text-gradient-emerald">{{ reservePct() }}%</div>
           <div class="text-xs text-slate-500 mt-1">Healthy</div>
         </div>
       </section>
@@ -439,10 +440,10 @@ function smoothPath(points: number[]): string {
           <div>
             <div class="flex justify-between items-baseline mb-2">
               <span class="text-xs text-slate-400">Reserve ratio</span>
-              <span class="text-sm font-semibold text-emerald-400">18.2%</span>
+              <span class="text-sm font-semibold text-emerald-400">{{ reservePct() }}%</span>
             </div>
             <div class="progress-track">
-              <div class="progress-fill progress-fill-emerald" style="width: 72%;"></div>
+              <div class="progress-fill progress-fill-emerald" style="width: {{ reservePct() }}%;"></div>
             </div>
           </div>
           <div>
@@ -457,10 +458,10 @@ function smoothPath(points: number[]): string {
           <div>
             <div class="flex justify-between items-baseline mb-2">
               <span class="text-xs text-slate-400">Deployment</span>
-              <span class="text-sm font-semibold">34.2%</span>
+              <span class="text-sm font-semibold">{{ status()?.health.deployment_ratio }}%</span>
             </div>
             <div class="progress-track">
-              <div class="progress-fill progress-fill-blue" style="width: 34%;"></div>
+              <div class="progress-fill progress-fill-blue" style="width: {{ status()?.health.deployment_ratio }}%;"></div>
             </div>
             <div class="text-[10px] text-slate-500 mt-1.5">In band 20–40% · Cap 50%</div>
           </div>
@@ -606,11 +607,21 @@ export class PoolPageComponent {
 
   private readonly client = inject(ApiClient);
 
+  /** Backend-readiness: pool KPIs/health sourced from the injected ApiClient
+   * (core/api/api-client.ts poolStatus()). The chart history (SERIES) and the
+   * Top Contributors table (CONTRIBUTORS) are display-only demo widgets — no
+   * backend contract exists for them yet (flagged, not faked). DISCOVERY 2026-08-18:
+   * PoolStatus (core/models/pool.ts) carries totals + health only; contributors
+   * list + time-series are not in any api doc, so they remain static display. */
+  readonly status = signal<PoolStatus | null>(null);
+
+  /** Reserve ratio as a percentage (PoolStatus.health.reserve_ratio is 0-100). */
+  readonly reservePct = computed(() => this.status()?.health.reserve_ratio ?? 0);
+
   constructor() {
-    // Backend-readiness pack: prove the data-layer wiring is in place.
-    // The wireframe demo content above (KPIs / chart / contributors) remains
-    // the display source until a canonical pool status endpoint replaces it;
-    // a real load would map poolStatus() into this view.
-    void this.client.poolStatus().catch(() => undefined);
+    this.client
+      .poolStatus()
+      .then((s) => this.status.set(s))
+      .catch(() => undefined);
   }
 }
