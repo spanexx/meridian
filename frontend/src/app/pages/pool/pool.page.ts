@@ -15,9 +15,10 @@
  * @owner   spanexx
  * @reviewed 2026-08-12
  */
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ApiClient } from '../../core/api/api-client';
 
 /** Top capital contributors (wireframe data). */
 export const CONTRIBUTORS = [
@@ -601,5 +602,15 @@ export class PoolPageComponent {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
     return `/community/alpha/members/${slug}`;
+  }
+
+  private readonly client = inject(ApiClient);
+
+  constructor() {
+    // Backend-readiness pack: prove the data-layer wiring is in place.
+    // The wireframe demo content above (KPIs / chart / contributors) remains
+    // the display source until a canonical pool status endpoint replaces it;
+    // a real load would map poolStatus() into this view.
+    void this.client.poolStatus().catch(() => undefined);
   }
 }

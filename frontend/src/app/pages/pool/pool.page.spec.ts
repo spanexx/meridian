@@ -19,14 +19,22 @@
  */
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { PoolPageComponent, CONTRIBUTORS } from './pool.page';
+import { ApiClient } from '../../core/api/api-client';
+import { SEED_POOL_STATUS } from '../../core/api/mock-seed';
 
 async function renderPool(): Promise<ComponentFixture<PoolPageComponent>> {
+  const mockClient = {
+    poolStatus: vi.fn().mockResolvedValue(SEED_POOL_STATUS),
+  } as unknown as ApiClient;
   await TestBed.configureTestingModule({
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
   }).compileComponents();
   const { PoolPageComponent: Comp } = await import('./pool.page');
   const fixture = TestBed.createComponent(Comp);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
