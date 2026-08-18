@@ -132,3 +132,16 @@ Known gaps found during extraction (filled from the subagent):
 
 Owner: agent-maintained
 Last reviewed: 2026-08-18
+
+## Execution status 2026-08-18 — PARKED (plan-only day)
+
+- Step 1 (environments) DONE + committed (`a18ba19`), specs green.
+- Step 2 (utils) DONE + committed (`a18ba19`), specs green.
+- Step 3 (models) PARTIAL — 6 of 9 model files written, untracked in
+  the tree (member, pool, opportunity, execution, payout, community);
+  governance, notification, barrel + model spec NOT written.
+- Step 4 (envelope/transport/gateway) PARTIAL — api-response,
+  api-transport, mock-gateway, mock-transport + specs written,
+  untracked, specs not yet run. HttpTransport NOT written.
+- Steps 5–7 (ApiClient, payouts rewire, verification/PR) NOT started.
+- Resume only after plan approval (docs/frontend/01-frontend-backlog.md).

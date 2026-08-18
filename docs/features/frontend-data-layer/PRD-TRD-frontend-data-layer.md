@@ -102,3 +102,22 @@ Verification
 
 Owner: agent-maintained
 Last reviewed: 2026-08-18
+
+## Status 2026-08-18 — work started before plan approval; PARKED
+
+The user's day-plan instruction was "plan the day", not "execute".
+Implementation of this pack started prematurely and was stopped the
+same day. Nothing was pushed; master untouched. State:
+
+- Branch `feat/frontend-data-layer` (local only, no upstream),
+  commit `a18ba19` — environments + utils + specs + angular.json +
+  pack docs + decisions log. Pre-commit 10/10 green; environments +
+  utils specs 22/22 green.
+- Untracked (still in the tree): `frontend/src/app/core/api/`
+  (api-response, api-transport, mock-gateway, mock-transport + specs;
+  specs written, not yet run) and `frontend/src/app/core/models/`
+  (6 of 9: member, pool, opportunity, execution, payout, community;
+  governance, notification, barrel + model spec NOT written).
+- Not started: ApiClient, gateway seed data, payouts rewiring, packs B–E.
+- Resume rule: executes only after the user approves the plan in
+  docs/frontend/01-frontend-backlog.md. Remaining steps = IMPL 3–7.
