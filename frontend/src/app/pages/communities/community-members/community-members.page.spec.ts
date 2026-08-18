@@ -16,15 +16,25 @@
  */
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { CommunityMembersPageComponent } from './community-members.page';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { ApiClient } from '../../../core/api/api-client';
+import { SEED_COMMUNITY_MEMBERS } from '../../../core/api/mock-seed';
+
+let mockClient: { communityMembers: ReturnType<typeof vi.fn> } | null = null;
 
 async function renderPage() {
+  mockClient = {
+    communityMembers: vi.fn().mockResolvedValue({ members: SEED_COMMUNITY_MEMBERS }),
+  } as unknown as { communityMembers: ReturnType<typeof vi.fn> };
   await TestBed.configureTestingModule({
     imports: [CommunityMembersPageComponent, UiIconComponent],
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient as unknown as ApiClient }],
   }).compileComponents();
   const fixture = TestBed.createComponent(CommunityMembersPageComponent);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
@@ -508,6 +518,27 @@ describe('CommunityMembersPageComponent', () => {
     c.closeRoleMenu();
     expect(c.roleMenuOpen).toBe(false);
     expect(c.activeRole).toBe('all');
+  });
+
+  it('calls ApiClient.communityMembers(id) and shows skeleton while loading', async () => {
+    const mc = {
+      communityMembers: vi.fn().mockResolvedValue({ members: SEED_COMMUNITY_MEMBERS }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({
+      imports: [CommunityMembersPageComponent, UiIconComponent],
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mc }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(CommunityMembersPageComponent);
+    fixture.detectChanges(); // loading = true, skeleton visible, no rows
+    const pre = fixture.nativeElement as HTMLElement;
+    expect(pre.querySelector('[data-testid="skeleton"]')).toBeTruthy();
+    expect(pre.querySelectorAll('[data-testid="member-row"]').length).toBe(0);
+    expect(mc.communityMembers).toHaveBeenCalledTimes(1);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const post = fixture.nativeElement as HTMLElement;
+    expect(post.querySelector('[data-testid="skeleton"]')).toBeFalsy();
+    expect(post.querySelectorAll('[data-testid="member-row"]').length).toBe(8);
   });
 
   it('toggleRoleMenu() flips open/closed', async () => {

@@ -4,31 +4,45 @@
  * Sub-route of /community/:id/members. Members are scoped to one community.
  *
  * Renders per wireframe/meridian/members/index.html.
+ *
+ * Backend-readiness pack: the page now consumes the injected
+ * ApiClient.communityMembers(id) (core/api/api-client.ts) instead of a
+ * hardcoded MEMBERS const. The dev MockGateway seeds the same wireframe
+ * members (mock-seed.ts SEED_COMMUNITY_MEMBERS, 10 rows). Each canonical
+ * CommunityMemberRow carries name/role/tier/reputation; the wireframe-only
+ * presentation fields (location, contribution text, signal counts, avatar
+ * gradient) are not in the canonical member API yet, so they are supplied
+ * by the MODULE-LOCAL MEMBER_PRESENTATION table keyed by display name.
+ *
  * Sections:
  *   - header: title + summary subtitle + search input + Tier dropdown
  *   - Tier dropdown menu (5 items: All / T4 / T3 / T2 / T1)
  *   - Role tabs (4: All / Capital / Signal / Access)
- *   - Members table (10 × 7 cols): Member / Role / Tier / Reputation / Contribution / Signals / chevron
+ *   - Members table (10 × 7 cols): Member / Role / Tier / Reputation /
+ *     Contribution / Signals / chevron
  *   - Pagination: "Showing 8 of 124" + Prev/Next + "1 / 16"
  *   - Empty state
  *
- * NOTE: each row links to /community/:id/members/<slug> (per-community route).
- * Each row carries data-category (tier) + data-status (role) attributes for the
- * tier filter and role-tab filters in the wireframe.
+ * Each row links to /community/:id/members/<slug> (per-community route).
+ * Each row carries data-category (tier) + data-status (role) attributes.
  *
  * @owner   spanexx
- * @reviewed 2026-08-12
+ * @reviewed 2026-08-18
  */
 
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   inject,
   Input,
+  signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { ApiClient } from '../../../core/api/api-client';
+import { type CommunityMemberRow, type CommunityContributionType } from '../../../core/models';
 
 export type Tier = 't1' | 't2' | 't3' | 't4';
 export type Role = 'capital' | 'signal' | 'access';
@@ -45,118 +59,39 @@ export interface Member {
   readonly avatarBg: 'violet' | 'emerald' | 'amber' | 'blue';
 }
 
-const MEMBERS: ReadonlyArray<Member> = [
-  {
-    name: 'Dana Voss',
-    location: 'Düsseldorf, DE',
-    role: 'capital',
-    tier: 't4',
-    reputation: 92,
-    contributionText: '$284,500',
-    signalsCount: 4,
-    signalsPctChange: 28,
-    avatarBg: 'violet',
-  },
-  {
-    name: 'Ravi Kumar',
-    location: 'London, UK',
-    role: 'capital',
-    tier: 't4',
-    reputation: 88,
-    contributionText: '$198,200',
-    signalsCount: 6,
-    signalsPctChange: 22,
-    avatarBg: 'emerald',
-  },
-  {
-    name: 'Mike Rivera',
-    location: 'Boston, US',
-    role: 'signal',
-    tier: 't3',
-    reputation: 78,
-    contributionText: '$3,200',
-    signalsCount: 14,
-    signalsPctChange: 24.6,
-    avatarBg: 'amber',
-  },
-  {
-    name: 'Sarah Park',
-    location: 'Seoul, KR',
-    role: 'signal',
-    tier: 't3',
-    reputation: 81,
-    contributionText: '$1,500',
-    signalsCount: 11,
-    signalsPctChange: 31,
-    avatarBg: 'violet',
-  },
-  {
-    name: 'Jules Tan',
-    location: 'Singapore, SG',
-    role: 'access',
-    tier: 't3',
-    reputation: 74,
-    contributionText: '3 creds',
-    signalsCount: 7,
-    signalsPctChange: 19,
-    avatarBg: 'blue',
-  },
-  {
-    name: 'Lena Moreau',
-    location: 'Paris, FR',
-    role: 'capital',
-    tier: 't3',
-    reputation: 69,
-    contributionText: '$142,000',
-    signalsCount: 3,
-    signalsPctChange: 16,
-    avatarBg: 'amber',
-  },
-  {
-    name: 'Kenji Honda',
-    location: 'Osaka, JP',
-    role: 'signal',
-    tier: 't2',
-    reputation: 55,
-    contributionText: '$800',
-    signalsCount: 9,
-    signalsPctChange: 12,
-    avatarBg: 'amber',
-  },
-  {
-    name: 'Tomás Alves',
-    location: 'Lisbon, PT',
-    role: 'capital',
-    tier: 't3',
-    reputation: 64,
-    contributionText: '$96,500',
-    signalsCount: 5,
-    signalsPctChange: 14,
-    avatarBg: 'blue',
-  },
-  {
-    name: 'Yuki Nakamura',
-    location: 'Tokyo, JP',
-    role: 'access',
-    tier: 't2',
-    reputation: 48,
-    contributionText: '1 cred',
-    signalsCount: 2,
-    signalsPctChange: 8,
-    avatarBg: 'violet',
-  },
-  {
-    name: 'Omar Nasser',
-    location: 'Cairo, EG',
-    role: 'signal',
-    tier: 't1',
-    reputation: 22,
-    contributionText: '$250',
-    signalsCount: 1,
-    signalsPctChange: null,
-    avatarBg: 'emerald',
-  },
-];
+/**
+ * Wireframe-only presentation fields not yet in the canonical member API
+ * (location / contribution money / signal counts / avatar gradient).
+ * Keyed by display name so they survive the canonical → view mapping.
+ */
+const MEMBER_PRESENTATION: Readonly<Record<string, Omit<Member, 'name' | 'role' | 'tier' | 'reputation'>>> = {
+  'Dana Voss': { location: 'Düsseldorf, DE', contributionText: '$284,500', signalsCount: 4, signalsPctChange: 28, avatarBg: 'violet' },
+  'Ravi Kumar': { location: 'London, UK', contributionText: '$198,200', signalsCount: 6, signalsPctChange: 22, avatarBg: 'emerald' },
+  'Mike Rivera': { location: 'Boston, US', contributionText: '$3,200', signalsCount: 14, signalsPctChange: 24.6, avatarBg: 'amber' },
+  'Sarah Park': { location: 'Seoul, KR', contributionText: '$1,500', signalsCount: 11, signalsPctChange: 31, avatarBg: 'violet' },
+  'Jules Tan': { location: 'Singapore, SG', contributionText: '3 creds', signalsCount: 7, signalsPctChange: 19, avatarBg: 'blue' },
+  'Lena Moreau': { location: 'Paris, FR', contributionText: '$142,000', signalsCount: 3, signalsPctChange: 16, avatarBg: 'amber' },
+  'Kenji Honda': { location: 'Osaka, JP', contributionText: '$800', signalsCount: 9, signalsPctChange: 12, avatarBg: 'amber' },
+  'Tomás Alves': { location: 'Lisbon, PT', contributionText: '$96,500', signalsCount: 5, signalsPctChange: 14, avatarBg: 'blue' },
+  'Yuki Nakamura': { location: 'Tokyo, JP', contributionText: '1 cred', signalsCount: 2, signalsPctChange: 8, avatarBg: 'violet' },
+  'Omar Nasser': { location: 'Cairo, EG', contributionText: '$250', signalsCount: 1, signalsPctChange: null, avatarBg: 'emerald' },
+};
+
+/** Map a canonical CommunityMemberRow (API shape) to the wireframe view row. */
+const toMember = (m: CommunityMemberRow): Member => {
+  const p = MEMBER_PRESENTATION[m.display_name];
+  return {
+    name: m.display_name,
+    location: p?.location ?? '',
+    role: m.contribution_type as Role,
+    tier: (m.tier.toLowerCase() as Tier) ?? 't1',
+    reputation: m.reputation_score,
+    contributionText: p?.contributionText ?? '',
+    signalsCount: p?.signalsCount ?? 0,
+    signalsPctChange: p?.signalsPctChange ?? null,
+    avatarBg: p?.avatarBg ?? 'violet',
+  };
+};
 
 const PAGE_SIZE = 8;
 const TOTAL_COUNT = 124;
@@ -170,9 +105,27 @@ const TOTAL_COUNT = 124;
 })
 export class CommunityMembersPageComponent {
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly client = inject(ApiClient);
+
+  constructor() {
+    this.load();
+  }
 
   /** Route param :id — defaults to 'alpha' so the page renders without a real binding. */
-  @Input() id: string = 'alpha';
+  @Input() set id(value: string) {
+    this._id.set(value || 'alpha');
+    this.load();
+  }
+  get id(): string {
+    return this._id();
+  }
+  private readonly _id = signal<string>('alpha');
+
+  /** True until the first communityMembers() payload resolves (drives the skeleton). */
+  readonly loading = signal(true);
+
+  /** All member rows — sourced from the injected ApiClient. */
+  private readonly _members = signal<ReadonlyArray<Member>>([]);
 
   /** Display name for the community (derived from id; v1 mapping). */
   get communityName(): string {
@@ -181,10 +134,8 @@ export class CommunityMembersPageComponent {
       'meridian-prime': 'Meridian Prime',
       'long-tail': 'Long Tail',
     };
-    return (
-      map[this.id] ??
-      (this.id ? this.id.charAt(0).toUpperCase() + this.id.slice(1) : 'Alpha Syndicate')
-    );
+    const id = this._id();
+    return map[id] ?? (id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Alpha Syndicate');
   }
 
   /** Capitalised single-line scope tag for the header. */
@@ -256,9 +207,18 @@ export class CommunityMembersPageComponent {
     { value: 'access', label: 'Access', count: this.counts.access },
   ];
 
+  /** Load members via the injected ApiClient and map them to the view. */
+  private load(): void {
+    this.loading.set(true);
+    this.client
+      .communityMembers(this._id())
+      .then((r) => this._members.set(r.members.map(toMember)))
+      .finally(() => this.loading.set(false));
+  }
+
   // ─── Core data accessors ──────────────────────────────────────────────
   members(): ReadonlyArray<Member> {
-    return MEMBERS;
+    return this._members();
   }
 
   /**
@@ -267,7 +227,7 @@ export class CommunityMembersPageComponent {
    */
   filteredMembers(): ReadonlyArray<Member> {
     const q = this._search.trim().toLowerCase();
-    return MEMBERS.filter((m) => {
+    return this._members().filter((m) => {
       if (this._activeTier !== 'all' && m.tier !== this._activeTier) return false;
       if (this._activeRole !== 'all' && m.role !== this._activeRole) return false;
       if (q && !m.name.toLowerCase().includes(q) && !m.location.toLowerCase().includes(q))
@@ -283,7 +243,7 @@ export class CommunityMembersPageComponent {
   }
 
   maxPage(): number {
-    return Math.max(1, Math.ceil(TOTAL_COUNT / PAGE_SIZE));
+    return Math.max(1, Math.ceil(this.counts.total / PAGE_SIZE));
   }
   pageSize(): number {
     return PAGE_SIZE;
@@ -294,29 +254,19 @@ export class CommunityMembersPageComponent {
     return name
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // strip diacritics (Lena = lena, Tomás = tomas)
+      .replace(/[̀-ͯ]/g, '') // strip diacritics (Lena = lena, Tomás = tomas)
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
   }
 
-  /** The URL each row links to. */
-  /**
-   * URL to a single member's public profile, scoped to the current
-   * community. Matches the route in app.routes.ts:
-   *   /community/:id/members/:memberId
-   */
+  /** URL to a single member's public profile, scoped to the current community. */
   memberUrl(name: string): string {
-    return `/community/${this.id}/members/${this.slugForName(name)}`;
+    return `/community/${this._id()}/members/${this.slugForName(name)}`;
   }
 
-  /**
-   * Public route-id setter (called by the route loader or in tests).
-   * v1: just stores the id; Angular's withComponentInputBinding is not enabled,
-   * so the route param doesn't auto-flow into @Input.
-   */
+  /** Public route-id setter (called by the route loader or in tests). */
   setRouteId(id: string): void {
     this.id = id || 'alpha';
-    this.cdr.markForCheck();
   }
 
   // ─── Formatters (called from the template) ─────────────────────────
@@ -369,13 +319,6 @@ export class CommunityMembersPageComponent {
     this.cdr.markForCheck();
   }
 
-  /**
-   * Document click handler: if the click target is outside any
-   * [data-menu-container], close everything. The two menus wrap
-   * their trigger button + panel in data-menu-container so clicks
-   * INSIDE the menu (on items, on the trigger) do not trigger close.
-   * Wired in the template via (document:click).
-   */
   closeOnOutsideClick(target: EventTarget | HTMLElement | null): void {
     if (!target) return;
     const el = target as HTMLElement;
@@ -432,3 +375,4 @@ export class CommunityMembersPageComponent {
     }
   }
 }
+

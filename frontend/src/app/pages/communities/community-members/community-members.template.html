@@ -2,7 +2,7 @@
   CommunityMembersPageComponent template (wireframe/meridian/members/index.html).
 
   @owner   spanexx
-  @reviewed 2026-08-12
+  @reviewed 2026-08-18
 -->
 <section class="page" (document:click)="closeOnOutsideClick($event.target)">
 
@@ -146,6 +146,12 @@
 
   <!-- table card -->
   <section class="card p-0 overflow-hidden">
+    @if (loading()) {
+      <div class="empty px-5 py-12 text-center" data-testid="skeleton">
+        <ui-icon name="activity" [size]="40" class="mx-auto mb-3 text-slate-500"></ui-icon>
+        <p class="text-sm font-medium text-slate-400 mb-1">Loading members…</p>
+      </div>
+    } @else {
     <div class="table-scroll overflow-x-auto" data-testid="members-table-body">
       <table class="min-w-full">
         <thead>
@@ -240,6 +246,7 @@
           </button>
         </div>
       </div>
+    }
     }
   </section>
 </section>
