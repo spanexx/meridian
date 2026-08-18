@@ -2,24 +2,28 @@
  * CommunitySettingsPageComponent — per-community settings page.
  *
  * Renders per wireframe/meridian/community-detail/settings/index.html.
- * Chunk 2/4 of the wireframe:
- *   - chunk 1: breadcrumb, header, General card, sidebar (At a glance + Safety rails)
- *   - chunk 2 (NEW): Governance Parameters card, Members & Roles card,
- *     Danger Zone card (with archive confirm modal), How changes work sidebar card
  *
- * Sections deferred to chunk 3/4 (deferred; if needed): enhanced How changes work
- * sub-cards with arrows. Chunk 3/4 retained as future work if desired.
+ * Backend-readiness pack: the Governance Parameters card now consumes the
+ * injected ApiClient.communityParameters(id) (core/api/api-client.ts)
+ * instead of the hardcoded GOVERNANCE_PARAMETERS const; the dev
+ * MockGateway seeds the same 6 wireframe parameters (mock-seed.ts
+ * SEED_COMMUNITY_PARAMETERS). The General card / Members & Roles /
+ * Danger Zone are local-configuration display and stay as-is (the
+ * detail API does not yet carry editable settings). A loading skeleton
+ * covers the parameters fetch.
  *
  * @owner   spanexx
- * @reviewed 2026-08-12
+ * @reviewed 2026-08-18
  */
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
 import { UiSwitchComponent } from '../../../ui/switch/switch.component';
 import { UiModalComponent } from '../../../ui/modal/modal.component';
 import { UiToastComponent } from '../../../ui/toast/toast.component';
+import { ApiClient } from '../../../core/api/api-client';
+import { type CommunityParameter } from '../../../core/models';
 
 interface CommunitySettings {
   readonly ref: string;
@@ -64,15 +68,6 @@ const COMMUNITY_SETTINGS: ReadonlyArray<CommunitySettings> = [
     founded: 'March 2024',
     activeProposals: 2,
   },
-];
-
-const GOVERNANCE_PARAMETERS: ReadonlyArray<GovernanceParameter> = [
-  { label: 'ROI floor',                    value: '12% APY' },
-  { label: 'Win-rate target',              value: '85%' },
-  { label: 'Capital share',                value: '40%' },
-  { label: 'Signal share',                 value: '35%' },
-  { label: 'Reserve ratio',                value: '25%' },
-  { label: 'Single-execution cap',         value: '8% of pool' },
 ];
 
 const MEMBER_ROLES: ReadonlyArray<MemberRole> = [
@@ -121,18 +116,45 @@ const SAFETY_RAILS: ReadonlyArray<string> = [
 })
 export class CommunitySettingsPageComponent {
   /** Route :id param. Defaults to 'alpha' for the mock dataset. */
-  @Input() id: string = 'alpha';
+  @Input() set id(value: string) {
+    this._id.set(value || 'alpha');
+    this.loadParameters();
+  }
+  get id(): string {
+    return this._id();
+  }
+  private readonly _id = signal<string>('alpha');
 
   /** Manual change-detection trigger (used for OnPush children). */
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly client = inject(ApiClient);
+
+  /** True until the first communityParameters() payload resolves (drives the skeleton). */
+  readonly loading = signal(true);
+
+  /** Governance parameters sourced from the injected ApiClient. */
+  private readonly _parameters = signal<ReadonlyArray<CommunityParameter>>([]);
 
   private static readonly COMMUNITIES_BY_REF = new Map<string, CommunitySettings>(
     COMMUNITY_SETTINGS.map((c) => [c.ref, c] as const),
   );
 
+  constructor() {
+    this.loadParameters();
+  }
+
+  /** Load governance parameters via the injected ApiClient. */
+  private loadParameters(): void {
+    this.loading.set(true);
+    this.client
+      .communityParameters(this._id())
+      .then((r) => this._parameters.set(r.parameters))
+      .finally(() => this.loading.set(false));
+  }
+
   /** The currently-loaded community (null if id not found). */
   get community(): CommunitySettings | null {
-    return CommunitySettingsPageComponent.COMMUNITIES_BY_REF.get(this.id) ?? null;
+    return CommunitySettingsPageComponent.COMMUNITIES_BY_REF.get(this._id()) ?? null;
   }
 
   /** Mutable status (mutates only via Danger Zone archive flow). */
@@ -166,7 +188,7 @@ export class CommunitySettingsPageComponent {
   get proposalsCount(): number { return this._proposalsCount; }
   get lastProposalLabel(): string | null { return this._lastProposalLabel; }
   governanceParameters(): ReadonlyArray<GovernanceParameter> {
-    return GOVERNANCE_PARAMETERS;
+    return this._parameters().map((p) => ({ label: p.display_name, value: p.value ?? '' }));
   }
   /** Called when a Propose button is clicked. Stamps the count + label. */
   onPropose(label: string): void {

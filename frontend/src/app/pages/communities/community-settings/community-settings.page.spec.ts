@@ -18,18 +18,28 @@
  */
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { CommunitySettingsPageComponent } from './community-settings.page';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { ApiClient } from '../../../core/api/api-client';
+import { SEED_COMMUNITY_PARAMETERS } from '../../../core/api/mock-seed';
+
+let mockClient: { communityParameters: ReturnType<typeof vi.fn> } | null = null;
 
 async function renderPage(id?: string) {
+  mockClient = {
+    communityParameters: vi.fn().mockResolvedValue({ parameters: SEED_COMMUNITY_PARAMETERS }),
+  } as unknown as { communityParameters: ReturnType<typeof vi.fn> };
   await TestBed.configureTestingModule({
     imports: [CommunitySettingsPageComponent, UiIconComponent],
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient as unknown as ApiClient }],
   }).compileComponents();
   const fixture = TestBed.createComponent(CommunitySettingsPageComponent);
   if (id) {
     fixture.componentInstance.id = id;
   }
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
@@ -404,6 +414,28 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
     c.onPropose('ROI floor');
     expect(c.proposalsCount).toBe(1);
     expect(c.lastProposalLabel).toBe('ROI floor');
+  });
+
+  it('calls ApiClient.communityParameters(id) and shows skeleton while loading', async () => {
+    const mc = {
+      communityParameters: vi.fn().mockResolvedValue({ parameters: SEED_COMMUNITY_PARAMETERS }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({
+      imports: [CommunitySettingsPageComponent, UiIconComponent],
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mc }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(CommunitySettingsPageComponent);
+    fixture.componentInstance.id = 'alpha';
+    fixture.detectChanges(); // loading = true, skeleton visible, no params
+    const pre = fixture.nativeElement as HTMLElement;
+    expect(pre.querySelector('[data-testid="skeleton"]')).toBeTruthy();
+    expect(pre.querySelectorAll('button[data-action="propose"]').length).toBe(0);
+    expect(mc.communityParameters).toHaveBeenCalledWith('alpha');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const post = fixture.nativeElement as HTMLElement;
+    expect(post.querySelector('[data-testid="skeleton"]')).toBeFalsy();
+    expect(post.querySelectorAll('button[data-action="propose"]').length).toBe(6);
   });
 
   // ─── CHUNK 2/4: Members & Roles card ─────────────────────────────────────

@@ -110,6 +110,12 @@
           Changes to these values open a public vote. Member reputation determines vote weight.
         </div>
         <ul class="space-y-3">
+          @if (loading()) {
+            <li class="empty text-center py-6" data-testid="skeleton">
+              <ui-icon name="activity" [size]="40" class="mx-auto"></ui-icon>
+              <p class="text-sm font-medium text-slate-400 mt-2">Loading parameters…</p>
+            </li>
+          }
           @for (p of governanceParameters(); track p.label) {
             <li class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-700/30 pb-3 last:border-none">
               <div>
