@@ -10,8 +10,8 @@
  * @owner   agent-maintained
  * @reviewed 2026-08-18
  */
-import { Injectable } from '@angular/core';
-import { ApiTransport, RequestOptions } from './api-transport';
+import { Injectable, Inject } from '@angular/core';
+import { ApiTransport, API_TRANSPORT, RequestOptions } from './api-transport';
 import {
   // Auth
   LoginResponse,
@@ -63,7 +63,12 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class ApiClient {
-  constructor(private readonly transport: ApiTransport) {}
+  // DISCOVERY 2026-08-18: ApiTransport is a type-only interface, so it cannot
+  // be used directly as an Angular DI token (NG2003). The API_TRANSPORT
+  // InjectionToken carries the concrete transport chosen in app.config.ts
+  // (MockTransport in dev, HttpTransport in prod). Unit specs still call
+  // `new ApiClient(transport)` directly, which bypasses DI and stays valid.
+  constructor(@Inject(API_TRANSPORT) private readonly transport: ApiTransport) {}
 
   // ===== Auth =====
 

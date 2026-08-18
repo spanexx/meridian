@@ -1,33 +1,65 @@
-# Session handoff — 2026-08-13 (evening close)
+# MERIDIAN Frontend Pre-Backend Completion — Step 6 + Step 7 Shipped
 
-## Soul
+## Current State (2026-08-18, ~15:30)
 
-A small, surgical session that closed out two long-standing inconsistencies in the meridian shell and theme. We came in mid-flow on PR #55 (the copper rename) and the user mid-task caught a related header bug on governance, then mid-evening the user pivoted to a sharper question — "is governance supposed to be a top-level page or a child page under communities?" — and that question, more than any of the actual code, set the tone. The answer was "child page, and the sidebar entry was the last leftover from the old top-level world." The energy was the user noticing what the rest of the codebase had quietly absorbed: governance doesn't live in the global menu, it lives inside a community. Two PRs shipped, both merged, both clean. The session has the feel of a week-end cleanup — surface-level polish that reveals a deeper structural lesson underneath.
+**Branch**: `feat/frontend-data-layer` (local, unpushed)
+**Goal**: Complete Packs A–E per `docs/frontend/01-frontend-backlog.md`
+**Goal status**: Active — Steps 1–7 of the data layer are DONE; frontend
+  data layer is feature-complete and green. PR to master is the next step.
 
-## What We Did
+## What's Done (all committed on `feat/frontend-data-layer`)
 
-We shipped **PR #55** (the copper rename + governance header alignment) and **PR #56** (sidebar governance removal). The copper rename was the bigger lift — 19 files, 40 occurrences, a token that was always copper but named `violet` because nobody had time to fix it. The full cascade: `theme.css` got the new `--gradient-copper` tokens (dark `#a86a2d`, light bumped from `#7c4a1a` to `#9a5b1f` to match `--v-300` and avoid the muddy brown the old value rendered as), every reference across 18 component and page files got renamed via `sed`, and `UiKpiCardComponent` gained a private `gradientClass` mapping record so the legacy `'violet'` semantic key in the TS type union maps cleanly to the new `text-gradient-copper` CSS class. The semantic key stayed intact because it's a tier concept, not a color name — renaming it would have broken every fixture and every type union for no visual benefit. The user found a related header alignment bug on governance (the `sm:items-center` from the old header pattern was still there even though PR #41 had switched community-settings to `sm:items-start`); the fix was a one-liner with a comment back-pointer to the lesson, and a computed-style probe at 768px confirmed `button.top - title.top = 0px`.
+| Step | Status | Key Artifacts |
+|------|--------|---------------|
+| A1 Environments + utils | ✅ | `src/environments/*`, `core/utils/{money,dates,errors}` |
+| A2 Canonical models | ✅ | 9 model files + barrel + `models.spec.ts` (17 tests) |
+| A3 ApiClient | ✅ | `api-client.ts` (33 typed methods, envelope-unwrapped) |
+| A4 Transport layer | ✅ | `http-transport`, `mock-transport`, `mock-gateway`, `api-response` |
+| A5 MockGateway seed | ✅ | `mock-seed.ts` (29 routes, full wireframe world) |
+| **Step 6 Payouts rewire** | ✅ | `payouts.page.ts` injects `ApiClient.payoutsList()`; `payouts.data.ts` DELETED; `MEMBER_DISPLAY` map + `viewRow/statusKey/typeKey`; loading skeleton. 31 page specs + 9 e2e green. |
+| **Step 7 app.config wiring** | ✅ | `API_TRANSPORT` InjectionToken (type-only interface → token); `app.config` provides transport (MockTransport+seedGateway dev / HttpTransport prod) + `ApiClient`. |
 
-**PR #56** came from the user noticing that governance was the only child page in the menu. That question led to a careful read of `ANGULAR_NAV_ITEMS`, which surfaced a hardcoded `/community/alpha/governance` slug that always pointed at Alpha Syndicate regardless of context — the worst form of a context-aware link. The fix was a RED test asserting `not.toContain('Governance')`, a GREEN commit removing the entry, and a visual probe confirming the sidebar now shows Dashboard / Opportunities / Executions / Capital Pool / Communities / Payouts / Submit Signal with Communities as the top-level entry point to all per-community pages. The `/governance` → `/community/:id/governance` redirect alias keeps every inbound link from profile, community-detail, community-settings, member-detail, and dashboard working transparently.
+**Two latent data-layer bugs found + fixed during Step 7 integration:**
+- `mock-seed.spec.ts` imported `opportunityDetailFromRow` without exporting it (spec failed to compile).
+- `opportunityDetailFromRow` hardcoded `risk_level: 'MEDIUM'` instead of reading `financials.risk_level`.
 
-## What We Found
+**Full suite: 956/956 vitest green + 9/9 payouts e2e green (byte-identical render).**
 
-The biggest lesson of the session was **the semantic-key vs CSS-class distinction**. The codebase has two parallel vocabularies: `'violet'` as a semantic key (in TS types, data fixtures, component Inputs) and `text-gradient-violet` / `var(--gradient-violet)` as a CSS concept. The user's complaint was about the CSS name, not the semantic key. Renaming both would have broken every fixture and every type union for no visual benefit. The right move was to rename only the CSS layer, keep the semantic key intact, and bridge them with an explicit mapping inside the component that uses both. `UiKpiCardComponent.gradientClass` is the canonical example of this pattern. Future renames of either layer should follow the same recipe.
+## How It Was Built (orchestrator workflow)
 
-The second lesson was **the pre-commit TDD rule has a heuristic gap**. `[10/10] TDD enforcement` checks that every exported symbol name appears in some test file. `numberClass()` had three tests that exercised its rendered DOM output, but the symbol name itself wasn't mentioned in any spec. The rule treated this as "no test" and blocked the commit. The right fix was a direct unit test — a free win, because the new test is shorter and more explicit than the indirect DOM assertions it joins. The lesson: rough heuristics are useful guards but sometimes flag coverage that is real-but-implicit. The fix is to add the explicit test, not to mute the rule.
+- cline-one job 5 (payouts rewire) TIMED OUT at 600s (exit 124) while
+  *planning* the spec edits — the page file was fully rewired but the spec
+  + data-file deletion were left undone. Orchestrator finished the spec,
+  deleted `payouts.data.ts`, and ran the e2e gate.
+- The e2e gate surfaced `NG2003` (ApiTransport is a type-only interface,
+  unusable as an Angular DI token) — closed via the `API_TRANSPORT`
+  InjectionToken. This gap was invisible to the unit specs because they
+  construct `new ApiClient(transport)` directly (bypassing DI).
+- Lesson: a passing unit suite over manually-constructed collaborators does
+  NOT prove the DI graph wires up in a real app — the e2e/ng-serve gate is
+  what catches it. See decision log 2026-08-18.
 
-The third discovery was the **sibling-bug pattern that keeps recurring**. PR #41 fixed `sm:items-start` on community-settings; governance was missed during the per-community restructure in PR #54. PR #55 shipped the governance fix; community-members still has the same `sm:items-center` issue. PR #56 fixed the sidebar governance entry; Payouts has the exact same problem (`/payouts` is a top-level route but payouts are per-community). Each "lesson learned" PR ships with sibling bugs that aren't in scope. The discipline: every such PR should explicitly call out the sibling in a "Sibling bug (not in this PR)" line in the description, and the next PR should pick it up. Without that line, the lesson is half-learned and the bug recurs. I saved this as pitfall #19 in the `visual-fidelity-check` skill.
+## Verification Commands (re-run before PR)
 
-A small tool friction worth noting: the `patch` tool requires `mode='replace'` to use `path/old_string/new_string`; using `mode='replace'` and also passing a `patch` V4A arg causes the "path required" error. The trap avoided for the rest of the session after one diagnostic.
+```bash
+cd /home/spanexx/Shared/Projects/meridian/frontend
+npx tsc -p tsconfig.app.json --noEmit
+npx vitest run --maxWorkers=2 --no-coverage
+npx playwright test e2e/payouts.spec.ts --reporter=list
+```
 
-## How to Continue
+## Next Step (not started)
 
-**State:** master at `647edd4`. 729/729 tests pass (40 files), pre-commit 10/10, both PRs merged. Dev server running at `127.0.0.1:4200`. Mode: AUTO.
+- **PR**: squash-merge `feat/frontend-data-layer` → `master` per
+  git-conventions. Frontend data layer is then complete; Packs B (auth),
+  C (flows), D (state), E (maintainability) remain for the full A–E scope
+  before backend work begins.
 
-**Sibling bug to fix in PR #57:** `Payouts` has the same problem as Governance had — `/payouts` is a top-level route but payouts are per-community. Two paths forward: remove from sidebar (the same one-line fix as PR #56), or convert payouts to a per-community pattern matching governance (`/community/:id/payouts`). The second is the more structural answer if payouts have community-specific semantics (which is likely, given the same community-scoped reputation model). The decision is the user's, not the agent's.
+## Key Files / References
 
-**Conventions to preserve:** the rename proved that the CSS layer and the semantic-key layer can diverge cleanly. Future renames of either layer should follow the same pattern: rename in `theme.css` + `sed` across CSS references, leave TS semantic keys alone, document the mapping in the component that bridges them. The `UiKpiCardComponent.gradientClass` record is the canonical example. The companion rule: every "lesson learned" PR must name its sibling bugs in the description, not bury them.
-
-**Pitfalls to remember:** (1) the semantic-key vs CSS-class distinction, (2) the pre-commit TDD rule's name-matching heuristic — when it flags a method, write a direct unit test rather than a TEST-COUPLED bypass, (3) sibling bugs are the recurring pattern — propagate the lesson or it doesn't stick, (4) the `patch` tool requires either `mode='replace'` with `path/old_string/new_string` OR `mode='patch'` with the V4A `patch` arg; never both.
-
-**Tests:** 729/729 passing as of `647edd4`. Pre-commit: 10/10. CI: 5/5. Decisions log: `sessions/decisions.md` updated with both PRs.
+- `docs/frontend/01-frontend-backlog.md` (full gap list + pack order)
+- `docs/features/frontend-data-layer/{IMPL,PRD-TRD}-frontend-data-layer.md`
+- `docs/features/frontend-data-layer/api-models-reference.md` (canonical shapes)
+- `frontend/src/app/core/api/*` (data layer)
+- `frontend/src/app/app.config.ts` (transport wiring)
+- `sessions/decisions.md` (AUTO-mode decision log)

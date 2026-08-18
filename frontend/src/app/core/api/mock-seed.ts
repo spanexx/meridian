@@ -274,7 +274,7 @@ export function opportunityDetailFromRow(r: OpportunityListRow): OpportunityDeta
     calculated: {
       estimated_profit: r.financials?.estimated_profit ?? 0,
       estimated_roi: r.financials?.estimated_roi ?? 0,
-      risk_level: 'MEDIUM',
+      risk_level: r.financials?.risk_level ?? 'MEDIUM',
       confidence_required: 'HIGH',
     },
     validation: { is_complete: true, missing_fields: [], warnings: [] },

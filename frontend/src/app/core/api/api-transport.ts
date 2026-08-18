@@ -10,7 +10,11 @@
  * @owner   agent-maintained
  * @reviewed 2026-08-18
  */
+import { InjectionToken } from '@angular/core';
 import { ApiResponse } from './api-response';
+
+/** DI token for the active transport (MockTransport in dev, HttpTransport in prod). */
+export const API_TRANSPORT = new InjectionToken<ApiTransport>('API_TRANSPORT');
 
 /** Per-request extras: idempotency (mutations) and an override token. */
 export interface RequestOptions {

@@ -19,6 +19,7 @@ import {
   SEED_NOTIFICATIONS,
   SEED_OPPORTUNITIES,
   SEED_PAYOUTS,
+  opportunityDetailFromRow,
 } from './mock-seed';
 
 describe('mock seed arrays', () => {
@@ -84,5 +85,28 @@ describe('mock seed arrays', () => {
     const gateway = new MockGateway();
     seedGateway(gateway);
     expect(gateway.routesList).toHaveLength(29);
+  });
+
+  it('opportunityDetailFromRow() converts a list row to the detail shape', () => {
+    const row: OpportunityListRow = {
+      opportunity_id: 'O-1001',
+      title: 'Test Opportunity',
+      category: 'RETAIL_ARBITRAGE',
+      status: 'APPROVED',
+      submitted_at: '2026-03-01T10:00:00Z',
+      submitted_by: { display_name: 'Test User', reputation_tier: 'SILVER', signal_score: 80, approval_rate: 90 },
+      financials: { estimated_profit: 5000, estimated_roi: 25.5, capital_needed: 20000, risk_level: 'LOW' },
+      vetting_status: { votes_for: 5, votes_against: 0, votes_needed: 5, your_vote: 'APPROVE', expires_at: '2026-03-15T10:00:00Z' },
+    };
+    const detail = opportunityDetailFromRow(row);
+    expect(detail.opportunity_id).toBe('O-1001');
+    expect(detail.title).toBe('Test Opportunity');
+    expect(detail.status).toBe('APPROVED');
+    expect(detail.calculated?.estimated_profit).toBe(5000);
+    expect(detail.calculated?.estimated_roi).toBe(25.5);
+    expect(detail.calculated?.risk_level).toBe('LOW');
+    expect(detail.validation?.is_complete).toBe(true);
+    expect(detail.submitted_at).toBe('2026-03-01T10:00:00Z');
+    expect(detail.vetting?.status).toBe('PENDING');
   });
 });

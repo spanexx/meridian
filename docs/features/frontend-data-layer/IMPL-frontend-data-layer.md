@@ -156,5 +156,18 @@ file-disjoint.
   in-session). 60/60 api specs green.
 - Step 5 (ApiClient) DONE — 33 typed methods, envelope-unwrapped,
   idempotency wired (opencode job 3).
-- Step 6 (payouts rewire) PENDING — cline-one job 5.
+- Step 6 (payouts rewire) DONE + committed — payouts.page.ts now injects
+  ApiClient.payoutsList() (mock client in spec); payouts.data.ts deleted;
+  canonical PayoutLedgerRow mapped to the wireframe view
+  (viewRow/statusKey/typeKey + 5-member MEMBER_DISPLAY map; formatApiMoney
+  for money, formatIsoDate + 'est. ' prefix for pending dates); loading
+  skeleton added. 31 page specs + 9 e2e green (byte-identical render).
+- Step 7 (app.config wiring + verification + PR) DONE + committed —
+  ApiTransport is a type-only interface, so it travels through the new
+  API_TRANSPORT InjectionToken; app.config provides API_TRANSPORT
+  (MockTransport+seedGateway in dev, HttpTransport in prod) + ApiClient.
+  Closure of two latent data-layer bugs found during integration:
+  mock-seed.spec imported opportunityDetailFromRow without exporting it,
+  and opportunityDetailFromRow hardcoded risk_level 'MEDIUM' instead of
+  reading the row's financials.risk_level. Full suite 956/956 green.
 - Step 7 (app.config wiring, verification, PR) PENDING — orchestrator.
