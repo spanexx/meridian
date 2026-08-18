@@ -24,11 +24,12 @@
  * @owner   agent-maintained
  * @reviewed 2026-08-17
  */
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ApiClient } from '../../core/api/api-client';
 
 interface ToastState {
   readonly title: string;
@@ -183,6 +184,8 @@ interface ToastState {
 })
 export class LoginPageComponent {
   private readonly router = inject(Router);
+  private readonly client = inject(ApiClient);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   /** Current theme key — mirrors ShellComponent's private theme signal. */
   private readonly theme = signal<'dark' | 'light'>(
@@ -191,6 +194,14 @@ export class LoginPageComponent {
 
   /** In-page toast state (ui-toast primitive rendered behind @if). */
   readonly toast = signal<ToastState | null>(null);
+
+  /**
+   * Captured access token after a successful login. The auth feature pack
+   * persists this and feeds it to the transport's token provider. The app
+   * currently runs with a stub token callback (app.config.ts) so this is not
+   * yet sent on subsequent requests.
+   */
+  readonly storedToken = signal<string | null>(null);
 
   /** Toggles the page theme. Auth pages live outside the shell. */
   toggleTheme(): void {
@@ -204,10 +215,29 @@ export class LoginPageComponent {
     this.showToast('Reset link sent to alex@meridian.com');
   }
 
-  /** Sign-in submit — success toast, then 900ms → /dashboard. */
-  submit(): void {
-    this.showToast('Signed in — welcome back');
-    setTimeout(() => this.router.navigate(['/dashboard']), 900);
+  /** Sign-in submit — calls the real ApiClient.auth.login(). */
+  async submit(): Promise<void> {
+    const root = this.host.nativeElement;
+    const email = (root.querySelector('input[data-field="email"]') as HTMLInputElement | null)?.value ?? '';
+    const password = (root.querySelector('input[data-field="password"]') as HTMLInputElement | null)?.value ?? '';
+
+    try {
+      const res = await this.client.login(email, password);
+      // Backend-readiness pack: first step toward real session wiring.
+      // We capture the access token here so the auth pack can persist it
+      // (and feed it to the transport's token provider). The transport
+      // token callback in app.config.ts is still a stub returning null —
+      // wiring the stored token into it is owned by the auth feature pack.
+      if ('access_token' in res) {
+        // res is LoginResponse — capture the token so the auth pack can
+        // persist it and feed it to the transport's token provider.
+        this.storedToken.set(res.access_token);
+      }
+      this.showToast('Signed in — welcome back');
+      setTimeout(() => this.router.navigate(['/dashboard']), 900);
+    } catch {
+      this.showToast('Sign-in failed — please try again');
+    }
   }
 
   /** Secondary 'Passkey' action. */

@@ -19,7 +19,9 @@
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
+import { vi } from 'vitest';
 import type { RegisterPageComponent } from './register.page';
+import { ApiClient } from '../../core/api/api-client';
 
 /** Minimal routable content so routerLink hrefs resolve in the test router. */
 @Component({ selector: 'stub-route', standalone: true, template: '' })
@@ -32,8 +34,11 @@ const AUTH_ROUTES = [
 ];
 
 async function renderStandalone(): Promise<ComponentFixture<RegisterPageComponent>> {
+  const mockClient = {
+    register: vi.fn().mockResolvedValue({ member_id: 'm1', email: 'x', status: 'ok', message: 'ok' }),
+  } as unknown as ApiClient;
   await TestBed.configureTestingModule({
-    providers: [provideRouter(AUTH_ROUTES)],
+    providers: [provideRouter(AUTH_ROUTES), { provide: ApiClient, useValue: mockClient }],
   }).compileComponents();
   const { RegisterPageComponent: Comp } = await import('./register.page');
   const fixture = TestBed.createComponent(Comp);
@@ -87,7 +92,7 @@ describe('RegisterPage (wireframe-aligned)', () => {
     const router = TestBed.inject(Router);
     const nav = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     vi.useFakeTimers();
-    c.submit();
+    await c.submit();
     fixture.detectChanges();
     const toast = root.querySelector('ui-toast') as HTMLElement;
     expect(toast.textContent).toContain('Account created — welcome aboard');

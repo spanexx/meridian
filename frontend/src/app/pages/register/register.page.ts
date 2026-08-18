@@ -19,11 +19,12 @@
  * @owner   agent-maintained
  * @reviewed 2026-08-17
  */
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ApiClient } from '../../core/api/api-client';
 
 interface ToastState {
   readonly title: string;
@@ -167,6 +168,8 @@ interface ToastState {
 })
 export class RegisterPageComponent {
   private readonly router = inject(Router);
+  private readonly client = inject(ApiClient);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   /** Current theme key — mirrors ShellComponent's private theme signal. */
   private readonly theme = signal<'dark' | 'light'>(
@@ -183,10 +186,27 @@ export class RegisterPageComponent {
     localStorage.setItem('meridian-theme', this.theme());
   }
 
-  /** Create-account submit — success toast, then 900ms → /dashboard. */
-  submit(): void {
-    this.showToast('Account created — welcome aboard');
-    setTimeout(() => this.router.navigate(['/dashboard']), 900);
+  /** Create-account submit — calls the real ApiClient.auth.register(). */
+  async submit(): Promise<void> {
+    const root = this.host.nativeElement;
+    const email = (root.querySelector('input[data-field="email"]') as HTMLInputElement | null)?.value ?? '';
+    const password = (root.querySelector('input[data-field="password"]') as HTMLInputElement | null)?.value ?? '';
+    const terms = !!(
+      root.querySelector('input[data-field="terms"]') as HTMLInputElement | null
+    )?.checked;
+
+    try {
+      await this.client.register({
+        email,
+        password,
+        password_confirm: password,
+        terms_accepted: terms,
+      });
+      this.showToast('Account created — welcome aboard');
+      setTimeout(() => this.router.navigate(['/dashboard']), 900);
+    } catch {
+      this.showToast('Registration failed — please try again');
+    }
   }
 
   private showToast(message: string): void {
