@@ -1,65 +1,65 @@
-# MERIDIAN Frontend Pre-Backend Completion — Step 6 + Step 7 Shipped
+# MERIDIAN — End-of-Session Handoff (2026-08-18, ~19:30)
 
-## Current State (2026-08-18, ~15:30)
+## Mode
+Operating mode is **AUTO** (`state` file = `auto`). The user flipped it in a
+prior session; only they can switch it back. Honor AUTO: the agent may decide
+HOW, never WHAT — follow `docs/`, `CONTEXT.md`, `decisions.md`. Document every
+AUTO decision in `sessions/decisions.md`.
 
-**Branch**: `feat/frontend-data-layer` (local, unpushed)
-**Goal**: Complete Packs A–E per `docs/frontend/01-frontend-backlog.md`
-**Goal status**: Active — Steps 1–7 of the data layer are DONE; frontend
-  data layer is feature-complete and green. PR to master is the next step.
+## Branch
+`feat/frontend-data-layer` (local, unpushed). master at `2e0a9c8`.
 
-## What's Done (all committed on `feat/frontend-data-layer`)
+## What shipped THIS session (all committed)
+- `4660ba1` feat(frontend): rewire payouts page to injected ApiClient (Step 6)
+  — `payouts.data.ts` deleted; page injects `apiClient.payoutsList()`.
+- `9ce7c48` feat(frontend): wire ApiClient via API_TRANSPORT token + fix
+  latent seed bugs (Step 7) — transport seam (MockTransport dev / HttpTransport
+  prod) chosen only in `app.config.ts`.
+- `e27eebb` fix(frontend): pin sidebar bottom action row on short screens
+  (cline-one job 6) — `.sidebar` no longer scrolls; `.sidebar-scroll` does;
+  bottom action row is pinned `.sidebar-footer`.
 
-| Step | Status | Key Artifacts |
-|------|--------|---------------|
-| A1 Environments + utils | ✅ | `src/environments/*`, `core/utils/{money,dates,errors}` |
-| A2 Canonical models | ✅ | 9 model files + barrel + `models.spec.ts` (17 tests) |
-| A3 ApiClient | ✅ | `api-client.ts` (33 typed methods, envelope-unwrapped) |
-| A4 Transport layer | ✅ | `http-transport`, `mock-transport`, `mock-gateway`, `api-response` |
-| A5 MockGateway seed | ✅ | `mock-seed.ts` (29 routes, full wireframe world) |
-| **Step 6 Payouts rewire** | ✅ | `payouts.page.ts` injects `ApiClient.payoutsList()`; `payouts.data.ts` DELETED; `MEMBER_DISPLAY` map + `viewRow/statusKey/typeKey`; loading skeleton. 31 page specs + 9 e2e green. |
-| **Step 7 app.config wiring** | ✅ | `API_TRANSPORT` InjectionToken (type-only interface → token); `app.config` provides transport (MockTransport+seedGateway dev / HttpTransport prod) + `ApiClient`. |
+## Verification state (green)
+`tsc --noEmit` clean · vitest 956/956 · Playwright e2e 9/9 (payouts,
+byte-identical). All 10 pre-commit hooks pass.
 
-**Two latent data-layer bugs found + fixed during Step 7 integration:**
-- `mock-seed.spec.ts` imported `opportunityDetailFromRow` without exporting it (spec failed to compile).
-- `opportunityDetailFromRow` hardcoded `risk_level: 'MEDIUM'` instead of reading `financials.risk_level`.
+## Backend-readiness audit (cline-one job 7) — VERDICT: NOT READY
+The transport seam is a correct single switch point (`app.config.ts` only
+picks Mock vs Http; flip `useMock`). BUT only `payouts.page.ts` injects
+`ApiClient`. ~14 other pages render hardcoded wireframe fixtures (confirmed by
+grep: only payouts.page.ts + core/api + app.config reference ApiClient). 5
+`ApiClient` methods have NO backend contract: `/executions`,
+`/executions/{id}`, `/payouts`, `/members/me/payouts`, `/notifications`. Auth
+token is a stub `() => null`. Full report:
+`.cline-one-reports/20260818-backend-readiness.md` (gitignored).
 
-**Full suite: 956/956 vitest green + 9/9 payouts e2e green (byte-identical render).**
+## Uncommitted working-tree state (decide next session)
+- `frontend/src/app/core/api/api-client.spec.ts` — 95 insertions of NEW test
+  coverage (memberSettings, login2fa, opportunitiesMine, vettingQueue,
+  executions, payoutsMine, communities, governance, etc.). NOT authored this
+  session — likely a prior in-flight expansion. Decide: commit as its own
+  commit, or fold into the data-layer PR.
+- `frontend/e2e/screenshots/*.png` — refreshed by e2e runs; gitignored? no.
+  Safe to leave or commit.
+- `sessions/.handoff-log.md` — handoff breadcrumb (auto).
 
-## How It Was Built (orchestrator workflow)
+## Dev server (session-scoped — will NOT exist next session)
+A resident `ng serve --port 8999 --host 0.0.0.0` is running (proc_3a3f25c5e0d0)
+for the user's phone check. Per the no-daemons rule it should be killed when
+the session ends. Re-run `cd frontend && npx ng serve --port 8999 --host
+0.0.0.0` if needed.
 
-- cline-one job 5 (payouts rewire) TIMED OUT at 600s (exit 124) while
-  *planning* the spec edits — the page file was fully rewired but the spec
-  + data-file deletion were left undone. Orchestrator finished the spec,
-  deleted `payouts.data.ts`, and ran the e2e gate.
-- The e2e gate surfaced `NG2003` (ApiTransport is a type-only interface,
-  unusable as an Angular DI token) — closed via the `API_TRANSPORT`
-  InjectionToken. This gap was invisible to the unit specs because they
-  construct `new ApiClient(transport)` directly (bypassing DI).
-- Lesson: a passing unit suite over manually-constructed collaborators does
-  NOT prove the DI graph wires up in a real app — the e2e/ng-serve gate is
-  what catches it. See decision log 2026-08-18.
+## Next agent: what to pick up
+1. User's stated goal: frontend must be backend-switch-ready (flip one config =
+   done). That is NOT met — needs a pack rewiring ~14 pages to ApiClient + 5
+   API contracts in `docs/apis/`. That is a big multi-session chunk → user must
+   trigger `wayfinder` or approve a plan first (plan-first rule).
+2. Pending decision: PR the data-layer branch to master, or keep stacking?
+3. Read `.cline-one-reports/20260818-backend-readiness.md` for the full gap
+   table before planning.
 
-## Verification Commands (re-run before PR)
-
-```bash
-cd /home/spanexx/Shared/Projects/meridian/frontend
-npx tsc -p tsconfig.app.json --noEmit
-npx vitest run --maxWorkers=2 --no-coverage
-npx playwright test e2e/payouts.spec.ts --reporter=list
-```
-
-## Next Step (not started)
-
-- **PR**: squash-merge `feat/frontend-data-layer` → `master` per
-  git-conventions. Frontend data layer is then complete; Packs B (auth),
-  C (flows), D (state), E (maintainability) remain for the full A–E scope
-  before backend work begins.
-
-## Key Files / References
-
-- `docs/frontend/01-frontend-backlog.md` (full gap list + pack order)
-- `docs/features/frontend-data-layer/{IMPL,PRD-TRD}-frontend-data-layer.md`
-- `docs/features/frontend-data-layer/api-models-reference.md` (canonical shapes)
-- `frontend/src/app/core/api/*` (data layer)
-- `frontend/src/app/app.config.ts` (transport wiring)
-- `sessions/decisions.md` (AUTO-mode decision log)
+## Key files
+- `frontend/src/app/app.config.ts` (transport seam — the one switch)
+- `frontend/src/app/core/api/*` (ApiClient, transports, mock seed)
+- `docs/frontend/01-frontend-backlog.md` (pack order A–E)
+- `sessions/decisions.md`, `sessions/.handoff-log.md`

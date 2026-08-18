@@ -1,33 +1,54 @@
-# Session handoff — 2026-08-13 (evening close)
+# MERIDIAN — Session Handoff (2026-08-18)
 
 ## Soul
-
-A small, surgical session that closed out two long-standing inconsistencies in the meridian shell and theme. We came in mid-flow on PR #55 (the copper rename) and the user mid-task caught a related header bug on governance, then mid-evening the user pivoted to a sharper question — "is governance supposed to be a top-level page or a child page under communities?" — and that question, more than any of the actual code, set the tone. The answer was "child page, and the sidebar entry was the last leftover from the old top-level world." The energy was the user noticing what the rest of the codebase had quietly absorbed: governance doesn't live in the global menu, it lives inside a community. Two PRs shipped, both merged, both clean. The session has the feel of a week-end cleanup — surface-level polish that reveals a deeper structural lesson underneath.
+This session was about proving the frontend could someday talk to a real
+backend without a rewrite — and finding out, honestly, that it mostly can't
+yet. We started by finishing the data layer (payouts page rewired, transport
+seam closed), fixed a small but real mobile sidebar bug that bit the user on
+their phone, then ran a cold audit of how ready the frontend is to flip from
+mock data to a live database. The mood was pragmatic: ship the pieces that are
+done, name the gap precisely, and hand the next agent a clean map instead of a
+vague "almost there."
 
 ## What We Did
-
-We shipped **PR #55** (the copper rename + governance header alignment) and **PR #56** (sidebar governance removal). The copper rename was the bigger lift — 19 files, 40 occurrences, a token that was always copper but named `violet` because nobody had time to fix it. The full cascade: `theme.css` got the new `--gradient-copper` tokens (dark `#a86a2d`, light bumped from `#7c4a1a` to `#9a5b1f` to match `--v-300` and avoid the muddy brown the old value rendered as), every reference across 18 component and page files got renamed via `sed`, and `UiKpiCardComponent` gained a private `gradientClass` mapping record so the legacy `'violet'` semantic key in the TS type union maps cleanly to the new `text-gradient-copper` CSS class. The semantic key stayed intact because it's a tier concept, not a color name — renaming it would have broken every fixture and every type union for no visual benefit. The user found a related header alignment bug on governance (the `sm:items-center` from the old header pattern was still there even though PR #41 had switched community-settings to `sm:items-start`); the fix was a one-liner with a comment back-pointer to the lesson, and a computed-style probe at 768px confirmed `button.top - title.top = 0px`.
-
-**PR #56** came from the user noticing that governance was the only child page in the menu. That question led to a careful read of `ANGULAR_NAV_ITEMS`, which surfaced a hardcoded `/community/alpha/governance` slug that always pointed at Alpha Syndicate regardless of context — the worst form of a context-aware link. The fix was a RED test asserting `not.toContain('Governance')`, a GREEN commit removing the entry, and a visual probe confirming the sidebar now shows Dashboard / Opportunities / Executions / Capital Pool / Communities / Payouts / Submit Signal with Communities as the top-level entry point to all per-community pages. The `/governance` → `/community/:id/governance` redirect alias keeps every inbound link from profile, community-detail, community-settings, member-detail, and dashboard working transparently.
+We closed out the frontend data layer by rewiring the payouts page to inject
+the single `ApiClient` and deleting its old hardcoded data file, then wired
+`app.config.ts` so that the mock transport (dev) and the HTTP transport (prod)
+are chosen in exactly one place — the only switch point that will ever matter.
+After the user spotted the sidebar's action buttons requiring a scroll on a
+short phone screen, we pinned the bottom row so only the nav scrolls, and
+confirmed it live on their device at the running dev server. The centerpiece
+was a read-only audit (delegate cline-one job 7) asking the blunt question:
+if we implement the backend tomorrow, is flipping the data source the only
+change needed? The answer was no, and we documented exactly why.
 
 ## What We Found
-
-The biggest lesson of the session was **the semantic-key vs CSS-class distinction**. The codebase has two parallel vocabularies: `'violet'` as a semantic key (in TS types, data fixtures, component Inputs) and `text-gradient-violet` / `var(--gradient-violet)` as a CSS concept. The user's complaint was about the CSS name, not the semantic key. Renaming both would have broken every fixture and every type union for no visual benefit. The right move was to rename only the CSS layer, keep the semantic key intact, and bridge them with an explicit mapping inside the component that uses both. `UiKpiCardComponent.gradientClass` is the canonical example of this pattern. Future renames of either layer should follow the same recipe.
-
-The second lesson was **the pre-commit TDD rule has a heuristic gap**. `[10/10] TDD enforcement` checks that every exported symbol name appears in some test file. `numberClass()` had three tests that exercised its rendered DOM output, but the symbol name itself wasn't mentioned in any spec. The rule treated this as "no test" and blocked the commit. The right fix was a direct unit test — a free win, because the new test is shorter and more explicit than the indirect DOM assertions it joins. The lesson: rough heuristics are useful guards but sometimes flag coverage that is real-but-implicit. The fix is to add the explicit test, not to mute the rule.
-
-The third discovery was the **sibling-bug pattern that keeps recurring**. PR #41 fixed `sm:items-start` on community-settings; governance was missed during the per-community restructure in PR #54. PR #55 shipped the governance fix; community-members still has the same `sm:items-center` issue. PR #56 fixed the sidebar governance entry; Payouts has the exact same problem (`/payouts` is a top-level route but payouts are per-community). Each "lesson learned" PR ships with sibling bugs that aren't in scope. The discipline: every such PR should explicitly call out the sibling in a "Sibling bug (not in this PR)" line in the description, and the next PR should pick it up. Without that line, the lesson is half-learned and the bug recurs. I saved this as pitfall #19 in the `visual-fidelity-check` skill.
-
-A small tool friction worth noting: the `patch` tool requires `mode='replace'` to use `path/old_string/new_string`; using `mode='replace'` and also passing a `patch` V4A arg causes the "path required" error. The trap avoided for the rest of the session after one diagnostic.
+The transport seam is genuinely correct — only `app.config.ts` decides mock
+versus HTTP, and flipping the `useMock` flag is the entire switch; no page
+touches a transport directly, and `HttpTransport` already reads a backend URL,
+attaches a Bearer token, and unwraps the same envelope the mock returns. The
+real exposure is the data wiring: only the payouts page actually injects
+`ApiClient`. Every other page — dashboard, opportunities, executions,
+communities, profile, notifications, pool, and the auth flows — renders
+hardcoded wireframe fixtures from local consts, so a backend flip would leave
+them frozen on fake data while only payouts went live. Worse, five `ApiClient`
+methods (executions, execution detail, pool-wide payouts, member payouts, and
+notifications) have no backend contract in `docs/apis/`, meaning they would
+404 the moment the switch happened, and the auth token provider is still a stub
+returning null. One uncommitted expansion of `api-client.spec.ts` (new test
+coverage for the typed surface) was found in the tree and needs a commit
+decision.
 
 ## How to Continue
-
-**State:** master at `647edd4`. 729/729 tests pass (40 files), pre-commit 10/10, both PRs merged. Dev server running at `127.0.0.1:4200`. Mode: AUTO.
-
-**Sibling bug to fix in PR #57:** `Payouts` has the same problem as Governance had — `/payouts` is a top-level route but payouts are per-community. Two paths forward: remove from sidebar (the same one-line fix as PR #56), or convert payouts to a per-community pattern matching governance (`/community/:id/payouts`). The second is the more structural answer if payouts have community-specific semantics (which is likely, given the same community-scoped reputation model). The decision is the user's, not the agent's.
-
-**Conventions to preserve:** the rename proved that the CSS layer and the semantic-key layer can diverge cleanly. Future renames of either layer should follow the same pattern: rename in `theme.css` + `sed` across CSS references, leave TS semantic keys alone, document the mapping in the component that bridges them. The `UiKpiCardComponent.gradientClass` record is the canonical example. The companion rule: every "lesson learned" PR must name its sibling bugs in the description, not bury them.
-
-**Pitfalls to remember:** (1) the semantic-key vs CSS-class distinction, (2) the pre-commit TDD rule's name-matching heuristic — when it flags a method, write a direct unit test rather than a TEST-COUPLED bypass, (3) sibling bugs are the recurring pattern — propagate the lesson or it doesn't stick, (4) the `patch` tool requires either `mode='replace'` with `path/old_string/new_string` OR `mode='patch'` with the V4A `patch` arg; never both.
-
-**Tests:** 729/729 passing as of `647edd4`. Pre-commit: 10/10. CI: 5/5. Decisions log: `sessions/decisions.md` updated with both PRs.
+Start the next session by running `situ` and reading this handoff plus
+`sessions/decisions.md`. The headline is that the infrastructure for a clean
+backend switch exists but the page-level wiring does not — treat "flip one
+config = done" as blocked until roughly fourteen pages are rewired to
+`ApiClient` and five API contracts are written in `docs/apis/`. That is a
+large, multi-session effort, so do not improvise it: let the user trigger
+`wayfinder` or approve a plan first, per the plan-first rule. Resolve the
+dangling `api-client.spec.ts` change as its own commit. Honor AUTO mode (the
+`state` file is `auto`) but remember AUTO only lets you decide how, never what
+— scope and economics still belong to the user. Kill the resident dev server
+(proc_3a3f25c5e0d0) if it is still alive, and re-run the verification trio
+(tsc, vitest, the payouts e2e) before any PR.

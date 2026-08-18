@@ -157,6 +157,12 @@ describe('api client (seeded gateway)', () => {
       expect(member.status).toMatch(/^(pending|active|inactive|suspended)$/);
     });
 
+    it('memberSettings() returns the prefs block', async () => {
+      const { settings } = await client.memberSettings();
+      expect(typeof settings.email_notifications).toBe('boolean');
+      expect(typeof settings.newsletter).toBe('boolean');
+    });
+
     it('notificationsList() returns the mock extension items', async () => {
       const { notifications } = await client.notificationsList();
       expect(notifications.length).toBeGreaterThan(0);
@@ -165,6 +171,95 @@ describe('api client (seeded gateway)', () => {
         expect(typeof item.read).toBe('boolean');
         expect('route' in item).toBe(true);
         expect(item.type).toMatch(/^[A-Z_]+$/);
+      }
+    });
+  });
+
+  describe('remaining typed surface', () => {
+    it('login2fa() completes the 2FA step with a temp token + code', async () => {
+      const g = new MockGateway();
+      g.register('POST', '/auth/login/2fa', () => ({
+        access_token: 'at',
+        refresh_token: 'rt',
+        token_type: 'Bearer',
+        expires_in: 900,
+      }));
+      const c = new ApiClient(new MockTransport(g, 0));
+      const result = await c.login2fa('temp-1', '123456');
+      expect(result.access_token).toBe('at');
+      const request = (c as unknown as { transport: MockTransport }).transport;
+      expect(request.requests[0].path).toBe('/auth/login/2fa');
+    });
+
+    it('opportunitiesMine() returns the mine container with summary', async () => {
+      const { opportunities, summary } = await client.opportunitiesMine();
+      expect(opportunities.length).toBe(24);
+      expect(summary.total_submitted).toBeGreaterThan(0);
+    });
+
+    it('vettingQueue() returns queue rows', async () => {
+      const { opportunities } = await client.vettingQueue();
+      expect(opportunities.length).toBeGreaterThan(0);
+      expect(opportunities[0].vetting_status).toBeDefined();
+    });
+
+    it('opportunityVote() posts a vetting vote and returns the tally delta', async () => {
+      const result = await client.opportunityVote('O-2051', { vote: 'APPROVE', confidence: 'HIGH' });
+      expect(result.vote).toBe('APPROVE');
+      expect(typeof result.vetting_status.votes_for).toBe('number');
+      const request = transport.requests.find((r) => r.path === '/opportunities/O-2051/vote');
+      expect(request).toBeDefined();
+    });
+
+    it('executionsList() + executionGet() serve the mock-only execution board', async () => {
+      const { executions } = await client.executionsList();
+      expect(executions.length).toBeGreaterThan(0);
+      const detail = await client.executionGet(executions[0].execution_id);
+      expect(detail.opportunity.title).toBeTruthy();
+      expect(detail.capital.allocated).toMatch(/^\d+\.\d{2}$/);
+    });
+
+    it('payoutsMine() returns the member payout list + summary', async () => {
+      const { payouts, summary } = await client.payoutsMine();
+      expect(payouts.length).toBeGreaterThan(0);
+      expect(payouts[0].opportunity_title).toBeTruthy();
+      expect(summary?.payouts_count).toBeGreaterThan(0);
+    });
+
+    it('communitiesList() returns alpha + helia', async () => {
+      const { communities } = await client.communitiesList();
+      const ids = communities.map((c) => c.id);
+      expect(ids).toContain('alpha');
+      expect(ids).toContain('helia');
+    });
+
+    it('communityParameters() returns votable params with provenance', async () => {
+      const { parameters } = await client.communityParameters('alpha');
+      expect(parameters.length).toBeGreaterThan(0);
+      const votable = parameters.find((p) => p.votable);
+      expect(votable?.provenance?.approval_percent).toBeGreaterThan(0);
+    });
+
+    it('governanceParameters() returns the 6-parameter grid', async () => {
+      const { parameters } = await client.governanceParameters();
+      expect(parameters.length).toBeGreaterThan(0);
+      for (const p of parameters) {
+        expect(typeof p.votable).toBe('boolean');
+      }
+    });
+
+    it('governanceSafetyRails() returns non-votable rails', async () => {
+      const { rails } = await client.governanceSafetyRails();
+      expect(rails.length).toBeGreaterThan(0);
+      expect(rails[0].key).toBeTruthy();
+      expect(rails[0].rationale).toBeTruthy();
+    });
+
+    it('governanceRecentVotes() returns decided proposals', async () => {
+      const { votes } = await client.governanceRecentVotes();
+      expect(votes.length).toBeGreaterThan(0);
+      for (const v of votes) {
+        expect(v.status).toMatch(/^(voting|passed|rejected|expired|withdrawn)$/);
       }
     });
   });
