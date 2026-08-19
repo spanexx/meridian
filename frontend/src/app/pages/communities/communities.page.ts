@@ -129,7 +129,7 @@ export class CommunitiesPageComponent {
   readonly loading = signal(true);
 
   /** All community rows — sourced from the injected ApiClient. */
-  private readonly allRows = signal<ReadonlyArray<CommunityRow>>([]);
+  private readonly allRows = signal<readonly CommunityRow[]>([]);
 
   /** Currently active filter tab ('all' / 'active' / 'proposed' / 'archived'). */
   readonly activeTab = signal<'all' | 'active' | 'proposed' | 'archived'>('all');
@@ -145,7 +145,7 @@ export class CommunitiesPageComponent {
   }
 
   /** Rows after applying the active tab filter. */
-  readonly filteredRows = computed<ReadonlyArray<CommunityRow>>(() => {
+  readonly filteredRows = computed<readonly CommunityRow[]>(() => {
     const t = this.activeTab();
     if (t === 'all') return this.allRows();
     return this.allRows().filter((r) => r.status === t);

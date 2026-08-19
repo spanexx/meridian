@@ -16,7 +16,7 @@
  * @reviewed 2026-08-18
  */
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
 import { UiSwitchComponent } from '../../../ui/switch/switch.component';
@@ -52,7 +52,7 @@ interface MemberRole {
   readonly initial: boolean;
 }
 
-const COMMUNITY_SETTINGS: ReadonlyArray<CommunitySettings> = [
+const COMMUNITY_SETTINGS: readonly CommunitySettings[] = [
   {
     ref: 'alpha',
     name: 'MERIDIAN Alpha',
@@ -70,7 +70,7 @@ const COMMUNITY_SETTINGS: ReadonlyArray<CommunitySettings> = [
   },
 ];
 
-const MEMBER_ROLES: ReadonlyArray<MemberRole> = [
+const MEMBER_ROLES: readonly MemberRole[] = [
   {
     key: 'openEnrollment',
     title: 'Open enrollment',
@@ -91,9 +91,9 @@ const MEMBER_ROLES: ReadonlyArray<MemberRole> = [
   },
 ];
 
-const HOW_CHANGES_STEPS: ReadonlyArray<string> = ['Propose', 'Debate', 'Vote', 'Enact'];
+const HOW_CHANGES_STEPS: readonly string[] = ['Propose', 'Debate', 'Vote', 'Enact'];
 
-const SAFETY_RAILS: ReadonlyArray<string> = [
+const SAFETY_RAILS: readonly string[] = [
   'Integrity verification',
   'Reconciliation checks',
   'No-ponzi mechanics',
@@ -114,7 +114,7 @@ const SAFETY_RAILS: ReadonlyArray<string> = [
   ],
   templateUrl: './community-settings.template.html',
 })
-export class CommunitySettingsPageComponent {
+export class CommunitySettingsPageComponent implements OnInit {
   /** Route :id param. Defaults to 'alpha' for the mock dataset. */
   @Input() set id(value: string) {
     this._id.set(value || 'alpha');
@@ -133,7 +133,7 @@ export class CommunitySettingsPageComponent {
   readonly loading = signal(true);
 
   /** Governance parameters sourced from the injected ApiClient. */
-  private readonly _parameters = signal<ReadonlyArray<CommunityParameter>>([]);
+  private readonly _parameters = signal<readonly CommunityParameter[]>([]);
 
   private static readonly COMMUNITIES_BY_REF = new Map<string, CommunitySettings>(
     COMMUNITY_SETTINGS.map((c) => [c.ref, c] as const),
@@ -187,7 +187,7 @@ export class CommunitySettingsPageComponent {
   private _lastProposalLabel: string | null = null;
   get proposalsCount(): number { return this._proposalsCount; }
   get lastProposalLabel(): string | null { return this._lastProposalLabel; }
-  governanceParameters(): ReadonlyArray<GovernanceParameter> {
+  governanceParameters(): readonly GovernanceParameter[] {
     return this._parameters().map((p) => ({ label: p.display_name, value: p.value ?? '' }));
   }
   /** Called when a Propose button is clicked. Stamps the count + label. */
@@ -222,7 +222,7 @@ export class CommunitySettingsPageComponent {
   }
 
   // ─── How changes work (sidebar card) ───────────────────────────────────
-  howChangesSteps(): ReadonlyArray<string> {
+  howChangesSteps(): readonly string[] {
     return HOW_CHANGES_STEPS;
   }
 
@@ -259,7 +259,7 @@ export class CommunitySettingsPageComponent {
     this.lastSavedAt = new Date().toISOString();
   }
 
-  safetyRails(): ReadonlyArray<string> {
+  safetyRails(): readonly string[] {
     return SAFETY_RAILS;
   }
 

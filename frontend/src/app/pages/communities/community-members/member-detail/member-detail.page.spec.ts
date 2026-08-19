@@ -30,7 +30,7 @@ import { SEED_COMMUNITY_MEMBERS } from '../../../../core/api/mock-seed';
 
 let mockClient: { communityMembers: ReturnType<typeof vi.fn> } | null = null;
 
-async function renderPage(communityId: string = 'alpha', memberId: string = 'dana-voss') {
+async function renderPage(communityId = 'alpha', memberId = 'dana-voss') {
   mockClient = {
     communityMembers: vi.fn().mockResolvedValue({ members: SEED_COMMUNITY_MEMBERS }),
   } as unknown as { communityMembers: ReturnType<typeof vi.fn> };

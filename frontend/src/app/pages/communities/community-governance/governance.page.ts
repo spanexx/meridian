@@ -60,7 +60,7 @@ interface RecentVote {
   readonly passed: boolean;
 }
 
-const PARAMETER_OPTIONS: ReadonlyArray<string> = [
+const PARAMETER_OPTIONS: readonly string[] = [
   'ROI floor',
   'Win-rate target',
   'Distribution shares',
@@ -69,14 +69,14 @@ const PARAMETER_OPTIONS: ReadonlyArray<string> = [
   'Single-execution cap',
 ];
 
-const PARAMETERS: ReadonlyArray<Parameter> = [
+const PARAMETERS: readonly Parameter[] = [
   { label: 'ROI floor', currentValue: '15%', setDate: 'Feb 14', approvalPct: 87 },
   { label: 'Win-rate target', currentValue: '70%', setDate: 'Jan 8', approvalPct: 81 },
   { label: 'Reserve target', currentValue: '12%', setDate: 'Dec 12', approvalPct: 90 },
   { label: 'Single-execution cap', currentValue: '$50k', setDate: 'Nov 30', approvalPct: 84 },
 ];
 
-const DISTRIBUTION_SHARES: ReadonlyArray<DistributionShare> = [
+const DISTRIBUTION_SHARES: readonly DistributionShare[] = [
   { name: 'Capital', value: '46%' },
   { name: 'Signal', value: '30%' },
   { name: 'Access', value: '12%' },
@@ -84,7 +84,7 @@ const DISTRIBUTION_SHARES: ReadonlyArray<DistributionShare> = [
   { name: 'Platform', value: '4%' },
 ];
 
-const SAFETY_RAILS: ReadonlyArray<string> = [
+const SAFETY_RAILS: readonly string[] = [
   'Reconciliation & audit trail',
   'No-ponzi · no unearned returns',
   'KYC & identity rules',
@@ -92,7 +92,7 @@ const SAFETY_RAILS: ReadonlyArray<string> = [
   'Technical architecture (kernel/engines/providers)',
 ];
 
-const RECENT_VOTES: ReadonlyArray<RecentVote> = [
+const RECENT_VOTES: readonly RecentVote[] = [
   { title: 'ROI floor 15%', date: 'Feb 14', approvalPct: 87, passed: true },
   { title: 'Vetting timeout 48h', date: 'Jan 22', approvalPct: 76, passed: true },
   { title: 'Deployment cap 50%', date: 'Jan 8', approvalPct: 72, passed: true },
@@ -160,8 +160,8 @@ export class GovernancePageComponent {
   get proposalsCount(): number { return this._proposalsCount; }
   get lastProposalSummary(): string | null { return this._lastProposalSummary; }
 
-  parameterOptions(): ReadonlyArray<string> { return PARAMETER_OPTIONS; }
-  parameters(): ReadonlyArray<Parameter> {
+  parameterOptions(): readonly string[] { return PARAMETER_OPTIONS; }
+  parameters(): readonly Parameter[] {
     return [
       ...PARAMETERS,
       {
@@ -172,10 +172,10 @@ export class GovernancePageComponent {
       },
     ];
   }
-  distributionShares(): ReadonlyArray<DistributionShare> { return DISTRIBUTION_SHARES; }
-  safetyRails(): ReadonlyArray<string> { return SAFETY_RAILS; }
-  recentVotes(): ReadonlyArray<RecentVote> { return RECENT_VOTES; }
-  activeProposals(): ReadonlyArray<Proposal> { return this._proposals; }
+  distributionShares(): readonly DistributionShare[] { return DISTRIBUTION_SHARES; }
+  safetyRails(): readonly string[] { return SAFETY_RAILS; }
+  recentVotes(): readonly RecentVote[] { return RECENT_VOTES; }
+  activeProposals(): readonly Proposal[] { return this._proposals; }
 
   /** Read-only tally accessor used by the template + tests. */
   voteCount(id: number, kind: 'approve' | 'reject'): number {

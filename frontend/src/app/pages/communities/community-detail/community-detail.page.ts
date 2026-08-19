@@ -117,7 +117,7 @@ const ABOUT_PARAGRAPH =
   'MERIDIAN Alpha is the founding community, focused on general arbitrage opportunities across multiple categories including electronics, collectibles, and fashion. The community operates globally and welcomes members from all regions.';
 
 /** Wireframe-only governed-parameter rows (detail endpoint does not carry these). */
-const GOVERNED_PARAMS: ReadonlyArray<GovernedParam> = [
+const GOVERNED_PARAMS: readonly GovernedParam[] = [
   { key: 'ROI floor', description: 'Minimum acceptable return', value: '15%', valueClass: 'text-emerald-400', iconName: 'target', iconClass: 'text-emerald-400', iconBg: 'rgba(16,185,129,0.12)', updated: 'Last updated: 2mo ago' },
   { key: 'Win-rate target', description: 'Success rate threshold', value: '75%', valueClass: 'text-violet-400', iconName: 'crosshair', iconClass: 'text-violet-400', iconBg: 'rgba(201,138,66,0.12)', updated: 'Last updated: 1mo ago' },
   { key: 'Distribution shares', description: 'Capital:Signal:Access split', value: '60:25:15', valueClass: 'text-amber-400', iconName: 'pie-chart', iconClass: 'text-amber-400', iconBg: 'rgba(245,158,11,0.12)', updated: 'Last updated: 3mo ago' },
@@ -125,13 +125,13 @@ const GOVERNED_PARAMS: ReadonlyArray<GovernedParam> = [
 ];
 
 /** Wireframe-only recent-execution cards (separate executions endpoint). */
-const RECENT_EXECUTIONS: ReadonlyArray<RecentExecution> = [
+const RECENT_EXECUTIONS: readonly RecentExecution[] = [
   { ref: 'E-1042', title: 'Limited Edition Sneaker Resale', statusLine: 'Acquired 8 pairs · Listed on StockX, GOAT', iconName: 'package', iconClass: 'text-emerald-400', iconBg: 'rgba(16,185,129,0.12)', roi: '+12.4% ROI', deployed: '$18,500 deployed', progressPct: 37, progressClass: 'progress-fill-emerald', progressLabel: '3 of 8 sold', progressLabelClass: 'text-slate-400' },
   { ref: 'E-1039', title: 'Vintage Watch Liquidation', statusLine: '5 items · all sold', iconName: 'watch', iconClass: 'text-violet-400', iconBg: 'rgba(201,138,66,0.12)', roi: '+18.7% ROI', deployed: '$32,000 deployed', progressPct: 100, progressClass: 'progress-fill-violet', progressLabel: 'Closing', progressLabelClass: 'text-emerald-400' },
 ];
 
 /** Wireframe-only safety rails (4 in the wireframe; the seed adds a 5th KYC rail). */
-const SAFETY_RAILS: ReadonlyArray<string> = [
+const SAFETY_RAILS: readonly string[] = [
   'Integrity verification',
   'Reconciliation checks',
   'No-ponzi mechanics',
@@ -164,7 +164,7 @@ const mapDetail = (d: CommunityDetail): CommunityData => {
 };
 
 /** Build the 4 KPI cards from canonical stats (deltas are wireframe presentation). */
-const buildKpis = (d: CommunityDetail): ReadonlyArray<Kpi> => {
+const buildKpis = (d: CommunityDetail): readonly Kpi[] => {
   const s = d.stats;
   const completed = s.executions_count - s.executions_active;
   return [
@@ -176,7 +176,7 @@ const buildKpis = (d: CommunityDetail): ReadonlyArray<Kpi> => {
 };
 
 /** Build the 3 member-composition segments from canonical counts (pcts derived). */
-const buildMemberComposition = (d: CommunityDetail): ReadonlyArray<MemberSegment> => {
+const buildMemberComposition = (d: CommunityDetail): readonly MemberSegment[] => {
   const m = d.stats.member_composition;
   const total = m.capital_providers + m.signal_providers + m.access_providers || 1;
   return [
@@ -253,29 +253,29 @@ export class CommunityDetailPageComponent {
   }
 
   /** Public: 4 KPI data points (derived from canonical stats). */
-  kpis(): ReadonlyArray<Kpi> {
+  kpis(): readonly Kpi[] {
     const d = this.detailRaw();
     return d ? buildKpis(d) : [];
   }
 
   /** Public: 4 community-governed parameters (wireframe presentation). */
-  governedParams(): ReadonlyArray<GovernedParam> {
+  governedParams(): readonly GovernedParam[] {
     return GOVERNED_PARAMS;
   }
 
   /** Public: 2 most recent executions (wireframe presentation). */
-  recentExecutions(): ReadonlyArray<RecentExecution> {
+  recentExecutions(): readonly RecentExecution[] {
     return RECENT_EXECUTIONS;
   }
 
   /** Public: 3 member-composition segments (derived from canonical counts). */
-  memberComposition(): ReadonlyArray<MemberSegment> {
+  memberComposition(): readonly MemberSegment[] {
     const d = this.detailRaw();
     return d ? buildMemberComposition(d) : [];
   }
 
   /** Public: 4 safety rails (never community-governed). */
-  safetyRails(): ReadonlyArray<string> {
+  safetyRails(): readonly string[] {
     return SAFETY_RAILS;
   }
 

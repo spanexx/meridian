@@ -72,7 +72,7 @@ interface Member {
  * response). Keyed by member slug; the active profile for the route is
  * resolved from this table.
  */
-const MEMBER_PROFILES: ReadonlyArray<Member> = [
+const MEMBER_PROFILES: readonly Member[] = [
   {
     name: 'Dana Voss',
     ref: 'dana-voss',

@@ -144,7 +144,7 @@ describe('CommunityMembersPageComponent', () => {
 
   it('members() returns 10 (unfiltered dataset)', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { members: () => ReadonlyArray<unknown> };
+    const c = f.componentInstance as unknown as { members: () => readonly unknown[] };
     expect(c.members().length).toBe(10);
   });
 
@@ -300,7 +300,7 @@ describe('CommunityMembersPageComponent', () => {
   // ─── Public methods (TDD pin) ───────────────────────────────────────
   it('members returns 10 members on first render', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { members: () => ReadonlyArray<unknown> };
+    const c = f.componentInstance as unknown as { members: () => readonly unknown[] };
     expect(c.members().length).toBe(10);
   });
 
@@ -317,7 +317,7 @@ describe('CommunityMembersPageComponent', () => {
   // ─── Coverage pins for TDD enforcement (public methods) ──────────────
   it('filteredMembers() returns 10 when filters are all=all', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { filteredMembers: () => ReadonlyArray<unknown> };
+    const c = f.componentInstance as unknown as { filteredMembers: () => readonly unknown[] };
     expect(c.filteredMembers().length).toBe(10);
   });
 
@@ -325,7 +325,7 @@ describe('CommunityMembersPageComponent', () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as {
       selectTier: (t: string) => void;
-      filteredMembers: () => ReadonlyArray<{ tier: string }>;
+      filteredMembers: () => readonly { tier: string }[];
     };
     c.selectTier('t4');
     expect(c.filteredMembers().every((m) => m.tier === 't4')).toBe(true);
@@ -333,7 +333,7 @@ describe('CommunityMembersPageComponent', () => {
 
   it('pagedMembers() returns 8 on page 1', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { pagedMembers: () => ReadonlyArray<unknown> };
+    const c = f.componentInstance as unknown as { pagedMembers: () => readonly unknown[] };
     expect(c.pagedMembers().length).toBe(8);
   });
 
@@ -341,7 +341,7 @@ describe('CommunityMembersPageComponent', () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as {
       nextPage: () => void;
-      pagedMembers: () => ReadonlyArray<unknown>;
+      pagedMembers: () => readonly unknown[];
     };
     c.nextPage();
     f.detectChanges();

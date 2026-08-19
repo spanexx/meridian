@@ -478,7 +478,7 @@ describe('CommunityDetailPageComponent', () => {
 
   it('safetyRails() returns 4 non-empty strings (the wireframe Safety Rails list)', async () => {
     const f = await renderPage('alpha');
-    const c = f.componentInstance as unknown as { safetyRails: () => ReadonlyArray<string> };
+    const c = f.componentInstance as unknown as { safetyRails: () => readonly string[] };
     const rails = c.safetyRails();
     expect(rails.length).toBe(4);
     for (const r of rails) {
@@ -510,7 +510,7 @@ describe('CommunityDetailPageComponent', () => {
     // The set of paths the Angular router has registered (mirrors app.routes.ts).
     // When a real link points to a path NOT in this set, the page will 404
     // when clicked — this test catches that drift early.
-    const KNOWN_ROUTES: ReadonlyArray<string> = [
+    const KNOWN_ROUTES: readonly string[] = [
       '/',
       '/showcase',
       '/dashboard',

@@ -24,7 +24,7 @@ import { provideRouter } from '@angular/router';
 import { GovernancePageComponent } from './governance.page';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
 
-async function renderPage(communityId: string = 'alpha') {
+async function renderPage(communityId = 'alpha') {
   await TestBed.configureTestingModule({
     imports: [GovernancePageComponent, UiIconComponent],
     providers: [provideRouter([])],
@@ -81,7 +81,7 @@ describe('GovernancePageComponent', () => {
 
   it('propose modal: Parameter select lists 6 options', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { openProposeModal: () => void; parameterOptions: () => ReadonlyArray<string> };
+    const c = f.componentInstance as unknown as { openProposeModal: () => void; parameterOptions: () => readonly string[] };
     c.openProposeModal();
     f.detectChanges();
     expect(c.parameterOptions()).toEqual([
@@ -221,7 +221,7 @@ describe('GovernancePageComponent', () => {
 
   it('Distribution shares card lists 5 distribution categories', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { distributionShares: () => ReadonlyArray<{ name: string; value: string }> };
+    const c = f.componentInstance as unknown as { distributionShares: () => readonly { name: string; value: string }[] };
     const dists = c.distributionShares();
     expect(dists.length).toBe(5);
     const names = dists.map((d) => d.name);
@@ -235,7 +235,7 @@ describe('GovernancePageComponent', () => {
   it('parameters() returns 5 entries with label + currentValue + provenance', async () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as {
-      parameters: () => ReadonlyArray<{ label: string; currentValue: string; setDate: string; approvalPct: number }>;
+      parameters: () => readonly { label: string; currentValue: string; setDate: string; approvalPct: number }[];
     };
     const params = c.parameters();
     expect(params.length).toBe(5);
@@ -272,7 +272,7 @@ describe('GovernancePageComponent', () => {
 
   it('safetyRails() returns the 5 fixed items', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { safetyRails: () => ReadonlyArray<string> };
+    const c = f.componentInstance as unknown as { safetyRails: () => readonly string[] };
     const rails = c.safetyRails();
     expect(rails.length).toBe(5);
     expect(rails[0]).toContain('Reconciliation');
@@ -282,7 +282,7 @@ describe('GovernancePageComponent', () => {
   it('recentVotes() returns 4 history entries with title + date + approvalPct + passed', async () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as {
-      recentVotes: () => ReadonlyArray<{ title: string; date: string; approvalPct: number; passed: boolean }>;
+      recentVotes: () => readonly { title: string; date: string; approvalPct: number; passed: boolean }[];
     };
     const votes = c.recentVotes();
     expect(votes.length).toBe(4);
@@ -293,7 +293,7 @@ describe('GovernancePageComponent', () => {
   it('activeProposals() returns 2 proposals with tally +0 votes', async () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as {
-      activeProposals: () => ReadonlyArray<{ title: string; approve: number; reject: number }>;
+      activeProposals: () => readonly { title: string; approve: number; reject: number }[];
     };
     const props = c.activeProposals();
     expect(props.length).toBe(2);
