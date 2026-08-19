@@ -1,10 +1,11 @@
 # Frontend Backlog — Pre-Backend Completion Plan
 
-Date: 2026-08-18
-Status: PLAN ONLY — not approved for execution. Reviewed by the user in
-chat on 2026-08-18; execution starts only on explicit approval.
+Date: 2026-08-18 (updated 2026-08-19)
+Status: **Pack A SHIPPED on `feat/frontend-data-layer` (local, unpushed);
+Packs B–E still open.** Execution was approved by the user on 2026-08-18
+("Everything A–E").
 Owner: agent-maintained
-Last reviewed: 2026-08-18
+Last reviewed: 2026-08-19
 
 ## Purpose
 
@@ -15,21 +16,22 @@ no auth, several interactions are fake. The backend has not started
 document is the day plan: everything the frontend must have before the
 backend begins, the order to build it in, and the evidence for each gap.
 
-## Current state (verified 2026-08-18)
+## Current state (verified 2026-08-19)
 
 | Area | Status |
 |---|---|
 | Wireframe pages (20 of 21 HTML files; the 21st is the index hub) | All routed via `app.routes.ts` |
 | UI primitives (`ui/*`, 19 components) | Done, tested |
-| Theme system (copper tokens, light/dark) | Done, but logic copy-pasted in 5 files |
-| Unit tests | 843+ green (`vitest`, `--maxWorkers=2`) |
-| E2E (Playwright + screenshots) | 157+ green |
-| Pre-commit guardrails | 10/10 (YAML, secrets, comments, TSC, vitest, icons, new-page pack, router links, link targets, TDD) |
-| HTTP / API layer | **Zero** — `grep HttpClient` = 0 matches in `frontend/src` |
-| State management | **None** — every page owns local `signal()`s (18 in submit-signal alone) |
-| Auth | **None** — login/register submit = `setTimeout(navigate('/dashboard'), 900)` |
-| Environments | **None** — no `src/environments/` |
-| Backend | Not started (docs-only: kernel/communities/governance feature docs) |
+| Theme system (copper tokens, light/dark) | Done, but logic copy-pasted in 5 files (Pack B fix) |
+| Unit tests | 981 green (`vitest`) |
+| E2E (Playwright + screenshots) | green, incl. payouts byte-identical check |
+| Pre-commit guardrails | 11/11 — now incl. **strict ESLint** (errors AND warnings block; eslint 9 + angular-eslint flat config; CI mirrors it) |
+| HTTP / API layer (**Pack A**) | **Done** — typed `ApiClient` + transport seam (`API_TRANSPORT` token; MockTransport dev / HttpTransport prod, flip = `environment.useMock`), 31 seeded mock routes (incl. auth register + 2FA), HttpClient + functional interceptors (auth/correlation/error), canonical models, money/date/error utils, env files + fileReplacements |
+| State management | **None (Pack B)** — every page owns local `signal()`s (18 in submit-signal alone) |
+| Auth | **Partial (Pack C)** — TokenStore + Bearer interceptor + login/register wired with token persistence; NO guards, no refresh, no 2FA UI, no KYC flow |
+| Flows (Pack D) | **Not started** — deposit/withdraw/vote/submit-signal still local state |
+| Maintainability (Pack E) | Partial — `_placeholder` deleted, `/showcase` gated out of prod, labels/aria a11y fixed; landing split + overview rewrite open |
+| Backend | Not started (docs-only: `docs/apis/*` now complete incl. executions/payouts/notifications contracts) |
 
 ## Pending work — the gap list
 
@@ -157,41 +159,40 @@ only fields actually read):
 These go into the backend pack's GRILL/PRD-TRD as must-document items;
 the frontend models annotate each conflict at its call site.
 
-## Work already started (2026-08-18) — PARKED, not approved
+## Work history — Pack A execution (2026-08-18 → 2026-08-19)
 
-Execution began before the plan was approved and was stopped the same
-day on the user's instruction. **Nothing was pushed; master untouched.**
-All of the following sits on the local branch `feat/frontend-data-layer`
-(no upstream):
+Pack A was originally parked on `feat/frontend-data-layer` (no upstream)
+after the plan-only pause on 2026-08-18, then SHIPPED after the user
+approved "Everything A–E" and restarted the execution goal:
 
-- **Committed `a18ba19`**: pack docs (`docs/features/frontend-data-layer/`
-  PRD-TRD + IMPL), `frontend/src/environments/` (dev/prod + model +
-  spec), `frontend/src/app/core/utils/` (money, dates, errors + specs),
-  `frontend/angular.json` (production fileReplacements), 2 lines in
-  `sessions/decisions.md`. Pre-commit 10/10 green; environments + utils
-  specs 22/22 green.
-- **Untracked (still in the tree)**: `frontend/src/app/core/api/`
-  (api-response, api-transport, mock-gateway, mock-transport + specs —
-  specs written but not yet run) and `frontend/src/app/core/models/`
-  (6 of 9 files: member, pool, opportunity, execution, payout,
-  community; governance, notification, barrel + model spec NOT written).
-- **Not started**: ApiClient, gateway seed data, payouts rewiring, and
-  all of packs B–E.
+- Pack docs + environments + utils + angular.json fileReplacements
+  (committed 2026-08-18).
+- `core/api/` + `core/models/` (api-response, transports, mock gateway +
+  seed, typed models) — committed.
+- All ~14 pages rewired to the injected `ApiClient` (one source); page
+  fixtures deleted. 2026-08-19: auth register + 2FA mock routes added
+  (route count 29 → 31), login now persists the token to `TokenStore`,
+  stale gap references in api-client/mock-seed/docs fixed.
+- Strict ESLint (eslint 9 + angular-eslint, flat config) wired in:
+  pre-commit check #11 blocks on ANY problem; the same gate runs in CI.
+  ~112 findings fixed (a11y labels, click/keyboard, output naming,
+  unused vars, typing, prefer-inject with documented exceptions).
 
-Resume rule: this work executes only after this plan is approved; the
-PRD-TRD/IMPL docs carry the same status marker.
+Resume rule for B–E: Packs B, C (guard/refresh/2FA/KYC), D and the
+remaining E items execute from this backlog; each ships
+`docs/features/<slug>/` + TDD specs + implementation + drift check,
+merged via PR per git-conventions.
 
 ## Open decisions
 
 - State tech: **signals stores** (user pick, 2026-08-18).
-- Today's scope if approved: **all packs A–E** (user pick, 2026-08-18).
+- Scope: **all packs A–E** (user pick, 2026-08-18); A is done.
 - Sequencing of D/E vs early backend: user call when A–C land.
 
 ## How to proceed
 
-1. User reviews this plan (and optionally the parked Pack A status).
-2. User approves scope + order (any subset of A–E).
-3. Resume the execution goal; each pack ships `docs/features/<slug>/` +
-   TDD specs + implementation + drift check, merged via PR per
-   git-conventions.
-4. Backend starts after A–C with a contract-complete consumer.
+1. User reviews this plan (pack statuses above are the current truth).
+2. Next pack: **B (state stores)** — signal stores for auth/pool/
+   opportunities/executions/payouts/communities/notifications + single
+   ThemeService; pages read stores, not fixtures.
+3. Backend starts after A–C with a contract-complete consumer.
