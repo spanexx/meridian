@@ -1,65 +1,102 @@
-# MERIDIAN — End-of-Session Handoff (2026-08-18, ~19:30)
+# MERIDIAN — End-of-Session Handoff (2026-08-19)
 
 ## Mode
-Operating mode is **AUTO** (`state` file = `auto`). The user flipped it in a
-prior session; only they can switch it back. Honor AUTO: the agent may decide
-HOW, never WHAT — follow `docs/`, `CONTEXT.md`, `decisions.md`. Document every
-AUTO decision in `sessions/decisions.md`.
+Operating mode is **AUTO** (`state` file = `auto`). The agent may decide
+HOW, never WHAT — follow `docs/`, `CONTEXT.md`, `decisions.md`. Every
+AUTO decision is logged in `sessions/decisions.md` (8 entries added
+2026-08-19).
 
 ## Branch
-`feat/frontend-data-layer` (local, unpushed). master at `2e0a9c8`.
+`feat/frontend-data-layer` (local, unpushed; master at `2e0a9c8`).
+5 commits landed this session on top of the data-layer pack:
 
-## What shipped THIS session (all committed)
-- `4660ba1` feat(frontend): rewire payouts page to injected ApiClient (Step 6)
-  — `payouts.data.ts` deleted; page injects `apiClient.payoutsList()`.
-- `9ce7c48` feat(frontend): wire ApiClient via API_TRANSPORT token + fix
-  latent seed bugs (Step 7) — transport seam (MockTransport dev / HttpTransport
-  prod) chosen only in `app.config.ts`.
-- `e27eebb` fix(frontend): pin sidebar bottom action row on short screens
-  (cline-one job 6) — `.sidebar` no longer scrolls; `.sidebar-scroll` does;
-  bottom action row is pinned `.sidebar-footer`.
+- `214342c` feat(frontend): strict eslint gate, zero-lint codebase
+- `b33ac32` refactor(frontend): eslint autofix residuals
+- `26ace73` feat(frontend): backend-switch readiness — token
+  persistence, auth mock routes, pool one-source money
+- `51bd12e` feat(frontend): a11y label association, keyboard handlers,
+  pack E hygiene
+- `2742f8c` docs(frontend): refresh data-layer status docs + AUTO
+  decisions
 
-## Verification state (green)
-`tsc --noEmit` clean · vitest 956/956 · Playwright e2e 9/9 (payouts,
-byte-identical). All 10 pre-commit hooks pass.
+## Verification state (ALL GREEN, verified after every commit)
+- eslint (strict): **0 problems** (errors AND warnings block commit + CI)
+- vitest: **980/980**
+- Playwright e2e: **157/157** (pool KPI + withdraw balance + dashboard
+  rows were failing on the previous HEAD; fixed)
+- `ng build --configuration production`: exit 0 — **was BROKEN before
+  this session** (pool page TS2532 template errors since the 290f42e
+  rewire; nothing had built the branch; plain tsc is template-blind and
+  pre-commit used to run bare tsc)
+- npm audit: 0 vulnerabilities
 
-## Backend-readiness audit (cline-one job 7) — VERDICT: NOT READY
-The transport seam is a correct single switch point (`app.config.ts` only
-picks Mock vs Http; flip `useMock`). BUT only `payouts.page.ts` injects
-`ApiClient`. ~14 other pages render hardcoded wireframe fixtures (confirmed by
-grep: only payouts.page.ts + core/api + app.config reference ApiClient). 5
-`ApiClient` methods have NO backend contract: `/executions`,
-`/executions/{id}`, `/payouts`, `/members/me/payouts`, `/notifications`. Auth
-token is a stub `() => null`. Full report:
-`.cline-one-reports/20260818-backend-readiness.md` (gitignored).
+## What changed THIS session
 
-## Uncommitted working-tree state (decide next session)
-- `frontend/src/app/core/api/api-client.spec.ts` — 95 insertions of NEW test
-  coverage (memberSettings, login2fa, opportunitiesMine, vettingQueue,
-  executions, payoutsMine, communities, governance, etc.). NOT authored this
-  session — likely a prior in-flight expansion. Decide: commit as its own
-  commit, or fold into the data-layer PR.
-- `frontend/e2e/screenshots/*.png` — refreshed by e2e runs; gitignored? no.
-  Safe to leave or commit.
-- `sessions/.handoff-log.md` — handoff breadcrumb (auto).
+1. **Strict eslint gate** (user request): eslint 9 + angular-eslint
+   20.7 flat config; pre-commit check 11/11 blocks on ANY problem; CI
+   lint step fails-on-error; pre-commit check 4 now runs the PRODUCTION
+   build (tsc alone cannot see template type errors). ~112 findings
+   fixed (a11y labels/keyboard, output renames close→closed,
+   select→selectChange, unused vars, any-types, prefer-inject with
+   documented exceptions in ApiClient/HttpTransport, elements-content,
+   empty-object-type, lifecycle interfaces). Mechanical categories were
+   delegated to an opencode-action subagent
+   (`.opencode-reports/20260819-lint-fixes.md`); complex semantics done
+   by the orchestrator. New repo skill:
+   `.agents/skills/angular-lint-gate/SKILL.md`.
+2. **Backend-switch readiness**: login persists the token to TokenStore
+   (Bearer now flows to the real gateway after login); mock seed gained
+   `POST /auth/register` + `POST /auth/login/2fa` (29→31 routes); pool
+   KPI money formatted via formatApiMoney and the withdraw modal shows
+   the MEMBER balance (ApiClient.balance()) not pool totals; E-1036
+   seed ETA is relative to now ('ETA 4 days' stable); stale e2e
+   assertions updated to one-source values.
+3. **Pack E hygiene**: `_placeholder` deleted, `/showcase` gated out of
+   production, e2e screenshots no longer committed (gitignored),
+   community-members header sm:items-start (last PR #41 sibling bug),
+   full label for/id association across 8 pages.
 
-## Dev server (session-scoped — will NOT exist next session)
-A resident `ng serve --port 8999 --host 0.0.0.0` is running (proc_3a3f25c5e0d0)
-for the user's phone check. Per the no-daemons rule it should be killed when
-the session ends. Re-run `cd frontend && npx ng serve --port 8999 --host
-0.0.0.0` if needed.
+## Answer to the user's goal question
+
+**Frontend IS backend-switch-ready for the data layer**: every page
+renders exclusively from the injected `ApiClient` (one source; page
+fixtures are gone), every ApiClient method has a `docs/apis/*` contract,
+and the switch is ONE flag: `environment.useMock: false` (+ apiUrl).
+Remaining work is NOT data-source work — it's the planned packs:
+
+- **B — state**: signal stores (auth/pool/opportunities/executions/
+  payouts/communities/notifications) + one ThemeService (theme logic
+  still copied in 5 files)
+- **C — auth**: route guards (none exist), token refresh, 2FA UI, KYC
+  flow (TokenStore + interceptor + login/register are wired)
+- **D — flows**: deposit/withdraw/vote/submit-signal mutations still
+  local state (pages render mock data but submit flows don't POST)
+- **E — remaining**: landing template split (1109 lines), any leftover
+  doc refresh
+
+Status table: `docs/frontend/01-frontend-backlog.md` (updated).
+
+## Known named issues (not fixed — out of scope)
+- Pool 'Pending' KPI card is still hardcoded `$42,100` (no canonical
+  field in PoolStatus; flagged, not faked).
+- Dashboard/landing/settings still have some presentation-only static
+  widgets (contributors table, chart series) — no backend contract
+  exists; documented in pool.page.ts.
+- `scripts/__pycache__/` is untracked (should be gitignored; harmless).
+- Angular 20.3 is still in LTS; a major bump (21/22) was treated as a
+  WHAT decision for the user.
 
 ## Next agent: what to pick up
-1. User's stated goal: frontend must be backend-switch-ready (flip one config =
-   done). That is NOT met — needs a pack rewiring ~14 pages to ApiClient + 5
-   API contracts in `docs/apis/`. That is a big multi-session chunk → user must
-   trigger `wayfinder` or approve a plan first (plan-first rule).
-2. Pending decision: PR the data-layer branch to master, or keep stacking?
-3. Read `.cline-one-reports/20260818-backend-readiness.md` for the full gap
-   table before planning.
+1. **Pack B** (state stores) is the next locked pack — user approved
+   A–E on 2026-08-18; A is done.
+2. Pending decision: PR the data-layer branch (5 commits + ~20 prior)
+   to master, or keep stacking B/C first.
+3. Pre-commit now takes ~2-3 min per commit (prod build + full vitest +
+   eslint) — expected, strictness was the user's explicit request.
 
 ## Key files
+- `frontend/eslint.config.js` (strict flat config)
 - `frontend/src/app/app.config.ts` (transport seam — the one switch)
-- `frontend/src/app/core/api/*` (ApiClient, transports, mock seed)
-- `docs/frontend/01-frontend-backlog.md` (pack order A–E)
-- `sessions/decisions.md`, `sessions/.handoff-log.md`
+- `frontend/src/app/core/api/*` (ApiClient, transports, seed, interceptors)
+- `scripts/pre-commit.py` (11/11 checks)
+- `docs/frontend/01-frontend-backlog.md` (pack statuses)
