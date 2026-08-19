@@ -86,10 +86,13 @@ test.describe('dashboard page (wireframe-driven)', () => {
 
   test('Active Executions rows show status text on the right (3 of 8 sold / Closing / ETA 4 days)', async ({ page }) => {
     await page.goto('/dashboard');
-    const html = await page.locator('body').innerHTML();
-    expect(html).toContain('3 of 8 sold');
-    expect(html).toContain('Closing');
-    expect(html).toContain('ETA 4 days');
+    // Rows are async (ApiClient.executionsList via the mock) — use
+    // retrying assertions instead of an immediate innerHTML read
+    // (DISCOVERY 2026-08-19: the innerHTML race passed pre-rewire when
+    // the list was hardcoded; one-source rows load after the seed).
+    await expect(page.getByText('3 of 8 sold')).toBeVisible();
+    await expect(page.getByText('Closing', { exact: true })).toBeVisible();
+    await expect(page.getByText('ETA 4 days')).toBeVisible();
   });
 
   test('Latest Opportunities renders a TABLE not cards', async ({ page }) => {

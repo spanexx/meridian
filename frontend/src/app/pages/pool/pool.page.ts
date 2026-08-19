@@ -19,7 +19,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
 import { ApiClient } from '../../core/api/api-client';
-import type { PoolStatus } from '../../core/models';
+import type { BalanceInfo, PoolStatus } from '../../core/models';
+import { formatApiMoney } from '../../core/utils/money';
 
 /** Top capital contributors (wireframe data). */
 export const CONTRIBUTORS = [
@@ -162,12 +163,12 @@ function smoothPath(points: number[]): string {
         </div>
         <form class="space-y-4" (submit)="depositOpen.set(false)">
           <div>
-            <label>Amount (USD)</label>
-            <input class="input" min="1" placeholder="0.00" required type="number" />
+            <label for="deposit-amount">Amount (USD)</label>
+            <input id="deposit-amount" class="input" min="1" placeholder="0.00" required type="number" />
           </div>
           <div>
-            <label>Rail</label>
-            <select class="input">
+            <label for="deposit-rail">Rail</label>
+            <select id="deposit-rail" class="input">
               <option>Stripe · bank transfer</option>
               <option>PayPal</option>
               <option>USDC (crypto)</option>
@@ -203,7 +204,7 @@ function smoothPath(points: number[]): string {
         <div class="modal-head">
           <div>
             <h2 class="modal-title">Request withdrawal</h2>
-            <p class="text-xs text-slate-500 mt-1">Available balance {{ status()?.totals.available_capital }}.</p>
+            <p class="text-xs text-slate-500 mt-1">Available balance {{ formatApiMoney(balance()?.balances?.available ?? '0.00') }}.</p>
           </div>
           <button
             type="button"
@@ -216,12 +217,12 @@ function smoothPath(points: number[]): string {
         </div>
         <form class="space-y-4" (submit)="withdrawOpen.set(false)">
           <div>
-            <label>Amount (USD)</label>
-            <input class="input" min="1" placeholder="0.00" required type="number" />
+            <label for="withdraw-amount">Amount (USD)</label>
+            <input id="withdraw-amount" class="input" min="1" placeholder="0.00" required type="number" />
           </div>
           <div>
-            <label>Method</label>
-            <select class="input">
+            <label for="withdraw-method">Method</label>
+            <select id="withdraw-method" class="input">
               <option>Bank transfer · •••• 4821</option>
               <option>PayPal · alex@meridian.com</option>
               <option>USDC · 0x8f2a…9c1e</option>
@@ -255,17 +256,17 @@ function smoothPath(points: number[]): string {
     <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" data-testid="kpi-row">
       <div class="card p-5">
         <div class="kpi-label mb-2">Total Available</div>
-        <div class="kpi-number text-gradient-emerald">{{ status()?.totals.available_capital }}</div>
+        <div class="kpi-number text-gradient-emerald">{{ formatApiMoney(status()?.totals?.available_capital ?? '0.00') }}</div>
         <div class="text-xs text-emerald-400 mt-2">+2.4% week</div>
       </div>
       <div class="card p-5">
         <div class="kpi-label mb-2">Total Locked</div>
-        <div class="kpi-number">{{ status()?.totals.deployed_capital }}</div>
-        <div class="text-xs text-slate-500 mt-2">{{ status()?.activity.active_executions }} executions</div>
+        <div class="kpi-number">{{ formatApiMoney(status()?.totals?.deployed_capital ?? '0.00') }}</div>
+        <div class="text-xs text-slate-500 mt-2">{{ status()?.activity?.active_executions }} executions</div>
       </div>
       <div class="card p-5">
         <div class="kpi-label mb-2">Reserve</div>
-        <div class="kpi-number">{{ status()?.totals.total_capital }}</div>
+        <div class="kpi-number">{{ formatApiMoney(status()?.totals?.total_capital ?? '0.00') }}</div>
         <div class="text-xs text-amber-400 mt-2">{{ reservePct() }}% of pool</div>
       </div>
       <div class="card p-5">
@@ -458,10 +459,10 @@ function smoothPath(points: number[]): string {
           <div>
             <div class="flex justify-between items-baseline mb-2">
               <span class="text-xs text-slate-400">Deployment</span>
-              <span class="text-sm font-semibold">{{ status()?.health.deployment_ratio }}%</span>
+              <span class="text-sm font-semibold">{{ (status()?.health?.deployment_ratio ?? 0) }}%</span>
             </div>
             <div class="progress-track">
-              <div class="progress-fill progress-fill-blue" style="width: {{ status()?.health.deployment_ratio }}%;"></div>
+              <div class="progress-fill progress-fill-blue" style="width: {{ status()?.health?.deployment_ratio ?? 0 }}%;"></div>
             </div>
             <div class="text-[10px] text-slate-500 mt-1.5">In band 20–40% · Cap 50%</div>
           </div>
@@ -568,13 +569,13 @@ export class PoolPageComponent {
   }
 
   /** Series paths for the active range. */
-  chartSeries(): Array<{
+  chartSeries(): {
     name: string;
     gradient: string;
     color: string;
     area: string;
     line: string;
-  }> {
+  }[] {
     const data = SERIES[this.chartRange()];
     const build = (key: 'available' | 'locked' | 'reserve', gradient: string, color: string) => {
       const line = smoothPath(data[key]);
@@ -607,6 +608,11 @@ export class PoolPageComponent {
 
   private readonly client = inject(ApiClient);
 
+  /** Display edge for API money strings (template access — Angular 20
+   * standalone-imports of plain functions are not transform-safe in the
+   * vitest plugin, so the util rides as a class member). */
+  protected readonly formatApiMoney = formatApiMoney;
+
   /** Backend-readiness: pool KPIs/health sourced from the injected ApiClient
    * (core/api/api-client.ts poolStatus()). The chart history (SERIES) and the
    * Top Contributors table (CONTRIBUTORS) are display-only demo widgets — no
@@ -615,6 +621,12 @@ export class PoolPageComponent {
    * list + time-series are not in any api doc, so they remain static display. */
   readonly status = signal<PoolStatus | null>(null);
 
+  /** Member-level available balance (ApiClient.balance()) — the withdraw
+   * modal's "Available balance" is the MEMBER edge, not the pool totals
+   * (DISCOVERY 2026-08-19: the pool-style totals were shown here before;
+   * e2e pins "$12,500.00"). */
+  readonly balance = signal<BalanceInfo | null>(null);
+
   /** Reserve ratio as a percentage (PoolStatus.health.reserve_ratio is 0-100). */
   readonly reservePct = computed(() => this.status()?.health.reserve_ratio ?? 0);
 
@@ -622,6 +634,10 @@ export class PoolPageComponent {
     this.client
       .poolStatus()
       .then((s) => this.status.set(s))
+      .catch(() => undefined);
+    this.client
+      .balance()
+      .then((b) => this.balance.set(b))
       .catch(() => undefined);
   }
 }

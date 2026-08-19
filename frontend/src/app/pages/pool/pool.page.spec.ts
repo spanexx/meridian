@@ -22,11 +22,12 @@ import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { PoolPageComponent, CONTRIBUTORS } from './pool.page';
 import { ApiClient } from '../../core/api/api-client';
-import { SEED_POOL_STATUS } from '../../core/api/mock-seed';
+import { SEED_BALANCE, SEED_POOL_STATUS } from '../../core/api/mock-seed';
 
 async function renderPool(): Promise<ComponentFixture<PoolPageComponent>> {
   const mockClient = {
     poolStatus: vi.fn().mockResolvedValue(SEED_POOL_STATUS),
+    balance: vi.fn().mockResolvedValue(SEED_BALANCE),
   } as unknown as ApiClient;
   await TestBed.configureTestingModule({
     providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
@@ -74,10 +75,11 @@ describe('PoolPageComponent', () => {
     const cards = Array.from(root.querySelectorAll('.kpi-label'));
     const labels = cards.map((c) => c.textContent?.trim());
     expect(labels).toEqual(['Total Available', 'Total Locked', 'Reserve', 'Pending']);
-    // Values come from ApiClient.poolStatus() (mock SEED_POOL_STATUS), not hardcoded.
-    expect(root.textContent).toContain(SEED_POOL_STATUS.totals.available_capital);
-    expect(root.textContent).toContain(SEED_POOL_STATUS.totals.deployed_capital);
-    expect(root.textContent).toContain(SEED_POOL_STATUS.totals.total_capital);
+    // Values come from ApiClient.poolStatus() (mock SEED_POOL_STATUS) and are
+    // formatted via formatApiMoney (wireframe "$936,350" style), not hardcoded.
+    expect(root.textContent).toContain('$936,350');
+    expect(root.textContent).toContain('$487,230');
+    expect(root.textContent).toContain('$1,423,580');
     expect(root.textContent).toContain('$42,100');
     expect(root.textContent).toContain('+2.4% week');
     expect(root.textContent).toContain(`${SEED_POOL_STATUS.health.reserve_ratio}% of pool`);
@@ -248,6 +250,21 @@ describe('PoolPageComponent', () => {
     const modal = root.querySelector('[data-testid="withdraw-modal"]') as HTMLElement;
     expect(modal?.hidden).toBe(false);
     expect(modal?.textContent).toContain('Request withdrawal');
+  });
+
+  it('withdraw modal shows the MEMBER available balance from ApiClient.balance()', async () => {
+    const fixture = await renderPool();
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const openBtn = Array.from(root.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Withdraw'),
+    );
+    (openBtn as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const modal = root.querySelector('[data-testid="withdraw-modal"]') as HTMLElement;
+    // Member-level balance (SEED_BALANCE.balances.available), formatted —
+    // NOT the pool totals (one-source: balance() is the member edge).
+    expect(modal?.textContent).toContain('Available balance $12,500.00.');
   });
 
   it('memberUrl() slugifies member names to the canonical /community/alpha/members/<slug>', async () => {

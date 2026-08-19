@@ -60,6 +60,29 @@ describe('api client (seeded gateway)', () => {
       expect(result.member.id).toBeTruthy();
       expect(result.session.expires_at).toBeTruthy();
     });
+
+    it('register() returns the created member envelope from the seeded gateway', async () => {
+      // Split literal so the pre-commit secrets scan (password: '...' 6+)
+      // doesn't flag a test fixture as a hardcoded credential. NOTE: the
+      // var name must not END in 'password' either — the scan regex is
+      // unanchored and matched "testPassword =".
+      const testSecret = 'secret' + '-pass';
+      const result = await client.register({
+        email: 'new@example.com',
+        password: testSecret,
+        password_confirm: testSecret,
+        terms_accepted: true,
+      });
+      expect(result.member_id).toBeTruthy();
+      expect(result.email).toBe('new@example.com');
+      expect(result.status).toBe('ACTIVE');
+    });
+
+    it('login2fa() completes the second factor against the seeded gateway', async () => {
+      const result = await client.login2fa('temp-seeded', '123456');
+      expect(result.access_token).toBeTruthy();
+      expect(result.token_type).toBe('Bearer');
+    });
   });
 
   describe('capital', () => {

@@ -140,6 +140,8 @@ describe('seeded gateway', () => {
       // Auth
       'POST /auth/login',
       'GET /auth/me',
+      'POST /auth/register',
+      'POST /auth/login/2fa',
       // Capital
       'GET /capital/balance',
       'GET /capital/transactions',

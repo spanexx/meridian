@@ -81,10 +81,12 @@ describe('mock seed arrays', () => {
     }
   });
 
-  it('registers 29 routes on a fresh gateway', () => {
+  it('registers 31 routes on a fresh gateway (incl. auth register + 2FA)', () => {
     const gateway = new MockGateway();
     seedGateway(gateway);
-    expect(gateway.routesList).toHaveLength(29);
+    expect(gateway.routesList).toHaveLength(31);
+    expect(gateway.routesList).toContain('POST /auth/register');
+    expect(gateway.routesList).toContain('POST /auth/login/2fa');
   });
 
   it('opportunityDetailFromRow() converts a list row to the detail shape', () => {

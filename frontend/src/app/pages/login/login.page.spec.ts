@@ -22,6 +22,7 @@ import { provideRouter, Router } from '@angular/router';
 import { vi } from 'vitest';
 import type { LoginPageComponent } from './login.page';
 import { ApiClient } from '../../core/api/api-client';
+import { TokenStore } from '../../core/auth/token-store';
 
 /** Minimal routable content so routerLink hrefs resolve in the test router. */
 @Component({ selector: 'stub-route', standalone: true, template: '' })
@@ -121,6 +122,23 @@ describe('LoginPage (wireframe-aligned)', () => {
     vi.advanceTimersByTime(900);
     expect(nav).toHaveBeenCalledWith(['/dashboard']);
     vi.useRealTimers();
+  });
+
+  it('submit() persists the access token to TokenStore (auth pack readiness)', async () => {
+    const fixture = await renderStandalone();
+    const c = fixture.componentInstance;
+    const store = TestBed.inject(TokenStore);
+    store.clear();
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    await c.submit();
+    expect(store.token).toBe('test-access');
+    // The 2FA challenge variant must NOT write a token.
+    const mock = TestBed.inject(ApiClient) as unknown as { login: ReturnType<typeof vi.fn> };
+    mock.login.mockResolvedValue({ requires_2fa: true, temp_token: 'temp-1', message: 'Enter code' });
+    store.clear();
+    await c.submit();
+    expect(store.token).toBeNull();
   });
 
   it('passkey() shows the "Passkey requested" toast', async () => {

@@ -38,6 +38,7 @@
  * @reviewed 2026-08-18
  */
 import { MockGateway } from './mock-gateway';
+import { ApiError } from './api-response';
 import type {
   AuthMeMember,
   BalanceInfo,
@@ -66,7 +67,9 @@ import type {
   ProposalListRow,
   ProposalVoteResponse,
   RecentVoteRow,
+  RegisterResponse,
   SafetyRail,
+  TwoFactorLoginResponse,
   VettingVoteResponse,
   WithdrawalResponse,
 } from '../models';
@@ -381,7 +384,11 @@ function executionTimelineOf(r: ExecutionSeedRow): ExecutionDetail['timeline'] {
       started_at: '2026-03-14T00:00:00Z',
       acquisition_completed_at: '2026-03-18T00:00:00Z',
       liquidation_started_at: '2026-03-22T00:00:00Z',
-      estimated_completion: '2026-03-22T00:00:00Z',
+      // DISCOVERY 2026-08-19: dashboard renders "ETA n days" from
+      // estimated_completion vs Date.now(); static dates decayed to
+      // "ETA 1 days". Relative-to-now keeps the wireframe "ETA 4 days"
+      // stable for dev + e2e (dashboard.spec.ts pins it).
+      estimated_completion: new Date(Date.now() + 4 * 86_400_000).toISOString(),
     };
   }
   const day = (Number(r.ref.slice(2)) % 27) + 1;
@@ -776,6 +783,32 @@ export function seedGateway(gateway: MockGateway): void {
     member: SEED_AUTH_ME_MEMBER,
     session: { created_at: '2026-03-18T08:00:00Z', expires_at: '2026-03-18T08:15:00Z' },
   }));
+  // POST /auth/register — contract: docs/apis/01-auth-api.md. Echoes the
+  // payload email back in the envelope (shapes: member.ts RegisterResponse).
+  gateway.register('POST', '/auth/register', (ctx) => {
+    const email = (ctx.body as { email?: string } | undefined)?.email ?? 'new@example.com';
+    return {
+      member_id: 'mem_new_' + email.split('@')[0],
+      email,
+      status: 'ACTIVE',
+      message: 'Account created — verification email sent.',
+    } satisfies RegisterResponse;
+  });
+  // POST /auth/login/2fa — contract: docs/apis/01-auth-api.md. A valid
+  // temp_token (any non-empty) completes the second factor and issues
+  // a token pair (shapes: member.ts TwoFactorLoginResponse).
+  gateway.register('POST', '/auth/login/2fa', (ctx) => {
+    const temp_token = (ctx.body as { temp_token?: string } | undefined)?.temp_token ?? '';
+    if (!temp_token) {
+      throw new ApiError('AUTH_TOKEN_INVALID', 'Missing or expired 2FA temp token.', {});
+    }
+    return {
+      access_token: TOKEN,
+      refresh_token: REFRESH,
+      token_type: 'Bearer',
+      expires_in: 900,
+    } satisfies TwoFactorLoginResponse;
+  });
 
   // ── Capital ─────────────────────────────────────────────────────────
   gateway.register('GET', '/capital/balance', () => SEED_BALANCE);
@@ -825,20 +858,15 @@ export function seedGateway(gateway: MockGateway): void {
   });
 
   // ── Executions ──────────────────────────────────────────────────────
-  // DISCOVERY 2026-08-18: GET /executions is NOT in the API docs — only
-  // GET /executions/{id} (reference gap §4.1). Mock-only list so the
-  // execution board has data; the backend pack documents the endpoint.
-  // See docs/features/frontend-data-layer/api-models-reference.md (gap §4.1).
+  // Contract: docs/apis/04b-executions-api.md (list board endpoint
+  // documented there as the canonical surface).
   gateway.register('GET', '/executions', () => ({ executions: SEED_EXECUTIONS }));
   gateway.registerPattern('GET', '/executions/:id', (ctx) =>
     SEED_EXECUTIONS.find((e) => e.execution_id === ctx.params?.['id']) ?? SEED_EXECUTIONS[0],
   );
 
   // ── Payouts ─────────────────────────────────────────────────────────
-  // DISCOVERY 2026-08-18: the pool-wide GET /payouts ledger is a draft
-  // contract (reference gap §4.2) — the backend pack adds
-  // docs/apis/07-payouts-api.md and PayoutLedgerRow is the shape.
-  // See docs/features/frontend-data-layer/api-models-reference.md (gap §4.2).
+  // Pool-wide ledger — contract: docs/apis/07-payouts-api.md.
   gateway.register('GET', '/payouts', () => ({ payouts: SEED_PAYOUTS }));
   gateway.register('GET', '/members/me/payouts', () => ({ payouts: SEED_PAYOUT_LIST, summary: SEED_PAYOUT_SUMMARY }));
 

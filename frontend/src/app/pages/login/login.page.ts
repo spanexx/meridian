@@ -30,6 +30,7 @@ import { Router, RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
 import { ApiClient } from '../../core/api/api-client';
+import { TokenStore } from '../../core/auth/token-store';
 
 interface ToastState {
   readonly title: string;
@@ -85,18 +86,19 @@ interface ToastState {
 
           <form (ngSubmit)="submit()" class="space-y-4" data-auth-form>
             <div>
-              <label>Email</label>
+              <label for="login-email">Email</label>
               <input
                 type="email"
                 class="input"
                 data-field="email"
                 value="alex@meridian.com"
+                id="login-email"
                 required
               />
             </div>
             <div>
               <div class="flex items-center justify-between mb-1">
-                <label style="margin-bottom: 0;">Password</label>
+                <label for="login-password" style="margin-bottom: 0;">Password</label>
                 <button
                   type="button"
                   class="text-xs text-violet-400 hover:text-violet-300"
@@ -111,6 +113,7 @@ interface ToastState {
                 class="input"
                 data-field="password"
                 value="demo-password"
+                id="login-password"
                 required
               />
               <p class="text-[11px] text-slate-500 mt-1.5">Demo: any credentials work.</p>
@@ -185,6 +188,7 @@ interface ToastState {
 export class LoginPageComponent {
   private readonly router = inject(Router);
   private readonly client = inject(ApiClient);
+  private readonly tokenStore = inject(TokenStore);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   /** Current theme key — mirrors ShellComponent's private theme signal. */
@@ -194,14 +198,6 @@ export class LoginPageComponent {
 
   /** In-page toast state (ui-toast primitive rendered behind @if). */
   readonly toast = signal<ToastState | null>(null);
-
-  /**
-   * Captured access token after a successful login. The auth feature pack
-   * persists this and feeds it to the transport's token provider. The app
-   * currently runs with a stub token callback (app.config.ts) so this is not
-   * yet sent on subsequent requests.
-   */
-  readonly storedToken = signal<string | null>(null);
 
   /** Toggles the page theme. Auth pages live outside the shell. */
   toggleTheme(): void {
@@ -223,17 +219,16 @@ export class LoginPageComponent {
 
     try {
       const res = await this.client.login(email, password);
-      // Backend-readiness pack: first step toward real session wiring.
-      // We capture the access token here so the auth pack can persist it
-      // (and feed it to the transport's token provider). The transport
-      // token callback in app.config.ts is still a stub returning null —
-      // wiring the stored token into it is owned by the auth feature pack.
+      // Backend-readiness pack: a successful login persists the access
+      // token to TokenStore so the auth interceptor attaches it to every
+      // subsequent request (Bearer). A 2FA challenge carries no token and
+      // is left for the auth feature pack's challenge surface.
       if ('access_token' in res) {
-        // res is LoginResponse — capture the token so the auth pack can
-        // persist it and feed it to the transport's token provider.
-        this.storedToken.set(res.access_token);
+        this.tokenStore.set(res.access_token);
+        this.showToast('Signed in — welcome back');
+      } else {
+        this.showToast('Two-factor verification required — check your email');
       }
-      this.showToast('Signed in — welcome back');
       setTimeout(() => this.router.navigate(['/dashboard']), 900);
     } catch {
       this.showToast('Sign-in failed — please try again');
