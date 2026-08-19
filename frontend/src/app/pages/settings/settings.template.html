@@ -83,16 +83,18 @@
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label>First name</label>
+          <label for="settings-first-name">First name</label>
           <input
+            id="settings-first-name"
             type="text"
             class="input"
             data-testid="settings-first-name"
             [value]="user.firstName">
         </div>
         <div>
-          <label>Last name</label>
+          <label for="settings-last-name">Last name</label>
           <input
+            id="settings-last-name"
             type="text"
             class="input"
             data-testid="settings-last-name"
@@ -100,16 +102,18 @@
         </div>
       </div>
       <div>
-        <label>Display name</label>
+        <label for="settings-display-name">Display name</label>
         <input
+          id="settings-display-name"
           type="text"
           class="input"
           data-testid="settings-display-name"
           [value]="user.displayName">
       </div>
       <div>
-        <label>Bio</label>
+        <label for="settings-bio">Bio</label>
         <textarea
+          id="settings-bio"
           class="input"
           rows="3"
           placeholder="Tell the community what you contribute."
@@ -134,17 +138,17 @@
         <h3 class="text-sm font-medium mb-3">Change password</h3>
         <form class="space-y-4" (ngSubmit)="savePassword()">
           <div>
-            <label>Current password</label>
-            <input type="password" class="input" placeholder="••••••••">
+            <label for="settings-current-password">Current password</label>
+            <input id="settings-current-password" type="password" class="input" placeholder="••••••••">
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label>New password</label>
-              <input type="password" class="input" placeholder="••••••••">
+              <label for="settings-new-password">New password</label>
+              <input id="settings-new-password" type="password" class="input" placeholder="••••••••">
             </div>
             <div>
-              <label>Confirm new password</label>
-              <input type="password" class="input" placeholder="••••••••">
+              <label for="settings-confirm-password">Confirm new password</label>
+              <input id="settings-confirm-password" type="password" class="input" placeholder="••••••••">
             </div>
           </div>
           <div class="flex justify-end">
@@ -235,8 +239,9 @@
         </button>
       </div>
       <div>
-        <label>Digest frequency</label>
+        <label for="settings-digest-frequency">Digest frequency</label>
         <select
+          id="settings-digest-frequency"
           class="input max-w-xs"
           data-testid="settings-digest-frequency"
           [value]="digestFrequency()">

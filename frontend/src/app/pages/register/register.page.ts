@@ -82,43 +82,47 @@ interface ToastState {
 
           <form (ngSubmit)="submit()" class="space-y-4" data-auth-form>
             <div>
-              <label>Full name</label>
+              <label for="register-name">Full name</label>
               <input
                 type="text"
                 class="input"
                 data-field="fullname"
                 placeholder="Your name"
+                id="register-name"
                 required
               />
             </div>
             <div>
-              <label>Email</label>
+              <label for="register-email">Email</label>
               <input
                 type="email"
                 class="input"
                 data-field="email"
                 placeholder="you@example.com"
+                id="register-email"
                 required
               />
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label>Password</label>
+                <label for="register-password">Password</label>
                 <input
                   type="password"
                   class="input"
                   data-field="password"
                   placeholder="••••••••"
+                  id="register-password"
                   required
                 />
               </div>
               <div>
-                <label>Confirm</label>
+                <label for="register-confirm">Confirm</label>
                 <input
                   type="password"
                   class="input"
                   data-field="confirm"
                   placeholder="••••••••"
+                  id="register-confirm"
                   required
                 />
               </div>

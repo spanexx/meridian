@@ -32,20 +32,20 @@
   <ui-modal [open]="proposeModalOpen" title="Propose a parameter change">
     <form class="space-y-4" data-testid="propose-modal" (submit)="submitProposal(); $event.preventDefault()">
       <div>
-        <label>Parameter</label>
-        <select class="input" [value]="getProposeParameter()" (change)="setProposeParameter($any($event.target).value)">
+        <label for="proposal-parameter">Parameter</label>
+        <select id="proposal-parameter" class="input" [value]="getProposeParameter()" (change)="setProposeParameter($any($event.target).value)">
           @for (opt of parameterOptions(); track opt) {
             <option [value]="opt" [selected]="opt === getProposeParameter()">{{ opt }}</option>
           }
         </select>
       </div>
       <div>
-        <label>Proposed value</label>
-        <input type="text" class="input" placeholder="e.g. 18%" [value]="getProposeValue()" (input)="setProposeValue($any($event.target).value)">
+        <label for="proposal-value">Proposed value</label>
+        <input id="proposal-value" type="text" class="input" placeholder="e.g. 18%" [value]="getProposeValue()" (input)="setProposeValue($any($event.target).value)">
       </div>
       <div>
-        <label>Rationale</label>
-        <textarea class="input" rows="3" placeholder="Why should the Community adopt this?" [value]="getProposeRationale()" (input)="setProposeRationale($any($event.target).value)"></textarea>
+        <label for="proposal-rationale">Rationale</label>
+        <textarea id="proposal-rationale" class="input" rows="3" placeholder="Why should the Community adopt this?" [value]="getProposeRationale()" (input)="setProposeRationale($any($event.target).value)"></textarea>
       </div>
       <div class="card p-4 text-xs text-blue-200" data-testid="propose-info-banner" style="background: rgba(96,165,250,0.04); border-color: rgba(96,165,250,0.2);">
         <div class="flex items-start gap-2">

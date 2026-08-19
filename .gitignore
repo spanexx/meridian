@@ -67,3 +67,5 @@ coverage/
 
 # cline-one one-shot subagent reports (orchestrator artifacts)
 .cline-one-reports/
+.opencode-reports/
+e2e/screenshots

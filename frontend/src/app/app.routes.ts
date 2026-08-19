@@ -2,22 +2,30 @@
  * Routes registered for the meridian Angular app
  *
  * @owner   spanexx
- * @reviewed 2026-08-11
+ * @reviewed 2026-08-19
  */
 import { Routes } from '@angular/router';
+import { environment } from '../environments/environment';
 
 export const routes: Routes = [
   // Root renders the shell-less marketing landing (wireframe index.html).
-  // /showcase remains reachable directly for the primitives showcase.
   {
     path: '',
     pathMatch: 'full',
     loadComponent: () => import('./pages/landing/landing.page').then((m) => m.LandingPageComponent),
   },
-  {
-    path: 'showcase',
-    loadComponent: () => import('./pages/showcase/showcase.page').then((m) => m.ShowcaseComponent),
-  },
+  // /showcase is a DEV-ONLY primitives catalog (Pack E: gate the dev page
+  // out of production). environment.production flips via angular.json
+  // fileReplacements, so the route physically disappears from prod bundles.
+  ...(environment.production
+    ? []
+    : [
+        {
+          path: 'showcase',
+          loadComponent: () =>
+            import('./pages/showcase/showcase.page').then((m) => m.ShowcaseComponent),
+        },
+      ]),
   {
     path: 'dashboard',
     loadComponent: () =>

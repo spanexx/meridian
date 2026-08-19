@@ -4,7 +4,7 @@
   @owner   spanexx
   @reviewed 2026-08-18
 -->
-<section class="page" (document:click)="closeOnOutsideClick($event.target)">
+<section class="page">
 
   <!-- breadcrumb -->
   <nav class="breadcrumb text-xs text-slate-500 mb-4" data-testid="members-breadcrumb">
@@ -13,8 +13,10 @@
     <span class="text-slate-400">Members</span>
   </nav>
 
-  <!-- header -->
-  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+  <!-- header (PR #41 lesson: multi-line subtitle + side controls need
+       sm:items-start, not sm:items-center — same fix as settings +
+       governance headers) -->
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
     <div>
       <h1 class="page-title" data-testid="community-members-title">Members</h1>
       <p class="page-subtitle" data-testid="community-members-subtitle">{{ communityName }} — {{ counts.total }} members · {{ counts.capital }} capital · {{ counts.signal }} signal · {{ counts.access }} access contributors.</p>

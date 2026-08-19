@@ -27,8 +27,9 @@
         <p class="text-xs text-slate-500 mb-5">What is the opportunity?</p>
         <div class="space-y-4">
           <div>
-            <label>Title</label>
+            <label for="ss-title">Title</label>
             <input
+              id="ss-title"
               type="text"
               class="input"
               data-field="title"
@@ -39,8 +40,9 @@
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label>Category</label>
+              <label for="ss-category">Category</label>
               <select
+                id="ss-category"
                 class="input"
                 data-field="category"
                 [value]="category()"
@@ -55,8 +57,9 @@
               </select>
             </div>
             <div>
-              <label>Risk level</label>
+              <label for="ss-risk">Risk level</label>
               <select
+                id="ss-risk"
                 class="input"
                 data-field="risk"
                 [value]="risk()"
@@ -69,8 +72,9 @@
             </div>
           </div>
           <div>
-            <label>Description</label>
+            <label for="ss-description">Description</label>
             <textarea
+              id="ss-description"
               class="input"
               rows="4"
               placeholder="Concise description of the opportunity, the source, and why it works."
@@ -88,8 +92,9 @@
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label>Source</label>
+              <label for="ss-source">Source</label>
               <input
+                id="ss-source"
                 type="text"
                 class="input"
                 data-field="source"
@@ -98,8 +103,9 @@
               />
             </div>
             <div>
-              <label>Location</label>
+              <label for="ss-location">Location</label>
               <input
+                id="ss-location"
                 type="text"
                 class="input"
                 data-field="location"
@@ -110,12 +116,13 @@
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div>
-              <label>Estimated cost</label>
+              <label for="ss-cost">Estimated cost</label>
               <div class="relative" data-field="cost">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"
                   >$</span
                 >
                 <input
+                  id="ss-cost"
                   type="text"
                   class="input"
                   style="padding-left: 1.75rem"
@@ -125,8 +132,9 @@
               </div>
             </div>
             <div>
-              <label>Quantity</label>
+              <label for="ss-qty">Quantity</label>
               <input
+                id="ss-qty"
                 type="text"
                 class="input"
                 [value]="qty()"
@@ -134,8 +142,9 @@
               />
             </div>
             <div>
-              <label>Deadline</label>
+              <label for="ss-deadline">Deadline</label>
               <input
+                id="ss-deadline"
                 type="date"
                 class="input"
                 data-field="deadline"
@@ -145,8 +154,9 @@
             </div>
           </div>
           <div>
-            <label>Access needed?</label>
+            <label for="ss-access">Access needed?</label>
             <select
+              id="ss-access"
               class="input"
               data-field="access"
               [value]="access()"
@@ -157,8 +167,9 @@
             </select>
           </div>
           <div>
-            <label>Skills needed</label>
+            <label for="ss-skills">Skills needed</label>
             <input
+              id="ss-skills"
               type="text"
               class="input"
               data-field="skills"
@@ -176,7 +187,7 @@
         <p class="text-xs text-slate-500 mb-5">Channels and projections.</p>
         <div class="space-y-4">
           <div>
-            <label>Channels</label>
+            <label for="ss-channel-0">Channels</label>
             <div class="flex flex-wrap gap-2 mt-1">
               @for (ch of channels; track ch.name; let i = $index) {
                 <label
@@ -189,6 +200,7 @@
                   <input
                     type="checkbox"
                     data-channel
+                    [id]="i === 0 ? 'ss-channel-0' : null"
                     [checked]="channelChecked()[i]"
                     (change)="selectType(ch.name)"
                   />
@@ -199,12 +211,13 @@
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div>
-              <label>Estimated value</label>
+              <label for="ss-value">Estimated value</label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"
                   >$</span
                 >
                 <input
+                  id="ss-value"
                   type="text"
                   class="input"
                   style="padding-left: 1.75rem"
@@ -214,8 +227,9 @@
               </div>
             </div>
             <div>
-              <label>Time to liquidate</label>
+              <label for="ss-ttl">Time to liquidate</label>
               <input
+                id="ss-ttl"
                 type="text"
                 class="input"
                 [value]="timeToLiquidate()"
@@ -223,8 +237,9 @@
               />
             </div>
             <div>
-              <label>Confidence</label>
+              <label for="ss-confidence">Confidence</label>
               <select
+                id="ss-confidence"
                 class="input"
                 [value]="confidence()"
                 (change)="confidence.set($any($event.target).value)"
@@ -256,8 +271,9 @@
         <p class="text-xs text-slate-500 mb-5">Link proof of source, recent sales, market data.</p>
         <div class="space-y-4">
           <div>
-            <label>Upload images</label>
+            <label for="ss-upload">Upload images</label>
             <input
+              id="ss-upload"
               type="file"
               data-upload-input
               hidden
@@ -272,7 +288,11 @@
               class="card upload-zone p-8 text-center cursor-pointer"
               style="border-style: dashed"
               data-upload-zone
+              role="button"
+              tabindex="0"
               (click)="openFilePicker(fileInput)"
+              (keydown.enter)="openFilePicker(fileInput)"
+              (keydown.space)="openFilePicker(fileInput); $event.preventDefault()"
             >
               <ui-icon
                 name="upload-cloud"
@@ -285,12 +305,13 @@
             <p class="text-xs text-emerald-400 mt-2" data-upload-name>{{ uploadName() }}</p>
           </div>
           <div>
-            <label>Add links</label>
+            <label for="ss-links">Add links</label>
             <div class="space-y-2" id="linksBox">
               @for (link of links(); track $index) {
                 <input
                   type="text"
                   class="input"
+                  [id]="$index === 0 ? 'ss-links' : null"
                   [placeholder]="link ? '' : 'https://'"
                   [value]="link"
                 />
@@ -306,8 +327,9 @@
             </div>
           </div>
           <div>
-            <label>Notes</label>
+            <label for="ss-notes">Notes</label>
             <textarea
+              id="ss-notes"
               class="input"
               rows="3"
               placeholder="Comparable recent sales, market commentary, anything else relevant."

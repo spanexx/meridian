@@ -64,7 +64,7 @@ GET /governance/safety-rails; GET /governance/recent-votes.
 
 Member: GET+PUT /members/me; GET+PUT /members/me/settings.
 
-Execution (journey 05 only — NO docs/apis file, gap §4.1):
+Execution (RESOLVED 2026-08-18 — docs/apis/04b-executions-api.md):
 POST /executions; PUT /executions/{execution_id}/status;
 POST /executions/{execution_id}/acquisition;
 POST /executions/{execution_id}/list-batch;
@@ -73,17 +73,18 @@ GET /executions/{execution_id}/inventory;
 POST /executions/{execution_id}/complete;
 POST /executions/{execution_id}/cancel;
 POST /inventory/{inventory_id}/list|sale|write-off.
-NO GET /executions (list) documented.
+GET /executions (list) is documented there as the canonical board
+endpoint (frontend ApiClient.executionsList()).
 
-Payout (journey 06 only — NO docs/apis file, gap §4.2):
+Payout (RESOLVED 2026-08-18 — docs/apis/07-payouts-api.md):
 POST /payouts (internal); GET /payouts/{payout_id};
-GET /members/me/payouts?page&limit. Pool-wide GET /payouts NOT
-documented — the wireframe ledger page needs it; the backend pack must
-document it (PayoutLedgerRow in payout.ts is the draft contract).
+GET /members/me/payouts?page&limit; pool-wide GET /payouts ledger
+documented there (PayoutLedgerRow in payout.ts is the canonical shape).
 
-Notifications (gap §4.3): NO endpoints documented anywhere. Only the
-type list and one payload example below. The backend pack must write
-docs/apis/07-notifications-api.md.
+Notifications (RESOLVED 2026-08-18 — docs/apis/08-notifications-api.md):
+GET /notifications; POST /notifications/{id}/read;
+POST /notifications/read-all; GET+PATCH /members/me/settings.
+Type list and payload example below remain the canonical enums.
 
 ## Enums (exact values)
 
