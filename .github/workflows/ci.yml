@@ -36,9 +36,9 @@ jobs:
         run: npm install --legacy-peer-deps --no-audit
 
       - name: Lint
-        run: npm run lint 2>/dev/null || npx ng lint || true
-        # Lint step is non-blocking while the project has no eslint config.
-        # Tighten to fail-on-error once eslint is wired in.
+        # STRICT since 2026-08-19: eslint 9 + angular-eslint flat config are
+        # wired; any error or warning fails the job (mirrors pre-commit [11/11]).
+        run: npm --prefix frontend run lint
 
       - name: Build
         run: npx ng build --configuration production

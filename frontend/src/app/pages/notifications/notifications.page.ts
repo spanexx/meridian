@@ -26,7 +26,7 @@
  * @reviewed 2026-08-18
  */
 
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
@@ -155,7 +155,9 @@ export class NotificationsPageComponent {
   /** Number of unread rows (drives the Unread tab count). */
   readonly unreadCount = computed(() => this.items().filter((n) => !n.read).length);
 
-  constructor(private readonly client: ApiClient) {
+  private readonly client = inject(ApiClient);
+
+  constructor() {
     this.client
       .notificationsList()
       .then((r) => this.items.set(r.notifications.map(toViewRow)))

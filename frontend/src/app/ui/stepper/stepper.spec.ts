@@ -3,7 +3,7 @@
  *
  * Retrofit test suite. Pins: .stepper wrapper, .step per entry with
  * 1-based numbering, .step-divider between steps (n-1 dividers),
- * .active / .done state classes, click emits (select) with index.
+ * .active / .done state classes, click emits (selectChange) with index.
  *
  * @owner   spanexx
  * @reviewed 2026-08-11
@@ -15,7 +15,7 @@ import { UiStepperComponent } from './stepper.component';
 @Component({
   standalone: true,
   imports: [UiStepperComponent],
-  template: `<ui-stepper [steps]="steps" (select)="onSelect($event)" />`,
+  template: `<ui-stepper [steps]="steps" (selectChange)="onSelect($event)" />`,
 })
 class HostComponent {
   steps = [
@@ -88,7 +88,7 @@ describe('UiStepperComponent', () => {
     expect(steps[4].classList.contains('done')).toBe(false);
   });
 
-  it('clicking a step emits (select) with the index', async () => {
+  it('clicking a step emits (selectChange) with the index', async () => {
     const fixture = await renderHost();
     const steps = fixture.nativeElement.querySelectorAll('.step');
     steps[3].click();

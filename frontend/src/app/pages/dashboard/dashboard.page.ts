@@ -63,19 +63,6 @@ interface OpportunityRow {
  * opportunitiesList() + the member's pool. For now they stay as the demo
  * source the page renders (backend-readiness pack: ApiClient is wired).
  */
-const DASHBOARD_EXECUTIONS: ExecutionRow[] = [
-  { ref: 'E-1042', title: 'Limited Edition Sneaker Resale', detail: 'Acquired 8 pairs · Listed on StockX, GOAT', roi: '+12.4% ROI', deployed: '$18,500', statusText: '3 of 8 sold', statusTone: 'emerald', progress: 37, iconBg: 'rgba(16,185,129,0.12)', iconColor: '#34d399', icon: 'package' },
-  { ref: 'E-1039', title: 'Vintage Watch Liquidation', detail: '5 items · all sold', roi: '+18.7% ROI', deployed: '$32,000', statusText: 'Closing', statusTone: 'violet', progress: 100, iconBg: 'rgba(201,138,66,0.12)', iconColor: '#a78bfa', icon: 'watch' },
-  { ref: 'E-1036', title: 'Wholesale Electronics', detail: 'Acquiring 12 units from Shenzhen', roi: 'In transit', deployed: '$45,000', statusText: 'ETA 4 days', statusTone: 'blue', progress: 25, iconBg: 'rgba(96,165,250,0.12)', iconColor: '#60a5fa', icon: 'cpu' },
-];
-
-const DASHBOARD_OPPORTUNITIES: OpportunityRow[] = [
-  { ref: 'O-2051', title: 'Bulk Lego Set Resale', category: 'Collectibles', roi: '+34.2%', status: 'In Vetting', votesUp: 4, votesDown: 0 },
-  { ref: 'O-2050', title: 'Restaurant Equipment Resale', category: 'Equipment', roi: '+22.8%', status: 'In Vetting', votesUp: 2, votesDown: 1 },
-  { ref: 'O-2049', title: 'Travis Scott × Nike Sneakers', category: 'Apparel', roi: '+51.4%', status: 'In Vetting', votesUp: 3, votesDown: 1 },
-  { ref: 'O-2048', title: 'Designer Furniture Resale', category: 'Furniture', roi: '+18.5%', status: 'Pending', votesUp: null, votesDown: null },
-  { ref: 'O-2047', title: 'Vintage Camera Lot', category: 'Collectibles', roi: '+41.0%', status: 'Pending', votesUp: null, votesDown: null },
-];
 
 @Component({
   selector: 'app-dashboard-page',

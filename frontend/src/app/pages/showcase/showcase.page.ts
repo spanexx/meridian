@@ -143,7 +143,7 @@ interface Row {
 
       <ui-card padding="md" extraClass="mt-6">
         <div class="text-sm font-semibold mb-3">Tabs</div>
-        <ui-tabs [tabs]="tabs" [active]="activeTab()" (select)="activeTab.set($event)" />
+        <ui-tabs [tabs]="tabs" [active]="activeTab()" (selectChange)="activeTab.set($event)" />
         <div class="mt-3 text-xs text-slate-500">Active: {{ activeTab() }}</div>
       </ui-card>
 
@@ -185,7 +185,7 @@ interface Row {
         @if (toastOpen()) {
           <ui-toast title="Saved" message="Your changes have been recorded." variant="success" (dismiss)="toastOpen.set(false)" />
         }
-        <ui-modal [open]="modalOpen()" title="Confirm action" (close)="modalOpen.set(false)">
+        <ui-modal [open]="modalOpen()" title="Confirm action" (closed)="modalOpen.set(false)">
           <p class="text-sm text-slate-400">Are you sure you want to proceed?</p>
           <div class="mt-4 flex justify-end gap-2">
             <ui-button variant="ghost" (click)="modalOpen.set(false)">Cancel</ui-button>

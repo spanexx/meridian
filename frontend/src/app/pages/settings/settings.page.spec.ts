@@ -91,7 +91,6 @@ describe('SettingsPageComponent', () => {
     const f = await renderPage();
     const panel = (f.nativeElement as HTMLElement).querySelector('[data-panel-name=profile]') as HTMLElement;
     expect(panel).toBeTruthy();
-    const inputs = panel.querySelectorAll('input, textarea');
     const first  = panel.querySelector('[data-testid=settings-first-name]') as HTMLInputElement;
     const last   = panel.querySelector('[data-testid=settings-last-name]') as HTMLInputElement;
     const name   = panel.querySelector('[data-testid=settings-display-name]') as HTMLInputElement;

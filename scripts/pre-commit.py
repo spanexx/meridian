@@ -2,7 +2,7 @@
 """
 Pre-commit guardrails for the meridian repo.
 
-Runs six blocks of checks against staged files:
+Runs eleven blocks of checks against staged files:
   1. YAML validity (workflows + manifests)
   2. Secrets scan (.env, .pem, .key, hardcoded tokens)
   3. Comment-policy header presence + DISCOVERY/MISTAKE/DRIFT format
@@ -11,11 +11,17 @@ Runs six blocks of checks against staged files:
   6. TDD enforcement: every new exported function/method has a
      matching test in the same directory or sibling __tests__/
      folder. Bypass via `// TEST-COUPLED:` inline marker.
+  7. Icon cross-check (<ui-icon name> vs ICON_PATHS)
+  8. New-page pack (spec + barrel + route)
+  9. Router links ([routerLink] not [attr.href])
+ 10. Link targets (links resolve to registered routes)
+ 11. ESLint (strict: ZERO problems — errors AND warnings block the
+     commit; the repo runs eslint 9 + angular-eslint flat config).
 
 Exit code 0 = pass, 1 = block the commit.
 
 @owner   spanexx
-@reviewed 2026-08-11
+@reviewed 2026-08-19
 """
 from __future__ import annotations
 
@@ -124,7 +130,7 @@ def is_header_exempt(path: Path) -> bool:
 
 
 def check_yaml(files: list[Path]) -> int:
-    header("[1/10] YAML validity")
+    header("[1/11] YAML validity")
     errors = 0
     yaml_files = [f for f in files if f.suffix in {".yml", ".yaml"} and f.exists()]
     if not yaml_files:
@@ -147,7 +153,7 @@ def check_yaml(files: list[Path]) -> int:
 
 
 def check_secrets(files: list[Path]) -> int:
-    header("[2/10] Secrets scan")
+    header("[2/11] Secrets scan")
     errors = 0
     candidates = [f for f in files if f.exists() and f.suffix not in {".png", ".jpg", ".gif", ".ico"}]
     for f in candidates:
@@ -165,7 +171,7 @@ def check_secrets(files: list[Path]) -> int:
 
 
 def check_comments(files: list[Path]) -> int:
-    header("[3/10] Comment policy")
+    header("[3/11] Comment policy")
     errors = 0
 
     source_files = [
@@ -207,32 +213,44 @@ def check_comments(files: list[Path]) -> int:
 
 
 def check_types(files: list[Path]) -> int:
-    header("[4/10] Type check (tsc)")
+    """
+    Type check — production build (ng build --configuration production).
+
+    2026-08-19 lesson: plain `tsc --noEmit` is template-BLIND — Angular
+    template type checking (strictTemplates, TS2532 in inline templates)
+    only runs inside the Angular build pipeline. The pool page shipped
+    with a `status()?.health.deployment_ratio` template error that plain
+    tsc passed and `ng build` caught. The production build is the real
+    gate (CI builds it anyway); it covers TS + templates + fileReplacements
+    in one shot.
+    """
+    header("[4/11] Type check (ng build --configuration production)")
     ts_files = [f for f in files if f.exists() and f.suffix in {".ts", ".tsx"}]
     if not ts_files:
         ok("no TS files staged")
         return 0
     frontend_dir = REPO_ROOT / "frontend"
     if not (frontend_dir / "tsconfig.json").exists():
-        warn("frontend/tsconfig.json missing; skipping tsc")
+        warn("frontend/tsconfig.json missing; skipping build")
         return 0
     result = subprocess.run(
-        ["npx", "--no-install", "tsc", "--noEmit", "-p", "tsconfig.app.json"],
+        ["npx", "--no-install", "ng", "build", "--configuration", "production"],
         cwd=frontend_dir,
         capture_output=True,
         text=True,
+        timeout=600,
     )
     if result.returncode != 0:
-        fail("tsc --noEmit reported errors:")
+        fail("ng build --configuration production reported errors:")
         print(result.stdout, file=sys.stderr)
         print(result.stderr, file=sys.stderr)
         return 1
-    ok("tsc clean")
+    ok("production build clean")
     return 0
 
 
 def check_unit_tests(files: list[Path]) -> int:
-    header("[5/10] Unit tests (vitest)")
+    header("[5/11] Unit tests (vitest)")
     ts_files = [f for f in files if f.exists() and f.suffix in {".ts", ".tsx"}]
     if not ts_files:
         ok("no TS files staged")
@@ -268,7 +286,7 @@ def check_icons(files: list[Path]) -> int:
     the dictionary renders an invisible (0-child) SVG — the bug class
     that shipped twice in PR #19/#20 (sun/cog paths never committed).
     """
-    header("[6/10] Icon cross-check")
+    header("[6/11] Icon cross-check")
     errors = 0
     icon_ts = REPO_ROOT / "frontend/src/app/ui/icon/icon.component.ts"
     if not icon_ts.exists():
@@ -313,7 +331,7 @@ def check_router_links(files: list[Path]) -> int:
     external link or asset). External links (http/https/mailto)
     are exempt.
     """
-    header("[8/10] Router links")
+    header("[8/11] Router links")
     errors = 0
     template_files = [
         f for f in files
@@ -368,7 +386,7 @@ def check_link_targets(files: list[Path]) -> int:
       - Pure fragment links (#anchor)
       - Routes registered in app.routes.ts (everything else must match)
     """
-    header("[9/10] Link targets")
+    header("[9/11] Link targets")
     errors = 0
     template_files = [
         f for f in files
@@ -499,7 +517,7 @@ def check_new_page(files: list[Path]) -> int:
     packages can't import the component), and the route is
     unreachable.
     """
-    header("[7/10] New-page pack")
+    header("[7/11] New-page pack")
     errors = 0
     page_files = [
         f for f in files
@@ -551,7 +569,7 @@ def check_tdd(files: list[Path]) -> int:
       - The file is in a test directory itself (src/__tests__, *.spec.ts)
       - The file is auto-generated (has `// AUTO-GENERATED`)
     """
-    header("[10/10] TDD enforcement")
+    header("[10/11] TDD enforcement")
     errors = 0
     source_files = [
         f for f in files
@@ -664,6 +682,45 @@ def check_tdd(files: list[Path]) -> int:
     return errors
 
 
+def check_lint(files: list[Path]) -> int:
+    """
+    ESLint gate (STRICT): any lint output — errors OR warnings — blocks
+    the commit.
+
+    2026-08-19 lesson (shipped as an eslint flat config): the repo was
+    lint-clean by tsc/vitest but had no linter at all, so ~112 ESLint
+    problems (a11y, unused vars, typing, output naming) accumulated
+    silently. This check runs the whole frontend (not just staged files)
+    because cross-file rules (component selectors, template a11y) only
+    fire on the full project. Use `npx eslint . --fix` for the
+    auto-fixable set before committing.
+    """
+    header("[11/11] ESLint (strict)")
+    frontend_dir = REPO_ROOT / "frontend"
+    eslint_config = frontend_dir / "eslint.config.js"
+    if not eslint_config.exists():
+        warn("frontend/eslint.config.js missing; skipping eslint")
+        return 0
+    staged_in_frontend = [f for f in files if "frontend" in str(f)]
+    if not staged_in_frontend:
+        ok("no frontend files staged")
+        return 0
+    result = subprocess.run(
+        ["npx", "--no-install", "eslint", "."],
+        cwd=frontend_dir,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        fail("eslint reported problems (errors or warnings block the commit):")
+        print(result.stdout, file=sys.stderr)
+        if result.stderr:
+            print(result.stderr, file=sys.stderr)
+        return 1
+    ok("eslint clean (0 problems)")
+    return 0
+
+
 def main() -> int:
     files = staged_files()
     if not files:
@@ -683,6 +740,7 @@ def main() -> int:
     total_errors += check_router_links(files)
     total_errors += check_link_targets(files)
     total_errors += check_tdd(files)
+    total_errors += check_lint(files)
 
     print()
     if total_errors > 0:

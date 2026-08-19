@@ -55,7 +55,6 @@ async function renderStandalone(): Promise<ComponentFixture<PayoutsPageComponent
 }
 
 const TYPES = ['All types', 'Capital', 'Signal', 'Access'];
-const STATUSES = ['All', 'Pending', 'Paid'];
 const COLUMNS = ['Execution', 'Member', 'Type', 'Amount', 'Share', 'Status', 'Date'];
 
 describe('PayoutsPage (wireframe-aligned, API-driven)', () => {

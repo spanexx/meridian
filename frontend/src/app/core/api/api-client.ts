@@ -63,11 +63,13 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class ApiClient {
-  // DISCOVERY 2026-08-18: ApiTransport is a type-only interface, so it cannot
-  // be used directly as an Angular DI token (NG2003). The API_TRANSPORT
-  // InjectionToken carries the concrete transport chosen in app.config.ts
-  // (MockTransport in dev, HttpTransport in prod). Unit specs still call
-  // `new ApiClient(transport)` directly, which bypasses DI and stays valid.
+  // DISCOVERY 2026-08-19: constructor injection is INTENTIONAL here, not
+  // a prefer-inject violation. Specs construct `new ApiClient(transport)`
+  // directly with bespoke transports (see api-client.spec.ts), which is
+  // impossible with `inject()` in a field initializer (NG0203 outside an
+  // injection context). The dual-construction design — DI for the app,
+  // direct for tests — is the documented seam of the transport layer.
+  // eslint-disable-next-line @angular-eslint/prefer-inject
   constructor(@Inject(API_TRANSPORT) private readonly transport: ApiTransport) {}
 
   // ===== Auth =====
@@ -181,7 +183,7 @@ export class ApiClient {
 
   // ===== Executions =====
 
-  // Mock-only endpoint — no docs/apis file exists (gap §4.1)
+  // Contract: docs/apis/04b-executions-api.md.
   async executionsList(): Promise<{ executions: ExecutionDetail[] }> {
     const response = await this.transport.request<{ executions: ExecutionDetail[] }>('GET', '/executions');
     return response.data;
@@ -194,7 +196,7 @@ export class ApiClient {
 
   // ===== Payouts =====
 
-  // Mock-only endpoint — pool-wide GET /payouts not documented (gap §4.2)
+  // Pool-wide ledger — contract: docs/apis/07-payouts-api.md.
   async payoutsList(): Promise<{ payouts: PayoutLedgerRow[] }> {
     const response = await this.transport.request<{ payouts: PayoutLedgerRow[] }>('GET', '/payouts');
     return response.data;

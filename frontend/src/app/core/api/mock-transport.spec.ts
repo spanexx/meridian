@@ -10,8 +10,7 @@
  * @owner   agent-maintained
  * @reviewed 2026-08-18
  */
-import { ApiError, ApiResponse } from './api-response';
-import { ApiTransport, RequestOptions } from './api-transport';
+import { ApiError } from './api-response';
 import { MockGateway } from './mock-gateway';
 import { MockTransport } from './mock-transport';
 

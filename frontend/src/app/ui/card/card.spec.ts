@@ -23,7 +23,7 @@ import { UiCardComponent } from './card.component';
 })
 class HostComponent {
   hover = false;
-  padding: any = 'md';
+  padding: 'none' | 'sm' | 'md' | 'lg' = 'md';
   extraClass = '';
 }
 

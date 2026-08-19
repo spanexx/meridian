@@ -22,7 +22,7 @@ import { UiToastComponent } from './toast.component';
 class HostComponent {
   title = 'Saved';
   message = 'Your changes have been recorded.';
-  variant: any = 'success';
+  variant: 'success' | 'error' | 'info' | 'neutral' = 'success';
   dismissible = true;
   dismissCount = 0;
   onDismiss() { this.dismissCount++; }

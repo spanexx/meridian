@@ -9,7 +9,7 @@
  * @owner   agent-maintained
  * @reviewed 2026-08-18
  */
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 const STORAGE_KEY = 'meridian_access_token';
 

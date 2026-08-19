@@ -15,12 +15,12 @@ describe('correlationInterceptor', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    next = vi.fn().mockImplementation((req) => {
+    next = vi.fn().mockImplementation((_req) => {
       return {
         pipe() { return this; },
         subscribe(observer: { next: (v: unknown) => void }) {
           observer.next({ status: 200, body: { success: true, data: null } });
-          return { unsubscribe: () => {} };
+          return { unsubscribe: () => { /* noop */ } };
         },
       };
     });

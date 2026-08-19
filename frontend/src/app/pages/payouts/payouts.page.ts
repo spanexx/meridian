@@ -29,7 +29,7 @@
  * @owner   agent-maintained
  * @reviewed 2026-08-18
  */
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiClient } from '../../core/api/api-client';
 import type { PayoutLedgerRow } from '../../core/models';
@@ -110,7 +110,7 @@ const viewRow = (row: PayoutLedgerRow): ViewRow => ({
               <ui-icon name="filter" [size]="16"></ui-icon>Type
             </button>
             @if (typeOpen()) {
-              <div class="fixed inset-0 z-40" data-click-away (click)="closeTypeMenu()"></div>
+              <div class="fixed inset-0 z-40" data-click-away role="presentation" (click)="closeTypeMenu()"></div>
             }
             <div class="menu" id="payMenu" [hidden]="!typeOpen()">
               <div class="menu-head">Contribution type</div>
@@ -348,7 +348,7 @@ export class PayoutsPageComponent {
   readonly page = signal(1);
 
   /** The 4 type-dropdown items (first is the default active). */
-  readonly types: ReadonlyArray<{ key: 'all' | ViewType; label: string; icon: string }> = [
+  readonly types: readonly { key: 'all' | ViewType; label: string; icon: string }[] = [
     { key: 'all', label: 'All types', icon: 'layout-grid' },
     { key: 'capital', label: 'Capital', icon: 'banknote' },
     { key: 'signal', label: 'Signal', icon: 'lightbulb' },
@@ -399,7 +399,9 @@ export class PayoutsPageComponent {
     Math.max(1, Math.ceil(this.filtered().length / this.pageSize)),
   );
 
-  constructor(private readonly client: ApiClient) {
+  private readonly client = inject(ApiClient);
+
+  constructor() {
     this.client
       .payoutsList()
       .then((r) => this.source.set(r.payouts))

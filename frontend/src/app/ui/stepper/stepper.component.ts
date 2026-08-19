@@ -1,3 +1,13 @@
+/**
+ * UiStepperComponent — step indicator primitive (theme.css .stepper).
+ *
+ * Steps are keyboard-activatable (role=button + tabindex) and emit
+ * selectChange (renamed from `select` — @angular-eslint/no-output-native:
+ * `select` shadows the native input event).
+ *
+ * @owner   agent-maintained
+ * @reviewed 2026-08-19
+ */
 import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter } from '@angular/core';
 
 export interface UiStep {
@@ -16,7 +26,7 @@ export interface UiStep {
           class="step"
           [class.active]="s.active"
           [class.done]="s.done"
-          (click)="select.emit(i)"
+          (click)="selectChange.emit(i)"
           role="button"
           tabindex="0"
         >
@@ -33,5 +43,5 @@ export interface UiStep {
 })
 export class UiStepperComponent {
   @Input() steps: UiStep[] = [];
-  @Output() select = new EventEmitter<number>();
+  @Output() selectChange = new EventEmitter<number>();
 }

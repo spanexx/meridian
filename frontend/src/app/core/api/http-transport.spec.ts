@@ -5,16 +5,15 @@
  * @reviewed 2026-08-18
  */
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTransport } from './http-transport';
-import { ApiError, ApiResponse } from './api-response';
+import { ApiResponse } from './api-response';
 import { RequestOptions } from './api-transport';
 import { TokenStore } from '../auth/token-store';
 import { authInterceptor } from './auth.interceptor';
 import { correlationInterceptor } from './correlation.interceptor';
 import { errorInterceptor } from './error.interceptor';
-import { HTTP_AUTH_TOKEN, HTTP_CORRELATION_ID, HTTP_SKIP_ERROR_HANDLING } from './http-context';
 import { HTTP_BASE_URL } from './http-transport';
 
 describe('HttpTransport', () => {

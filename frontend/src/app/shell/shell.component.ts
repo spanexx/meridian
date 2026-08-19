@@ -19,7 +19,7 @@
  * @owner   spanexx
  * @reviewed 2026-08-11
  */
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -89,6 +89,7 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
         class="sidebar-backdrop"
         [hidden]="!sidebarOpen()"
         data-sidebar-backdrop
+        role="presentation"
         (click)="closeSidebar()"
       ></div>
 

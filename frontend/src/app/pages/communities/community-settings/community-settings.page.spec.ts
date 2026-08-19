@@ -294,7 +294,7 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
 
   it('safetyRails() returns the 5 fixed items (read-only)', async () => {
     const f = await renderPage('alpha');
-    const c = f.componentInstance as unknown as { safetyRails: () => ReadonlyArray<string> };
+    const c = f.componentInstance as unknown as { safetyRails: () => readonly string[] };
     const rails = c.safetyRails();
     expect(rails.length).toBe(5);
     expect(rails).toContain('Integrity verification');
@@ -517,8 +517,6 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
     f.detectChanges();
     expect(c.archiveModalOpen).toBe(true);
     const root = f.nativeElement as HTMLElement;
-    // Dump body to figure out where the data-testid lands
-    const allTestIds = Array.from(root.querySelectorAll('[data-testid]')).map(e => e.getAttribute('data-testid'));
     expect(root.querySelector('[data-testid="archive-confirm-modal"]')).toBeTruthy();
   });
 
@@ -568,14 +566,14 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
 
   it('howChangesSteps() returns the 4 step labels', async () => {
     const f = await renderPage('alpha');
-    const c = f.componentInstance as unknown as { howChangesSteps: () => ReadonlyArray<string> };
+    const c = f.componentInstance as unknown as { howChangesSteps: () => readonly string[] };
     expect(c.howChangesSteps()).toEqual(['Propose', 'Debate', 'Vote', 'Enact']);
   });
 
   it('governanceParameters() returns 6 entries with label + value', async () => {
     const f = await renderPage('alpha');
     const c = f.componentInstance as unknown as {
-      governanceParameters: () => ReadonlyArray<{ label: string; value: string }>;
+      governanceParameters: () => readonly { label: string; value: string }[];
     };
     const params = c.governanceParameters();
     expect(params.length).toBe(6);

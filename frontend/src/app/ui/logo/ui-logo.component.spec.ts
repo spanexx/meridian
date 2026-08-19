@@ -51,7 +51,6 @@ describe('UiLogoComponent', () => {
   it('renders the official meridian arc (quadratic bezier, bows left)', () => {
     const root = render();
     const svg = root.querySelector('svg') as SVGElement;
-    const paths = svg.querySelectorAll('g clipPath path, g > path');
     const arc = svg.querySelector('g path');
     expect(arc).toBeTruthy();
     expect(arc?.getAttribute('d')).toBe('M 9.61 23.24 Q 6.13 11.15 12.60 0.53');

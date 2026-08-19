@@ -23,28 +23,6 @@
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
-const ALL_PRIMITIVE_SELECTORS = [
-  'accordion-item',
-  'avatar',
-  'badge',
-  'button',
-  'card',
-  'empty-state',
-  'kpi-card',
-  'modal',
-  'progress',
-  'skeleton',
-  'sparkline',
-  'stat-bar',
-  'stepper',
-  'switch',
-  'table',
-  'tabs',
-  'tier-badge',
-  'toast',
-  'vote-button',
-] as const;
-
 async function renderShowcase(): Promise<ComponentFixture> {
   await TestBed.configureTestingModule({
     providers: [provideRouter([])],

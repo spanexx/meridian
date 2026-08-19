@@ -18,21 +18,27 @@
  * (§Response Format, §Error Format); design rationale tracked in
  * sessions/decisions.md.
  */
-import { Injectable, inject, Inject, InjectionToken } from '@angular/core';
+import { Injectable, Inject, InjectionToken } from '@angular/core';
 import { HttpClient, HttpContext } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ApiResponse, ApiError, isApiEnvelope } from './api-response';
 import { ApiTransport, RequestOptions } from './api-transport';
-import { HTTP_AUTH_TOKEN, HTTP_CORRELATION_ID, HTTP_IDEMPOTENCY_KEY, HTTP_SKIP_ERROR_HANDLING } from './http-context';
+import { HTTP_AUTH_TOKEN, HTTP_IDEMPOTENCY_KEY } from './http-context';
 
 /** InjectionToken carrying the API base URL for the HttpClient-backed transport. */
 export const HTTP_BASE_URL = new InjectionToken<string>('HTTP_BASE_URL');
 
 @Injectable()
 export class HttpTransport implements ApiTransport {
+  // DISCOVERY 2026-08-19: constructor injection is INTENTIONAL here, not
+  // a prefer-inject violation. buildTransport() in app.config.ts constructs
+  // `new HttpTransport(http, baseUrl)` (a DI factory), and the http-transport
+  // spec resolves it via TestBed — both modes must keep working. The two
+  // deps (HttpClient, HTTP_BASE_URL) are explicit on purpose: this class is
+  // the transport boundary and must stay directly instantiable.
   constructor(
-    private readonly http: HttpClient,
-    @Inject(HTTP_BASE_URL) private readonly baseUrl: string,
+    private readonly http: HttpClient, // eslint-disable-line @angular-eslint/prefer-inject
+    @Inject(HTTP_BASE_URL) private readonly baseUrl: string, // eslint-disable-line @angular-eslint/prefer-inject
   ) {}
 
   async request<T>(

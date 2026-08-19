@@ -7,7 +7,6 @@
 import { HttpRequest, HttpHandlerFn, HttpErrorResponse, HttpContext } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { runInInjectionContext } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { errorInterceptor } from './error.interceptor';

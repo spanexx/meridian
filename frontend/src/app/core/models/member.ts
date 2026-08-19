@@ -113,7 +113,7 @@ export interface TwoFactorChallenge {
 }
 
 /** POST /auth/login/2fa payload. */
-export interface TwoFactorLoginResponse extends AuthTokens {}
+export type TwoFactorLoginResponse = AuthTokens;
 
 /** POST /auth/register payload. */
 export interface RegisterResponse {

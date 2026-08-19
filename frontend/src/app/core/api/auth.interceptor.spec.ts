@@ -7,7 +7,6 @@
 import { HttpRequest, HttpHandlerFn, HttpContext } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
-import { runInInjectionContext } from '@angular/core';
 import { authInterceptor } from './auth.interceptor';
 import { TokenStore } from '../auth/token-store';
 import { HTTP_AUTH_TOKEN } from './http-context';
@@ -21,12 +20,12 @@ describe('authInterceptor', () => {
       providers: [TokenStore],
     });
     tokenStore = TestBed.inject(TokenStore);
-    next = vi.fn().mockImplementation((req) => {
+    next = vi.fn().mockImplementation((_req) => {
       return {
         pipe() { return this; },
         subscribe(observer: { next: (v: unknown) => void }) {
           observer.next({ status: 200, body: { success: true, data: null } });
-          return { unsubscribe: () => {} };
+          return { unsubscribe: () => { /* noop */ } };
         },
       };
     });

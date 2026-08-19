@@ -11,7 +11,7 @@ import { TestBed } from '@angular/core/testing';
 import { UiTierBadgeComponent } from './tier-badge.component';
 
 describe('UiTierBadgeComponent', () => {
-  function create(tier: any) {
+  function create(tier: 'observer' | 'contributor' | 'vetted' | 'governor' | 'founder') {
     const fixture = TestBed.createComponent(UiTierBadgeComponent);
     fixture.componentRef.setInput('tier', tier);
     fixture.detectChanges();

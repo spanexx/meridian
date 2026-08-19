@@ -34,7 +34,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  computed,
+  HostListener,
   inject,
   Input,
   signal,
@@ -42,7 +42,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
 import { ApiClient } from '../../../core/api/api-client';
-import { type CommunityMemberRow, type CommunityContributionType } from '../../../core/models';
+import { type CommunityMemberRow } from '../../../core/models';
 
 export type Tier = 't1' | 't2' | 't3' | 't4';
 export type Role = 'capital' | 'signal' | 'access';
@@ -125,7 +125,7 @@ export class CommunityMembersPageComponent {
   readonly loading = signal(true);
 
   /** All member rows — sourced from the injected ApiClient. */
-  private readonly _members = signal<ReadonlyArray<Member>>([]);
+  private readonly _members = signal<readonly Member[]>([]);
 
   /** Display name for the community (derived from id; v1 mapping). */
   get communityName(): string {
@@ -191,7 +191,7 @@ export class CommunityMembersPageComponent {
     access: 15,
   };
 
-  readonly tiers: ReadonlyArray<{ value: 'all' | Tier; label: string }> = [
+  readonly tiers: readonly { value: 'all' | Tier; label: string }[] = [
     { value: 'all', label: 'All tiers' },
     { value: 't4', label: 'Top contributors' },
     { value: 't3', label: 'Vetters' },
@@ -200,7 +200,7 @@ export class CommunityMembersPageComponent {
   ];
 
   /** Role options for the mobile dropdown (matches the inline tabs). */
-  readonly roles: ReadonlyArray<{ value: 'all' | Role; label: string; count: number }> = [
+  readonly roles: readonly { value: 'all' | Role; label: string; count: number }[] = [
     { value: 'all', label: 'All', count: this.counts.total },
     { value: 'capital', label: 'Capital', count: this.counts.capital },
     { value: 'signal', label: 'Signal', count: this.counts.signal },
@@ -217,7 +217,7 @@ export class CommunityMembersPageComponent {
   }
 
   // ─── Core data accessors ──────────────────────────────────────────────
-  members(): ReadonlyArray<Member> {
+  members(): readonly Member[] {
     return this._members();
   }
 
@@ -225,7 +225,7 @@ export class CommunityMembersPageComponent {
    * Members after tier + role + search filters (used by the template).
    * Pagination is applied downstream — this list is everything matching.
    */
-  filteredMembers(): ReadonlyArray<Member> {
+  filteredMembers(): readonly Member[] {
     const q = this._search.trim().toLowerCase();
     return this._members().filter((m) => {
       if (this._activeTier !== 'all' && m.tier !== this._activeTier) return false;
@@ -237,7 +237,7 @@ export class CommunityMembersPageComponent {
   }
 
   /** The 8-row page slice of `filteredMembers()`. */
-  pagedMembers(): ReadonlyArray<Member> {
+  pagedMembers(): readonly Member[] {
     const start = (this._page - 1) * PAGE_SIZE;
     return this.filteredMembers().slice(start, start + PAGE_SIZE);
   }
@@ -319,6 +319,11 @@ export class CommunityMembersPageComponent {
     this.cdr.markForCheck();
   }
 
+  // document click-away moved from the template into a host listener
+  // (a11y: a (document:click) on <section> made the page look like an
+  // interactive element to lint's click/keyboard rule; the section itself
+  // is never interactive — dropdown menus are the keyboard surface).
+  @HostListener('document:click', ['$event.target'])
   closeOnOutsideClick(target: EventTarget | HTMLElement | null): void {
     if (!target) return;
     const el = target as HTMLElement;

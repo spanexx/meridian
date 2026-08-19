@@ -41,7 +41,9 @@
               role="switch"
               [attr.aria-checked]="switches()[i]"
               (click)="togglePref(i)"
-            ></button>
+            >
+              <span class="sr-only">Toggle {{ p.label }}</span>
+            </button>
           </div>
         }
         <div class="flex justify-end gap-3 pt-2">
