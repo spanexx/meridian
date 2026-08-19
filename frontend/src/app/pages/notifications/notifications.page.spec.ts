@@ -18,7 +18,6 @@ import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import type { NotificationsPageComponent } from './notifications.page';
-import { NOTIFICATIONS } from './notifications.page';
 import { ApiClient } from '../../core/api/api-client';
 import { SEED_NOTIFICATIONS } from '../../core/api/mock-seed';
 
@@ -238,17 +237,20 @@ describe('NotificationsPage (wireframe-aligned, API-driven)', () => {
     expect(c.toast()).toBeNull();
   });
 
-  it('NOTIFICATIONS totals 8 with the wireframe link targets', async () => {
-    expect(NOTIFICATIONS.length).toBe(8);
-    const byTitle = (t: string) => NOTIFICATIONS.find((n) => n.title.startsWith(t));
-    expect(byTitle('O-2051')?.link).toEqual(['/opportunities', 'O-2051']);
-    expect(byTitle('E-1042')?.link).toEqual(['/executions', 'E-1042']);
-    expect(byTitle('Reserve ratio')?.link).toEqual(['/pool']);
-    expect(byTitle('Payout preview')?.link).toEqual(['/payouts']);
-    expect(byTitle('New proposal')?.link).toEqual(['/community', 'alpha', 'governance']);
-    expect(byTitle('Reputation milestone')?.link).toEqual(['/profile']);
-    expect(byTitle('Pool snapshot')?.link).toEqual(['/pool']);
-    expect(byTitle('Daily reconciliation')?.link).toEqual(['/executions', 'E-1042']);
+  it('SEED_NOTIFICATIONS totals 8 with the wireframe link targets', async () => {
+    // The page renders these rows via ApiClient.notificationsList(); this
+    // pins the canonical seed that mock-transport serves (one source).
+    const rows = SEED_NOTIFICATIONS;
+    expect(rows.length).toBe(8);
+    const byTitle = (t: string) => rows.find((n) => n.title.startsWith(t));
+    expect(byTitle('O-2051')?.route).toBe('/opportunities/O-2051');
+    expect(byTitle('E-1042')?.route).toBe('/executions/E-1042');
+    expect(byTitle('Reserve ratio')?.route).toBe('/pool');
+    expect(byTitle('Payout preview')?.route).toBe('/payouts');
+    expect(byTitle('New proposal')?.route).toBe('/community/alpha/governance');
+    expect(byTitle('Reputation milestone')?.route).toBe('/profile');
+    expect(byTitle('Pool snapshot')?.route).toBe('/pool');
+    expect(byTitle('Daily reconciliation')?.route).toBe('/executions/E-1042');
   });
 
   it('calls ApiClient.notificationsList() once and shows skeleton while loading', async () => {

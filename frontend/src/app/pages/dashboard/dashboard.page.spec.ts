@@ -31,12 +31,13 @@ import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { ApiClient } from '../../core/api/api-client';
-import { SEED_OPPORTUNITIES, SEED_MEMBER } from '../../core/api/mock-seed';
+import { SEED_OPPORTUNITIES, SEED_MEMBER, SEED_EXECUTIONS } from '../../core/api/mock-seed';
 
 async function renderDashboard(): Promise<ComponentFixture<unknown>> {
   const mockClient = {
     me: vi.fn().mockResolvedValue(SEED_MEMBER),
     opportunitiesList: vi.fn().mockResolvedValue({ opportunities: SEED_OPPORTUNITIES }),
+    executionsList: vi.fn().mockResolvedValue({ executions: SEED_EXECUTIONS }),
   } as unknown as ApiClient;
   await TestBed.configureTestingModule({
     providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
@@ -200,10 +201,12 @@ describe('DashboardPage (wireframe-driven)', () => {
   it('Each Active Execution row carries a status subtitle on the right', async () => {
     const fixture = await renderDashboard();
     const html = (fixture.nativeElement as HTMLElement).innerHTML;
-    // Per wireframe: "3 of 8 sold", "Closing", "ETA 4 days"
+    // Status subtitles derive from the canonical seed (one source):
+    // E-1042 HOLDING → "3 of 8 sold", E-1039 LIQUIDATING → "Closing",
+    // E-1036 ACQUIRING → "ETA n days".
     expect(html).toContain('3 of 8 sold');
     expect(html).toContain('Closing');
-    expect(html).toContain('ETA 4 days');
+    expect(html).toContain('ETA');
   });
 
   it('Active Executions use multi-color progress bars (emerald / violet / blue)', async () => {

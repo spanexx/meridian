@@ -32,7 +32,6 @@ import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.comp
 import { UiIconComponent } from '../../ui/icon/icon.component';
 import { ApiClient } from '../../core/api/api-client';
 import type { NotificationItem as CanonicalNotification } from '../../core/models';
-import { SEED_NOTIFICATIONS } from '../../core/api/mock-seed';
 
 /** One notification row in the wireframe view shape. */
 export interface NotificationItem {
@@ -103,8 +102,9 @@ const toViewRow = (n: CanonicalNotification): NotificationItem => {
   };
 };
 
-/** The wireframe rows, derived from the canonical seed (single source). */
-export const NOTIFICATIONS: NotificationItem[] = SEED_NOTIFICATIONS.map(toViewRow);
+/** The wireframe rows are produced by toViewRow() from the injected
+ * ApiClient.notificationsList() payload (mock-seed SEED_NOTIFICATIONS in
+ * dev, HttpTransport in prod) — single source, no page-level fixture. */
 
 @Component({
   selector: 'app-notifications-page',

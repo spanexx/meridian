@@ -30,6 +30,7 @@ import { RouterLink } from '@angular/router';
 import { UiBadgeComponent } from '../../ui/badge/badge.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
 import { ApiClient } from '../../core/api/api-client';
+import type { ExecutionDetail, OpportunityListRow } from '../../core/models';
 
 interface ExecutionRow {
   ref: string;
@@ -178,7 +179,7 @@ const DASHBOARD_OPPORTUNITIES: OpportunityRow[] = [
               </a>
             </div>
             <div class="space-y-3">
-              @for (ex of executions; track ex.ref) {
+              @for (ex of executions(); track ex.ref) {
                 <a class="block card card-hover p-4" [routerLink]="['/executions', ex.ref]">
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-3">
@@ -235,7 +236,7 @@ const DASHBOARD_OPPORTUNITIES: OpportunityRow[] = [
                   </tr>
                 </thead>
                 <tbody>
-                  @for (opp of opportunities; track opp.ref) {
+                  @for (opp of opportunities(); track opp.ref) {
                     <tr class="table-row">
                       <td class="hidden md:table-cell">
                         <a [routerLink]="['/opportunities', opp.ref]">
@@ -409,17 +410,74 @@ export class DashboardPageComponent {
     { id: '90d' as const, label: '90d' },
   ];
 
-  /** Active executions — wireframe demo data (pending dashboard summary endpoint). */
-  readonly executions: ExecutionRow[] = DASHBOARD_EXECUTIONS;
+  /** Active executions — sourced from the injected ApiClient.executionsList(). */
+  readonly executions = signal<ExecutionRow[]>([]);
 
-  /** Latest opportunities — wireframe demo data (pending dashboard summary endpoint). */
-  readonly opportunities: OpportunityRow[] = DASHBOARD_OPPORTUNITIES;
+  /** Latest opportunities — sourced from the injected ApiClient.opportunitiesList(). */
+  readonly opportunities = signal<OpportunityRow[]>([]);
 
+  /** DISCOVERY 2026-08-18: lists now flow from ApiClient (one source). The KPI
+   * tiles / Pool Health / Your Portfolio blocks are display-only aggregates —
+   * no canonical dashboard-summary endpoint exists in docs/apis yet, so they
+   * remain static demo values (flagged, not faked). Pointer: backend team adds
+   * a dashboard summary contract in docs/apis before these become live. */
   constructor() {
-    // Backend-readiness pack: prove the data-layer wiring is in place.
-    // A real dashboard would assemble its summary from these responses;
-    // for now the static demo above remains the display source.
+    this.client
+      .executionsList()
+      .then((r) => this.executions.set(r.executions.slice(0, 3).map(toExecutionRow)))
+      .catch(() => undefined);
+    this.client
+      .opportunitiesList()
+      .then((r) => this.opportunities.set(r.opportunities.slice(0, 5).map(toOpportunityRow)))
+      .catch(() => undefined);
     void this.client.me().catch(() => undefined);
-    void this.client.opportunitiesList().catch(() => undefined);
   }
 }
+
+/** Map a canonical ExecutionDetail to the wireframe ExecutionRow view. */
+const toExecutionRow = (e: ExecutionDetail): ExecutionRow => {
+  const sold = e.inventory.sold;
+  const total = e.inventory.total_items;
+  const progress = total > 0 ? Math.round((sold / total) * 100) : 0;
+  const roi = `${e.financials.projected_roi >= 0 ? '+' : ''}${e.financials.projected_roi}% ROI`;
+  const statusText =
+    e.status === 'LIQUIDATING' || e.status === 'COMPLETED'
+      ? 'Closing'
+      : e.status === 'ACQUIRING'
+        ? `ETA ${Math.max(1, Math.round((new Date(e.timeline.estimated_completion).getTime() - Date.now()) / 86400000))} days`
+        : `${sold} of ${total} sold`;
+  return {
+    ref: e.execution_id,
+    title: e.opportunity.title,
+    detail: `Acquired ${total} units · Listed`,
+    roi,
+    deployed: `$${Number(e.capital.allocated).toLocaleString()}`,
+    statusText,
+    statusTone:
+      e.status === 'LIQUIDATING' || e.status === 'COMPLETED'
+        ? 'violet'
+        : e.status === 'ACQUIRING'
+          ? 'blue'
+          : 'emerald',
+    progress,
+    iconBg: 'rgba(16,185,129,0.12)',
+    iconColor: '#34d399',
+    icon: 'package',
+  };
+};
+
+/** Map a canonical OpportunityListRow to the wireframe OpportunityRow view. */
+const toOpportunityRow = (o: OpportunityListRow): OpportunityRow => {
+  const roi = o.financials?.estimated_roi != null ? `+${o.financials.estimated_roi}%` : 'In Vetting';
+  const status: OpportunityRow['status'] =
+    o.status === 'VETTING' ? 'In Vetting' : o.status === 'APPROVED' ? 'Approved' : 'Pending';
+  return {
+    ref: o.opportunity_id,
+    title: o.title,
+    category: o.category,
+    roi,
+    status,
+    votesUp: o.vetting_status?.votes_for ?? null,
+    votesDown: o.vetting_status?.votes_against ?? null,
+  };
+};
