@@ -25,11 +25,14 @@
  * @owner   spanexx
  * @reviewed 2026-08-18
  */
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiBadgeComponent } from '../../ui/badge/badge.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
 import { ApiClient } from '../../core/api/api-client';
+import { PoolStore } from '../../core/state/pool.store';
+import { AuthStore } from '../../core/state/auth.store';
+import { formatApiMoney } from '../../core/utils/money';
 import type { ExecutionDetail, OpportunityListRow } from '../../core/models';
 
 interface ExecutionRow {
@@ -74,7 +77,7 @@ interface OpportunityRow {
     <section class="page">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 class="page-title">Good evening, Alex</h1>
+          <h1 class="page-title">Good evening, {{ greetingName() }}</h1>
           <p class="page-subtitle">Here's what's moving across the pool today.</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -99,7 +102,7 @@ interface OpportunityRow {
             <div class="kpi-label">Total Pool</div>
             <ui-icon name="banknote" class="text-slate-500"></ui-icon>
           </div>
-          <div class="kpi-number text-gradient-emerald">$1,423,580</div>
+          <div class="kpi-number text-gradient-emerald">{{ totalPool() }}</div>
           <div class="mt-3 flex items-center gap-2 text-xs">
             <span class="text-emerald-400 flex items-center gap-1">
               <ui-icon name="trending-up"></ui-icon>+2.4%
@@ -113,11 +116,11 @@ interface OpportunityRow {
             <div class="kpi-label">Active Capital</div>
             <ui-icon name="zap" class="text-slate-500"></ui-icon>
           </div>
-          <div class="kpi-number">$487,230</div>
+          <div class="kpi-number">{{ activeCapital() }}</div>
           <div class="mt-3 flex items-center gap-2 text-xs">
-            <span class="text-slate-400">3 executions in flight</span>
+            <span class="text-slate-400">{{ inFlight() }} executions in flight</span>
           </div>
-          <div class="progress-track mt-3"><div class="progress-fill progress-fill-emerald" style="width: 34%;"></div></div>
+          <div class="progress-track mt-3"><div class="progress-fill progress-fill-emerald" style="width: {{ deploymentPct() }}%;"></div></div>
         </a>
 
         <a class="card card-hover p-5 block" [routerLink]="['/community/alpha/members']">
@@ -125,7 +128,7 @@ interface OpportunityRow {
             <div class="kpi-label">Active Members</div>
             <ui-icon name="users" class="text-slate-500"></ui-icon>
           </div>
-          <div class="kpi-number">124</div>
+          <div class="kpi-number">{{ memberCount() }}</div>
           <div class="mt-3 flex items-center gap-2 text-xs">
             <span class="text-emerald-400 flex items-center gap-1">
               <ui-icon name="trending-up"></ui-icon>+8
@@ -139,10 +142,10 @@ interface OpportunityRow {
             <div class="kpi-label">Open Opportunities</div>
             <ui-icon name="lightbulb" class="text-slate-500"></ui-icon>
           </div>
-          <div class="kpi-number">12</div>
+          <div class="kpi-number">{{ openOpportunities() }}</div>
           <div class="mt-3 flex items-center gap-2 text-xs">
             <span class="text-amber-300 flex items-center gap-1">
-              <ui-icon name="vote"></ui-icon>8 awaiting your vote
+              <ui-icon name="vote"></ui-icon>{{ awaitingVote() }} awaiting your vote
             </span>
           </div>
         </a>
@@ -388,6 +391,9 @@ interface OpportunityRow {
 })
 export class DashboardPageComponent {
   private readonly client = inject(ApiClient);
+  // Pack B: identity is a single source — AuthStore owns the session
+  // member; the greeting reads the signed-in first name from it.
+  private readonly auth = inject(AuthStore);
 
   /** Period toggle for the Pool Health chart (7d / 30d / 90d). */
   readonly period = signal<'7d' | '30d' | '90d'>('30d');
@@ -403,21 +409,53 @@ export class DashboardPageComponent {
   /** Latest opportunities — sourced from the injected ApiClient.opportunitiesList(). */
   readonly opportunities = signal<OpportunityRow[]>([]);
 
-  /** DISCOVERY 2026-08-18: lists now flow from ApiClient (one source). The KPI
-   * tiles / Pool Health / Your Portfolio blocks are display-only aggregates —
-   * no canonical dashboard-summary endpoint exists in docs/apis yet, so they
-   * remain static demo values (flagged, not faked). Pointer: backend team adds
-   * a dashboard summary contract in docs/apis before these become live. */
+  // Pack B (2026-08-19): the KPI tiles are now ONE-SOURCE derivations —
+  // pool totals via PoolStore, member count via communitiesList, open +
+  // awaiting counts derived from the SAME opportunitiesList() payload
+  // the table renders (no extra fetch). The wireframe's fabricated
+  // 12/8 counters were replaced by honest derivations, flagged here.
+  private readonly store = inject(PoolStore);
+
+  readonly totalPool = computed(() =>
+    formatApiMoney(this.store.status()?.totals?.total_capital ?? '0.00'),
+  );
+  readonly activeCapital = computed(() =>
+    formatApiMoney(this.store.status()?.totals?.deployed_capital ?? '0.00'),
+  );
+  readonly inFlight = computed(() => this.store.status()?.activity?.active_executions ?? 0);
+  readonly deploymentPct = computed(() => this.store.status()?.health?.deployment_ratio ?? 0);
+  readonly memberCount = signal(0);
+  readonly openOpportunities = signal(0);
+  readonly awaitingVote = signal(0);
+
+  /** First name of the signed-in member (single source: AuthStore). */
+  readonly greetingName = computed(() => this.auth.member()?.profile.first_name ?? 'Alex');
+
   constructor() {
+    void this.store.load();
+    // Pack B: hand the session member fetch to AuthStore (one source).
+    void this.auth.loadMe();
     this.client
       .executionsList()
       .then((r) => this.executions.set(r.executions.slice(0, 3).map(toExecutionRow)))
       .catch(() => undefined);
     this.client
       .opportunitiesList()
-      .then((r) => this.opportunities.set(r.opportunities.slice(0, 5).map(toOpportunityRow)))
+      .then((r) => {
+        this.opportunities.set(r.opportunities.slice(0, 5).map(toOpportunityRow));
+        this.openOpportunities.set(
+          r.opportunities.filter((o) => !['EXECUTED', 'EXPIRED', 'REJECTED'].includes(o.status ?? ''))
+            .length,
+        );
+        this.awaitingVote.set(
+          r.opportunities.filter((o) => o.status === 'SUBMITTED' || o.status === 'VETTING').length,
+        );
+      })
       .catch(() => undefined);
-    void this.client.me().catch(() => undefined);
+    this.client
+      .communitiesList()
+      .then((r) => this.memberCount.set(r.communities[0]?.member_count ?? 0))
+      .catch(() => undefined);
   }
 }
 

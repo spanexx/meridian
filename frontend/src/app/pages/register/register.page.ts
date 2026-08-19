@@ -24,7 +24,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
-import { ApiClient } from '../../core/api/api-client';
+import { ThemeService } from '../../core/state/theme.service';
+import { AuthStore } from '../../core/state/auth.store';
 
 interface ToastState {
   readonly title: string;
@@ -172,25 +173,21 @@ interface ToastState {
 })
 export class RegisterPageComponent {
   private readonly router = inject(Router);
-  private readonly client = inject(ApiClient);
+  private readonly auth = inject(AuthStore);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-
-  /** Current theme key — mirrors ShellComponent's private theme signal. */
-  private readonly theme = signal<'dark' | 'light'>(
-    (localStorage.getItem('meridian-theme') as 'dark' | 'light') ?? 'dark',
-  );
+  // Pack B: theme owned by ThemeService (single owner, persisted) —
+  // auth pages live outside the shell so they call it directly.
+  private readonly themeService = inject(ThemeService);
 
   /** In-page toast state (ui-toast primitive rendered behind @if). */
   readonly toast = signal<ToastState | null>(null);
 
   /** Toggles the page theme. Auth pages live outside the shell. */
   toggleTheme(): void {
-    this.theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
-    document.documentElement.dataset['theme'] = this.theme();
-    localStorage.setItem('meridian-theme', this.theme());
+    this.themeService.toggle();
   }
 
-  /** Create-account submit — calls the real ApiClient.auth.register(). */
+  /** Create-account submit — via AuthStore (one-source registration). */
   async submit(): Promise<void> {
     const root = this.host.nativeElement;
     const email = (root.querySelector('input[data-field="email"]') as HTMLInputElement | null)?.value ?? '';
@@ -200,7 +197,7 @@ export class RegisterPageComponent {
     )?.checked;
 
     try {
-      await this.client.register({
+      await this.auth.register({
         email,
         password,
         password_confirm: password,

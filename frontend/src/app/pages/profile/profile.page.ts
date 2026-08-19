@@ -25,11 +25,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
-import { ApiClient } from '../../core/api/api-client';
+import { AuthStore } from '../../core/state/auth.store';
 
 interface Reputation {
   readonly key: 'signal' | 'capital' | 'access' | 'community';
@@ -64,7 +65,17 @@ interface Activity {
   templateUrl: './profile.template.html',
 })
 export class ProfilePageComponent {
-  // ─── Dataset (mock for the signed-in user) ───────────────────────────
+  // ─── Session (single source: AuthStore) ──────────────────────────────
+  // Pack B (2026-08-19): the signed-in identity now flows from AuthStore
+  // (member()), not a per-page mock. loadMe() fills it from /auth/me;
+  // the wireframe's static demo content below remains the display source
+  // for reputation / payouts / activity until those endpoints land.
+  private readonly auth = inject(AuthStore);
+
+  /** Display name from the session member (falls back to the wireframe name). */
+  readonly displayName = computed(() => this.auth.member()?.profile.display_name ?? 'Alex Chen');
+  /** Email from the session member (falls back to the wireframe email). */
+  readonly email = computed(() => this.auth.member()?.email ?? 'alex@meridian.com');
   readonly user = {
     name: 'Alex Chen',
     initials: 'AC',
@@ -190,13 +201,11 @@ export class ProfilePageComponent {
     // session-clearing pipeline is owned by the auth feature pack.
   }
 
-  private readonly client = inject(ApiClient);
-
   constructor() {
-    // Backend-readiness pack: prove the data-layer wiring is in place.
-    // The wireframe demo content above remains the display source until a
-    // canonical member/me endpoint replaces it; a real load would map
-    // me() into this view.
-    void this.client.me().catch(() => undefined);
+    // Pack B: the session member now flows through AuthStore (one
+    // source). loadMe() calls /auth/me and fills member(); the hero
+    // reads firstName()/email() so a real session replaces the demo
+    // identity without touching the wireframe template.
+    void this.auth.loadMe();
   }
 }

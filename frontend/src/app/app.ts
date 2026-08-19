@@ -13,6 +13,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { ShellComponent } from './shell/shell.component';
+import { ThemeService } from './core/state/theme.service';
 import { filter } from 'rxjs/operators';
 
 /**
@@ -31,17 +32,15 @@ const SHELL_LESS_PATHS = ['/', '/login', '/register'];
 export class App {
   protected readonly title = signal('meridian');
   private readonly router = inject(Router);
+  // Pack B: ThemeService owns the persisted theme and applies it before
+  // first paint (constructor side effect) — the old localStorage boot
+  // block moved into the service (core/state/theme.service.ts).
+  private readonly themeService = inject(ThemeService);
 
   /** True when the active route is a shell-less page (landing, /login, /register). */
   protected readonly shellLess = signal(false);
 
   constructor() {
-    // Apply the persisted theme before first paint (mirrors the wireframe
-    // boot script; the shell/landing toggles write it on every change).
-    const stored = localStorage.getItem('meridian-theme');
-    if (stored === 'light' || stored === 'dark') {
-      document.documentElement.dataset['theme'] = stored;
-    }
     // Initialize from the current URL, then keep it fresh on every
     // NavigationEnd (fires on every navigation, including the same route).
     this.shellLess.set(this.isShellLessUrl(this.router.url));

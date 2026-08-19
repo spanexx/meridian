@@ -1,8 +1,8 @@
 # Frontend Backlog — Pre-Backend Completion Plan
 
 Date: 2026-08-18 (updated 2026-08-19)
-Status: **Pack A SHIPPED on `feat/frontend-data-layer` (local, unpushed);
-Packs B–E still open.** Execution was approved by the user on 2026-08-18
+Status: **Pack A SHIPPED, Pack B SHIPPED on `feat/frontend-data-layer` (local, unpushed);
+Packs C–E still open.** Execution was approved by the user on 2026-08-18
 ("Everything A–E").
 Owner: agent-maintained
 Last reviewed: 2026-08-19
@@ -27,7 +27,7 @@ backend begins, the order to build it in, and the evidence for each gap.
 | E2E (Playwright + screenshots) | green, incl. payouts byte-identical check |
 | Pre-commit guardrails | 11/11 — now incl. **strict ESLint** (errors AND warnings block; eslint 9 + angular-eslint flat config; CI mirrors it) |
 | HTTP / API layer (**Pack A**) | **Done** — typed `ApiClient` + transport seam (`API_TRANSPORT` token; MockTransport dev / HttpTransport prod, flip = `environment.useMock`), 31 seeded mock routes (incl. auth register + 2FA), HttpClient + functional interceptors (auth/correlation/error), canonical models, money/date/error utils, env files + fileReplacements |
-| State management | **None (Pack B)** — every page owns local `signal()`s (18 in submit-signal alone) |
+| State management | **Pack B SHIPPED** — ThemeService (single owner) + PoolStore + AuthStore; dashboard KPIs + greeting + profile identity now one-source via stores |
 | Auth | **Partial (Pack C)** — TokenStore + Bearer interceptor + login/register wired with token persistence; NO guards, no refresh, no 2FA UI, no KYC flow |
 | Flows (Pack D) | **Not started** — deposit/withdraw/vote/submit-signal still local state |
 | Maintainability (Pack E) | Partial — `_placeholder` deleted, `/showcase` gated out of prod, labels/aria a11y fixed; landing split + overview rewrite open |
@@ -182,6 +182,37 @@ Resume rule for B–E: Packs B, C (guard/refresh/2FA/KYC), D and the
 remaining E items execute from this backlog; each ships
 `docs/features/<slug>/` + TDD specs + implementation + drift check,
 merged via PR per git-conventions.
+
+## Work history — Pack B execution (2026-08-19 → 2026-08-19)
+
+Pack B landed on `feat/frontend-data-layer` (local, unpushed), on top of
+Pack A. Scope per the user's "delay complexity" call: **only the shared
+stores** (ThemeService, PoolStore, AuthStore) — single-consumer stores
+(opportunities/executions/payouts/communities/notifications) were
+explicitly deferred to Pack C/D.
+
+- **ThemeService** — single owner of dark/light theme (replaces 6
+  copy-pasted implementations in app.ts, shell, login, register, landing,
+  settings). All 6 consumers migrated; theme boot moved into the service
+  constructor.
+- **PoolStore** — shared pool status + balance; used by pool page +
+  dashboard KPIs. Dashboard KPI tiles are now one-source derivations
+  (`formatApiMoney(poolStatus.totals)` + `communitiesList` +
+  `opportunitiesList`), replacing the wireframe's fabricated 12/8
+  counters with honest 16-open / 11-awaiting derivations.
+- **AuthStore** — session state (token + member); `login()` (persists
+  token to TokenStore), `register()`, `loadMe()` (fills `member()` from
+  `/auth/me`), `logout()`. Login + register pages migrated to
+  `auth.login()`/`auth.register()`.
+- **Dashboard greeting** — now reads `auth.member().profile.first_name`
+  via a `greetingName` computed (single source); the page's own
+  `client.me()` call removed in favor of `auth.loadMe()`.
+- **Profile identity** — hero display name + identity email now source
+  from `auth.member()` (`displayName()`/`email()` computeds) instead of a
+  per-page mock; constructor calls `auth.loadMe()`.
+
+Verification (all green): eslint 0 problems; vitest 1001/1001;
+`ng build --configuration production` exit 0; Playwright 157/157.
 
 ## Open decisions
 

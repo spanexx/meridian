@@ -25,6 +25,7 @@ import { filter } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UiIconComponent } from '../ui/icon/icon.component';
 import { UiLogoComponent } from '../ui/logo/ui-logo.component';
+import { ThemeService } from '../core/state/theme.service';
 
 /**
  * The navigation map mirrors wireframe/meridian/kit/app.js NAV.
@@ -202,16 +203,15 @@ export class ShellComponent {
   /** Mobile sidebar open state — controlled by the mobile-bar menu button. */
   readonly sidebarOpen = signal(false);
 
-  /** Current theme key. */
-  private readonly theme = signal<'dark' | 'light'>(
-    (localStorage.getItem('meridian-theme') as 'dark' | 'light') ?? 'dark',
-  );
+  /** Pack B: theme lives in ThemeService (single owner, persisted). */
+  private readonly themeService = inject(ThemeService);
+
+  /** Current theme key — read from the single ThemeService. */
+  readonly theme = this.themeService.theme;
 
   /** Toggles the page theme. Wired to the data-theme-toggle buttons. */
   toggleTheme(): void {
-    this.theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
-    document.documentElement.dataset['theme'] = this.theme();
-    localStorage.setItem('meridian-theme', this.theme());
+    this.themeService.toggle();
   }
 
   /** Toggles the mobile sidebar. Called from the mobile-bar menu button. */

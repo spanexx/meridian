@@ -17,10 +17,11 @@
  * @owner   agent-maintained
  * @reviewed 2026-08-17
  */
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
 import { UiLogoComponent } from '../../ui/logo/ui-logo.component';
+import { ThemeService } from '../../core/state/theme.service';
 
 @Component({
   selector: 'app-landing-page',
@@ -459,14 +460,11 @@ import { UiLogoComponent } from '../../ui/logo/ui-logo.component';
   ],
 })
 export class LandingPageComponent {
-  /** Current theme key (page-level toggle; mirrors shell + auth pages). */
-  private readonly theme = signal<'dark' | 'light'>(
-    (localStorage.getItem('meridian-theme') as 'dark' | 'light') ?? 'dark',
-  );
+  // Pack B: theme owned by ThemeService (single owner, persisted) —
+  // the landing page keeps its own toggle button, delegating to it.
+  private readonly themeService = inject(ThemeService);
 
   toggleTheme(): void {
-    this.theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
-    document.documentElement.dataset['theme'] = this.theme();
-    localStorage.setItem('meridian-theme', this.theme());
+    this.themeService.toggle();
   }
 }

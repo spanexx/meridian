@@ -18,9 +18,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
-import { ApiClient } from '../../core/api/api-client';
-import type { BalanceInfo, PoolStatus } from '../../core/models';
 import { formatApiMoney } from '../../core/utils/money';
+import { PoolStore } from '../../core/state/pool.store';
 
 /** Top capital contributors (wireframe data). */
 export const CONTRIBUTORS = [
@@ -606,38 +605,28 @@ export class PoolPageComponent {
     return `/community/alpha/members/${slug}`;
   }
 
-  private readonly client = inject(ApiClient);
-
   /** Display edge for API money strings (template access — Angular 20
    * standalone-imports of plain functions are not transform-safe in the
    * vitest plugin, so the util rides as a class member). */
   protected readonly formatApiMoney = formatApiMoney;
 
-  /** Backend-readiness: pool KPIs/health sourced from the injected ApiClient
-   * (core/api/api-client.ts poolStatus()). The chart history (SERIES) and the
-   * Top Contributors table (CONTRIBUTORS) are display-only demo widgets — no
-   * backend contract exists for them yet (flagged, not faked). DISCOVERY 2026-08-18:
-   * PoolStatus (core/models/pool.ts) carries totals + health only; contributors
-   * list + time-series are not in any api doc, so they remain static display. */
-  readonly status = signal<PoolStatus | null>(null);
+  // Pack B: pool state lives in PoolStore (shared with the dashboard
+  // KPI row); the page aliases the store's signals so templates and
+  // specs keep working unchanged.
+  private readonly store = inject(PoolStore);
 
-  /** Member-level available balance (ApiClient.balance()) — the withdraw
-   * modal's "Available balance" is the MEMBER edge, not the pool totals
-   * (DISCOVERY 2026-08-19: the pool-style totals were shown here before;
-   * e2e pins "$12,500.00"). */
-  readonly balance = signal<BalanceInfo | null>(null);
+  /** Pool KPIs/health — from the shared PoolStore (one source). */
+  readonly status = this.store.status;
+
+  /** Member-level available balance — from the shared PoolStore
+   * (the withdraw modal's "Available balance" is the MEMBER edge, not
+   * the pool totals; DISCOVERY 2026-08-19, e2e pins "$12,500.00"). */
+  readonly balance = this.store.balance;
 
   /** Reserve ratio as a percentage (PoolStatus.health.reserve_ratio is 0-100). */
   readonly reservePct = computed(() => this.status()?.health.reserve_ratio ?? 0);
 
   constructor() {
-    this.client
-      .poolStatus()
-      .then((s) => this.status.set(s))
-      .catch(() => undefined);
-    this.client
-      .balance()
-      .then((b) => this.balance.set(b))
-      .catch(() => undefined);
+    void this.store.load();
   }
 }

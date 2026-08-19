@@ -184,4 +184,56 @@ describe('SettingsPageComponent', () => {
     // reset for downstream tests
     c.setTheme('dark');
   });
+
+  // ─── Toggle helpers (public methods, TDD-coupled) ──────────────────
+  it('isThemeCurrent() matches the active theme only', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as {
+      currentTheme: () => string; isThemeCurrent: (t: string) => boolean;
+    };
+    expect(c.isThemeCurrent(c.currentTheme())).toBe(true);
+    expect(c.isThemeCurrent(c.currentTheme() === 'light' ? 'dark' : 'light')).toBe(false);
+  });
+
+  it('toggle2FA() flips the 2FA signal', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as { twoFactorEnabled: () => boolean; toggle2FA: () => void };
+    const before = c.twoFactorEnabled();
+    c.toggle2FA();
+    expect(c.twoFactorEnabled()).toBe(!before);
+    c.toggle2FA();
+    expect(c.twoFactorEnabled()).toBe(before);
+  });
+
+  it('toggleNotifInApp() flips the in-app notification signal', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as { notifInApp: () => boolean; toggleNotifInApp: () => void };
+    const before = c.notifInApp();
+    c.toggleNotifInApp();
+    expect(c.notifInApp()).toBe(!before);
+  });
+
+  it('toggleNotifEmail() flips the email notification signal', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as { notifEmail: () => boolean; toggleNotifEmail: () => void };
+    const before = c.notifEmail();
+    c.toggleNotifEmail();
+    expect(c.notifEmail()).toBe(!before);
+  });
+
+  it('toggleNotifPush() flips the push notification signal', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as { notifPush: () => boolean; toggleNotifPush: () => void };
+    const before = c.notifPush();
+    c.toggleNotifPush();
+    expect(c.notifPush()).toBe(!before);
+  });
+
+  it('toggleCompactTables() flips the compact-tables signal', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as { compactTables: () => boolean; toggleCompactTables: () => void };
+    const before = c.compactTables();
+    c.toggleCompactTables();
+    expect(c.compactTables()).toBe(!before);
+  });
 });

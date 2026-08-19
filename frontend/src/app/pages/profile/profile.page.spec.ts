@@ -25,7 +25,8 @@ import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { ProfilePageComponent } from './profile.page';
 import { ApiClient } from '../../core/api/api-client';
-import { SEED_MEMBER } from '../../core/api/mock-seed';
+import { TokenStore } from '../../core/auth/token-store';
+import { SEED_AUTH_ME_MEMBER } from '../../core/api/mock-seed';
 
 async function renderPage() {
   const f = TestBed.createComponent(ProfilePageComponent);
@@ -37,11 +38,13 @@ async function renderPage() {
 describe('ProfilePageComponent', () => {
   beforeEach(async () => {
     const mockClient = {
-      me: vi.fn().mockResolvedValue(SEED_MEMBER),
+      // Pack B: profile reads the session member from AuthStore, which
+      // calls /auth/me (real response shape, not the Member record).
+      me: vi.fn().mockResolvedValue({ member: SEED_AUTH_ME_MEMBER, session: { created_at: '', expires_at: '' } }),
     } as unknown as ApiClient;
     await TestBed.configureTestingModule({
       imports: [ProfilePageComponent],
-      providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }, TokenStore],
     }).compileComponents();
   });
 

@@ -29,8 +29,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
-import { ApiClient } from '../../core/api/api-client';
-import { TokenStore } from '../../core/auth/token-store';
+import { ThemeService } from '../../core/state/theme.service';
+import { AuthStore } from '../../core/state/auth.store';
 
 interface ToastState {
   readonly title: string;
@@ -187,23 +187,18 @@ interface ToastState {
 })
 export class LoginPageComponent {
   private readonly router = inject(Router);
-  private readonly client = inject(ApiClient);
-  private readonly tokenStore = inject(TokenStore);
+  private readonly auth = inject(AuthStore);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-
-  /** Current theme key — mirrors ShellComponent's private theme signal. */
-  private readonly theme = signal<'dark' | 'light'>(
-    (localStorage.getItem('meridian-theme') as 'dark' | 'light') ?? 'dark',
-  );
+  // Pack B: theme owned by ThemeService (single owner, persisted) —
+  // auth pages live outside the shell so they call it directly.
+  private readonly themeService = inject(ThemeService);
 
   /** In-page toast state (ui-toast primitive rendered behind @if). */
   readonly toast = signal<ToastState | null>(null);
 
   /** Toggles the page theme. Auth pages live outside the shell. */
   toggleTheme(): void {
-    this.theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
-    document.documentElement.dataset['theme'] = this.theme();
-    localStorage.setItem('meridian-theme', this.theme());
+    this.themeService.toggle();
   }
 
   /** 'Forgot password?' — demos the email reset link. */
@@ -211,20 +206,19 @@ export class LoginPageComponent {
     this.showToast('Reset link sent to alex@meridian.com');
   }
 
-  /** Sign-in submit — calls the real ApiClient.auth.login(). */
+  /** Sign-in submit — via AuthStore (persists the token internally). */
   async submit(): Promise<void> {
     const root = this.host.nativeElement;
     const email = (root.querySelector('input[data-field="email"]') as HTMLInputElement | null)?.value ?? '';
     const password = (root.querySelector('input[data-field="password"]') as HTMLInputElement | null)?.value ?? '';
 
     try {
-      const res = await this.client.login(email, password);
-      // Backend-readiness pack: a successful login persists the access
-      // token to TokenStore so the auth interceptor attaches it to every
-      // subsequent request (Bearer). A 2FA challenge carries no token and
-      // is left for the auth feature pack's challenge surface.
+      const res = await this.auth.login(email, password);
+      // Pack B: AuthStore persists the access token to TokenStore on a
+      // successful login (Bearer flows to the real gateway afterwards).
+      // A 2FA challenge carries no token and is left for the auth
+      // feature pack's challenge surface.
       if ('access_token' in res) {
-        this.tokenStore.set(res.access_token);
         this.showToast('Signed in — welcome back');
       } else {
         this.showToast('Two-factor verification required — check your email');

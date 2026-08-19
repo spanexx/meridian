@@ -1,102 +1,67 @@
-# MERIDIAN — End-of-Session Handoff (2026-08-19)
+# MERIDIAN — Handoff (2026-08-19, Pack B SHIPPED)
 
 ## Mode
-Operating mode is **AUTO** (`state` file = `auto`). The agent may decide
-HOW, never WHAT — follow `docs/`, `CONTEXT.md`, `decisions.md`. Every
-AUTO decision is logged in `sessions/decisions.md` (8 entries added
-2026-08-19).
+Operating mode is **AUTO** (`state` file = `auto`). The agent may decide HOW, never WHAT — follow `docs/`, `CONTEXT.md`, `decisions.md`. Every AUTO decision is logged in `sessions/decisions.md`.
 
 ## Branch
 `feat/frontend-data-layer` (local, unpushed; master at `2e0a9c8`).
-5 commits landed this session on top of the data-layer pack:
+Current commit: was `f570b9a`; Pack B commit landed on top this session.
 
-- `214342c` feat(frontend): strict eslint gate, zero-lint codebase
-- `b33ac32` refactor(frontend): eslint autofix residuals
-- `26ace73` feat(frontend): backend-switch readiness — token
-  persistence, auth mock routes, pool one-source money
-- `51bd12e` feat(frontend): a11y label association, keyboard handlers,
-  pack E hygiene
-- `2742f8c` docs(frontend): refresh data-layer status docs + AUTO
-  decisions
+## Current State (Pack B SHIPPED)
 
-## Verification state (ALL GREEN, verified after every commit)
-- eslint (strict): **0 problems** (errors AND warnings block commit + CI)
-- vitest: **980/980**
-- Playwright e2e: **157/157** (pool KPI + withdraw balance + dashboard
-  rows were failing on the previous HEAD; fixed)
-- `ng build --configuration production`: exit 0 — **was BROKEN before
-  this session** (pool page TS2532 template errors since the 290f42e
-  rewire; nothing had built the branch; plain tsc is template-blind and
-  pre-commit used to run bare tsc)
-- npm audit: 0 vulnerabilities
+**Shipped this round (Pack B — state stores):**
+- **ThemeService** — single owner of dark/light theme (replaces 6 copy-pasted implementations). All 6 consumers migrated.
+- **PoolStore** — shared pool status + balance; pool page + dashboard KPIs. Dashboard KPI tiles are one-source derivations (honest 16-open / 11-awaiting from seed, not the wireframe's fabricated 12/8).
+- **AuthStore** — session state (token + member): `login()`, `register()`, `loadMe()`, `logout()`; token persisted to TokenStore. Login + register pages migrated to `auth.login()`/`auth.register()`.
+- **Dashboard greeting** — `Good evening, {{ greetingName() }}` where `greetingName` reads `auth.member().profile.first_name` (single source). Page's own `client.me()` call removed in favor of `auth.loadMe()`.
+- **Profile identity** — hero display name + identity email source from `auth.member()` (`displayName()`/`email()` computeds); constructor calls `auth.loadMe()`.
 
-## What changed THIS session
+**Verification (all green):**
+- eslint strict: 0 problems
+- vitest: 1001/1001
+- `ng build --configuration production`: exit 0
+- Playwright e2e: 157/157
 
-1. **Strict eslint gate** (user request): eslint 9 + angular-eslint
-   20.7 flat config; pre-commit check 11/11 blocks on ANY problem; CI
-   lint step fails-on-error; pre-commit check 4 now runs the PRODUCTION
-   build (tsc alone cannot see template type errors). ~112 findings
-   fixed (a11y labels/keyboard, output renames close→closed,
-   select→selectChange, unused vars, any-types, prefer-inject with
-   documented exceptions in ApiClient/HttpTransport, elements-content,
-   empty-object-type, lifecycle interfaces). Mechanical categories were
-   delegated to an opencode-action subagent
-   (`.opencode-reports/20260819-lint-fixes.md`); complex semantics done
-   by the orchestrator. New repo skill:
-   `.agents/skills/angular-lint-gate/SKILL.md`.
-2. **Backend-switch readiness**: login persists the token to TokenStore
-   (Bearer now flows to the real gateway after login); mock seed gained
-   `POST /auth/register` + `POST /auth/login/2fa` (29→31 routes); pool
-   KPI money formatted via formatApiMoney and the withdraw modal shows
-   the MEMBER balance (ApiClient.balance()) not pool totals; E-1036
-   seed ETA is relative to now ('ETA 4 days' stable); stale e2e
-   assertions updated to one-source values.
-3. **Pack E hygiene**: `_placeholder` deleted, `/showcase` gated out of
-   production, e2e screenshots no longer committed (gitignored),
-   community-members header sm:items-start (last PR #41 sibling bug),
-   full label for/id association across 8 pages.
+**Note on a found bug:** prod build caught a genuine strict-type error in `dashboard.page.ts` (`o.status` is optional → `string | undefined`, unsafe in `.includes()`); fixed with `o.status ?? ''`. This class of bug is invisible to eslint/vitest (lenient esbuild) — the prod build is the real gate.
 
-## Answer to the user's goal question
+## Remaining packs (for future rounds)
+- **Pack C — Auth guards/refresh/2FA UI/KYC flow** (route guards, token refresh flow, 2FA challenge UI, KYC status).
+- **Pack D — Flows** (deposit/withdraw/vote/submit-signal mutations to ApiClient).
+- **Pack E — Remaining** (landing template split 1109 lines, any leftover docs).
 
-**Frontend IS backend-switch-ready for the data layer**: every page
-renders exclusively from the injected `ApiClient` (one source; page
-fixtures are gone), every ApiClient method has a `docs/apis/*` contract,
-and the switch is ONE flag: `environment.useMock: false` (+ apiUrl).
-Remaining work is NOT data-source work — it's the planned packs:
+Single-consumer stores (opportunities/executions/payouts/communities/notifications) were deferred per the "delay complexity" decision — build them in Pack C/D as those features need them.
 
-- **B — state**: signal stores (auth/pool/opportunities/executions/
-  payouts/communities/notifications) + one ThemeService (theme logic
-  still copied in 5 files)
-- **C — auth**: route guards (none exist), token refresh, 2FA UI, KYC
-  flow (TokenStore + interceptor + login/register are wired)
-- **D — flows**: deposit/withdraw/vote/submit-signal mutations still
-  local state (pages render mock data but submit flows don't POST)
-- **E — remaining**: landing template split (1109 lines), any leftover
-  doc refresh
+## Key Files (this round)
+- `frontend/src/app/core/state/theme.service.ts/.spec.ts`
+- `frontend/src/app/core/state/pool.store.ts/.spec.ts`
+- `frontend/src/app/core/state/auth.store.ts/.spec.ts`
+- `frontend/src/app/pages/dashboard/dashboard.page.ts/.spec.ts`
+- `frontend/src/app/pages/profile/profile.page.ts/.template.html/.spec.ts`
+- `frontend/src/app/pages/login/login.page.ts/.spec.ts`
+- `frontend/src/app/pages/register/register.page.ts/.spec.ts`
+- `docs/frontend/01-frontend-backlog.md` (Pack B SHIPPED)
+- `sessions/decisions.md` (AUTO entry added)
 
-Status table: `docs/frontend/01-frontend-backlog.md` (updated).
+## Next Steps (in order)
+1. **Pack C** — route guards (`AuthGuard` + role guard), token-refresh flow, 2FA challenge surface, KYC status flow.
+2. Run full verification after each Pack C feature: `npx vitest run && npx eslint . && npx ng build --configuration production && npx playwright test`.
+3. Commit per feature with conventional-commits; git identity `spanexx <spanexxvictor@gmail.com>`.
+4. Update `docs/frontend/01-frontend-backlog.md`, `sessions/decisions.md`, and this handoff.
 
-## Known named issues (not fixed — out of scope)
-- Pool 'Pending' KPI card is still hardcoded `$42,100` (no canonical
-  field in PoolStatus; flagged, not faked).
-- Dashboard/landing/settings still have some presentation-only static
-  widgets (contributors table, chart series) — no backend contract
-  exists; documented in pool.page.ts.
-- `scripts/__pycache__/` is untracked (should be gitignored; harmless).
-- Angular 20.3 is still in LTS; a major bump (21/22) was treated as a
-  WHAT decision for the user.
+## Commands to Verify
+```bash
+cd /home/spanexx/Shared/Projects/meridian/frontend
+npx vitest run                    # full vitest
+npx eslint .                      # lint
+npx ng build --configuration production  # prod build (real strict gate)
+npx playwright test               # e2e
+```
 
-## Next agent: what to pick up
-1. **Pack B** (state stores) is the next locked pack — user approved
-   A–E on 2026-08-18; A is done.
-2. Pending decision: PR the data-layer branch (5 commits + ~20 prior)
-   to master, or keep stacking B/C first.
-3. Pre-commit now takes ~2-3 min per commit (prod build + full vitest +
-   eslint) — expected, strictness was the user's explicit request.
+## Relevant Skills for Next Session
+- `feature-pipeline` (continue Pack C)
+- `tdd` (auth guards/refresh/2FA/KYC)
+- `git-conventions` (commit conventions)
+- `handoff` (write next handoff)
 
-## Key files
-- `frontend/eslint.config.js` (strict flat config)
-- `frontend/src/app/app.config.ts` (transport seam — the one switch)
-- `frontend/src/app/core/api/*` (ApiClient, transports, seed, interceptors)
-- `scripts/pre-commit.py` (11/11 checks)
-- `docs/frontend/01-frontend-backlog.md` (pack statuses)
+---
+*End of handoff — session continues in next round*

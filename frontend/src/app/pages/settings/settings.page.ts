@@ -17,12 +17,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   signal,
 } from '@angular/core';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ThemeService, type ThemeKey } from '../../core/state/theme.service';
 
 type TabKey = 'profile' | 'security' | 'notifications' | 'appearance';
-type ThemeKey = 'light' | 'dark';
 
 @Component({
   selector: 'app-settings-page',
@@ -35,10 +36,11 @@ export class SettingsPageComponent {
   /** Currently active tab (which panel is visible). */
   readonly activeTab = signal<TabKey>('profile');
 
+  // Pack B: theme owned by ThemeService (single owner, persisted).
+  private readonly themeService = inject(ThemeService);
+
   /** Current theme (used to highlight the matching theme card). */
-  readonly currentTheme = signal<ThemeKey>(
-    (document.documentElement.getAttribute('data-theme') as ThemeKey) ?? 'dark',
-  );
+  readonly currentTheme = this.themeService.theme;
 
   /** Static current-user fields (placeholder). Production: inject a service. */
   readonly user = {
@@ -74,15 +76,9 @@ export class SettingsPageComponent {
     this.activeTab.set(tab);
   }
 
-  /** Apply the chosen theme (mutates document.documentElement). */
+  /** Apply the chosen theme — delegates to the single ThemeService. */
   setTheme(theme: ThemeKey): void {
-    this.currentTheme.set(theme);
-    document.documentElement.setAttribute('data-theme', theme);
-    try {
-      localStorage.setItem('meridian-theme', theme);
-    } catch {
-      /* storage may be unavailable in private-mode browsers */
-    }
+    this.themeService.set(theme);
   }
 
   /** Toggle helpers (each inverts the current signal value). */
