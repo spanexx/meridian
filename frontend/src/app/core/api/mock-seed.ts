@@ -41,6 +41,7 @@ import { MockGateway } from './mock-gateway';
 import { ApiError } from './api-response';
 import type {
   AuthMeMember,
+  AuthTokens,
   BalanceInfo,
   CapitalTransaction,
   CommunityDetail,
@@ -70,6 +71,8 @@ import type {
   RegisterResponse,
   SafetyRail,
   TwoFactorLoginResponse,
+  TwoFactorSetupResponse,
+  TwoFactorStatusResponse,
   VettingVoteResponse,
   WithdrawalResponse,
 } from '../models';
@@ -808,6 +811,45 @@ export function seedGateway(gateway: MockGateway): void {
       token_type: 'Bearer',
       expires_in: 900,
     } satisfies TwoFactorLoginResponse;
+  });
+  // POST /auth/refresh — contract: docs/apis/01-auth-api.md. Rotates to a
+  // fresh token pair; a missing refresh token is rejected.
+  gateway.register('POST', '/auth/refresh', (ctx) => {
+    const refresh_token = (ctx.body as { refresh_token?: string } | undefined)?.refresh_token ?? '';
+    if (!refresh_token) {
+      throw new ApiError('AUTH_REFRESH_INVALID', 'Missing or revoked refresh token.', {});
+    }
+    return {
+      access_token: TOKEN,
+      refresh_token: REFRESH,
+      token_type: 'Bearer',
+      expires_in: 900,
+    } satisfies AuthTokens;
+  });
+  // POST /auth/logout — revoke the session (no-op in mock; presence is the contract).
+  gateway.register('POST', '/auth/logout', () => ({ success: true }));
+  // POST /auth/2fa/setup — initiate 2FA enrollment (dev secret + backup codes).
+  gateway.register('POST', '/auth/2fa/setup', () => ({
+    secret: 'JBSWY3DPEHPK3PXP',
+    qr_code_url: 'data:image/png;base64,dev_qr',
+    manual_entry: { account: 'alex@meridian.com', issuer: 'MERIDIAN' },
+    backup_codes: ['a1b2c3d4', 'e5f6g7h8', 'i9j0k1l2', 'm3n4o5p6', 'q7r8s9t0'],
+  } satisfies TwoFactorSetupResponse));
+  // POST /auth/2fa/verify — a 6-digit code enables 2FA in the mock.
+  gateway.register('POST', '/auth/2fa/verify', (ctx) => {
+    const code = String((ctx.body as { code?: unknown } | undefined)?.code ?? '');
+    if (code.trim().length < 6) {
+      throw new ApiError('AUTH_2FA_INVALID', 'That code is incorrect. Please try again.', {});
+    }
+    return { two_factor_enabled: true, message: 'Two-factor authentication enabled' } satisfies TwoFactorStatusResponse;
+  });
+  // POST /auth/2fa/disable — a valid code + password disables it.
+  gateway.register('POST', '/auth/2fa/disable', (ctx) => {
+    const code = String((ctx.body as { code?: unknown } | undefined)?.code ?? '');
+    if (code.trim().length < 6) {
+      throw new ApiError('AUTH_2FA_INVALID', 'That code is incorrect. Please try again.', {});
+    }
+    return { two_factor_enabled: false, message: 'Two-factor authentication disabled' } satisfies TwoFactorStatusResponse;
   });
 
   // ── Capital ─────────────────────────────────────────────────────────

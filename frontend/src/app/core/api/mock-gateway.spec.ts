@@ -142,6 +142,11 @@ describe('seeded gateway', () => {
       'GET /auth/me',
       'POST /auth/register',
       'POST /auth/login/2fa',
+      'POST /auth/refresh',
+      'POST /auth/logout',
+      'POST /auth/2fa/setup',
+      'POST /auth/2fa/verify',
+      'POST /auth/2fa/disable',
       // Capital
       'GET /capital/balance',
       'GET /capital/transactions',

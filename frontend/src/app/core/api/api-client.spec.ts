@@ -61,6 +61,38 @@ describe('api client (seeded gateway)', () => {
       expect(result.session.expires_at).toBeTruthy();
     });
 
+    it('refresh() returns a fresh token pair from the seeded gateway', async () => {
+      const result = await client.refresh('mock_refresh_token_2026');
+      expect(result.access_token).toBeTruthy();
+      expect(result.refresh_token).toBeTruthy();
+    });
+
+    it('refresh() rejects a missing refresh token', async () => {
+      await expect(client.refresh('')).rejects.toMatchObject({ code: 'AUTH_REFRESH_INVALID' });
+    });
+
+    it('logout() resolves without error on the seeded gateway', async () => {
+      await client.logout();
+      expect(true).toBe(true);
+    });
+
+    it('twoFactorSetup() returns a secret + backup codes', async () => {
+      const result = await client.twoFactorSetup();
+      expect(result.secret).toBeTruthy();
+      expect(result.backup_codes).toHaveLength(5);
+    });
+
+    it('twoFactorVerify() accepts a 6-digit code; rejects a short one', async () => {
+      const ok = await client.twoFactorVerify('123456');
+      expect(ok.two_factor_enabled).toBe(true);
+      await expect(client.twoFactorVerify('123')).rejects.toMatchObject({ code: 'AUTH_2FA_INVALID' });
+    });
+
+    it('twoFactorDisable() accepts a 6-digit code + password', async () => {
+      const result = await client.twoFactorDisable('123456', 'secret-pass');
+      expect(result.two_factor_enabled).toBe(false);
+    });
+
     it('register() returns the created member envelope from the seeded gateway', async () => {
       // Split literal so the pre-commit secrets scan (password: '...' 6+)
       // doesn't flag a test fixture as a hardcoded credential. NOTE: the

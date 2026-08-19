@@ -115,6 +115,21 @@ export interface TwoFactorChallenge {
 /** POST /auth/login/2fa payload. */
 export type TwoFactorLoginResponse = AuthTokens;
 
+/** POST /auth/2fa/setup payload (initiates enrollment, returns a secret). */
+export interface TwoFactorSetupResponse {
+  secret: string;
+  qr_code_url: string;
+  manual_entry: { account: string; issuer: string };
+  backup_codes: string[];
+}
+
+/** POST /auth/2fa/verify + /auth/2fa/disable payload. */
+export interface TwoFactorStatusResponse {
+  two_factor_enabled: boolean;
+  message: string;
+}
+
+
 /** POST /auth/register payload. */
 export interface RegisterResponse {
   member_id: string;

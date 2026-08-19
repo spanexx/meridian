@@ -19,6 +19,9 @@ import {
   TwoFactorLoginResponse,
   RegisterResponse,
   AuthMeMember,
+  AuthTokens,
+  TwoFactorSetupResponse,
+  TwoFactorStatusResponse,
   // Capital
   BalanceInfo,
   CapitalTransaction,
@@ -105,6 +108,39 @@ export class ApiClient {
     const response = await this.transport.request<{ member: AuthMeMember; session: { created_at: string; expires_at: string } }>(
       'GET',
       '/auth/me',
+    );
+    return response.data;
+  }
+
+  /** POST /auth/refresh — rotate to a fresh token pair using the refresh token. */
+  async refresh(refresh_token: string): Promise<AuthTokens> {
+    const response = await this.transport.request<AuthTokens>('POST', '/auth/refresh', { refresh_token });
+    return response.data;
+  }
+
+  /** POST /auth/logout — revoke the current session server-side. */
+  async logout(): Promise<void> {
+    await this.transport.request<{ success: boolean }>('POST', '/auth/logout');
+  }
+
+  /** POST /auth/2fa/setup — begin 2FA enrollment (returns the secret + QR). */
+  async twoFactorSetup(): Promise<TwoFactorSetupResponse> {
+    const response = await this.transport.request<TwoFactorSetupResponse>('POST', '/auth/2fa/setup');
+    return response.data;
+  }
+
+  /** POST /auth/2fa/verify — confirm a code to enable 2FA. */
+  async twoFactorVerify(code: string): Promise<TwoFactorStatusResponse> {
+    const response = await this.transport.request<TwoFactorStatusResponse>('POST', '/auth/2fa/verify', { code });
+    return response.data;
+  }
+
+  /** POST /auth/2fa/disable — disable 2FA with the current code + password. */
+  async twoFactorDisable(code: string, password: string): Promise<TwoFactorStatusResponse> {
+    const response = await this.transport.request<TwoFactorStatusResponse>(
+      'POST',
+      '/auth/2fa/disable',
+      { code, password },
     );
     return response.data;
   }
