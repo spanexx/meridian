@@ -9,12 +9,14 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTransport } from './http-transport';
 import { ApiResponse } from './api-response';
-import { RequestOptions } from './api-transport';
+import { RequestOptions, API_TRANSPORT } from './api-transport';
 import { TokenStore } from '../auth/token-store';
+import { AuthStore } from '../state/auth.store';
 import { authInterceptor } from './auth.interceptor';
 import { correlationInterceptor } from './correlation.interceptor';
 import { errorInterceptor } from './error.interceptor';
 import { HTTP_BASE_URL } from './http-transport';
+import { vi } from 'vitest';
 
 describe('HttpTransport', () => {
   let transport: HttpTransport;
@@ -28,6 +30,11 @@ describe('HttpTransport', () => {
         provideHttpClientTesting(),
         HttpTransport,
         TokenStore,
+        // Pack C: authInterceptor now injects AuthStore (→ ApiClient →
+        // API_TRANSPORT). A no-op transport satisfies the DI graph here;
+        // these tests drive the HTTP layer via HttpTestingController.
+        AuthStore,
+        { provide: API_TRANSPORT, useValue: { request: vi.fn() } },
         { provide: HTTP_BASE_URL, useValue: baseUrl },
       ],
     });
