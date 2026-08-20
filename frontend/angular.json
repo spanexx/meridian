@@ -34,7 +34,8 @@
             ],
             "styles": [
               "src/fonts.scss",
-              "src/styles.scss"
+              "src/styles.scss",
+              "src/app/pages/landing/landing.styles.scss"
             ]
           },
           "configurations": {
@@ -102,7 +103,8 @@
             ],
             "styles": [
               "src/fonts.scss",
-              "src/styles.scss"
+              "src/styles.scss",
+              "src/app/pages/landing/landing.styles.scss"
             ]
           }
         },
