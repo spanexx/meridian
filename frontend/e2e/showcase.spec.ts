@@ -8,6 +8,7 @@
  * @reviewed 2026-08-11
  */
 import { test, expect } from '@playwright/test';
+import { expectScreenshot, waitForStable } from './helpers/visual';
 
 /**
  * Verifies the Angular dashboard renders the wireframe's theme tokens
@@ -81,12 +82,9 @@ test.describe('showcase primitive-coverage', () => {
     expect(bg).not.toBe('rgb(246, 247, 251)');
   });
 
-  test('showcase screenshot saved for visual review', async ({ page }) => {
+  test('showcase renders true to its golden baseline', async ({ page }) => {
     await page.goto('/showcase');
-    await page.waitForTimeout(500); // give the SPA a beat to settle
-    await page.screenshot({ path: 'e2e/screenshots/showcase.png', fullPage: true });
-    // Note: a real visual diff against the wireframe would use
-    // toHaveScreenshot with a checked-in baseline. For the smoke
-    // test we just capture a PNG for human inspection.
+    await waitForStable(page);
+    await expectScreenshot(page, 'showcase');
   });
 });

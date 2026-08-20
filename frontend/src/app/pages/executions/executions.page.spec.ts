@@ -185,6 +185,33 @@ describe('ExecutionsPage (wireframe-aligned)', () => {
     expect(c.formatRoi(0)).toBe('0.0%');
   });
 
+  it('progressPct() rounds a progress value for aria-valuenow', async () => {
+    const mockClient = {
+      executionsList: vi.fn().mockResolvedValue({ executions: SEED_EXECUTIONS }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({ providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }] }).compileComponents();
+    const { ExecutionsPageComponent: Comp } = await import('./executions.page');
+    const fixture = TestBed.createComponent(Comp);
+    const c = fixture.componentInstance;
+    expect(c.progressPct(37)).toBe(37);
+    expect(c.progressPct(37.6)).toBe(38);
+    expect(c.progressPct(0)).toBe(0);
+    expect(c.progressPct(100)).toBe(100);
+  });
+
+  it('progress bars render with role="progressbar" + aria-valuenow (BRIDGE 2026-08-20)', async () => {
+    const fixture = await renderStandalone();
+    const root = fixture.nativeElement as HTMLElement;
+    const bars = Array.from(root.querySelectorAll('[role="progressbar"]')) as HTMLElement[];
+    expect(bars.length).toBeGreaterThan(0);
+    for (const bar of bars) {
+      expect(bar.getAttribute('aria-valuemin')).toBe('0');
+      expect(bar.getAttribute('aria-valuemax')).toBe('100');
+      expect(Number(bar.getAttribute('aria-valuenow'))).toBeGreaterThanOrEqual(0);
+      expect(Number(bar.getAttribute('aria-valuenow'))).toBeLessThanOrEqual(100);
+    }
+  });
+
   it('the active status tab carries CSS class "active" (matches theme.css)', async () => {
     const fixture = await renderStandalone();
     const root = fixture.nativeElement as HTMLElement;

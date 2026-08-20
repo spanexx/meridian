@@ -12,6 +12,7 @@
  */
 import { expect, test } from '@playwright/test';
 import { seedSession } from './helpers/auth';
+import { expectScreenshot, waitForStable } from './helpers/visual';
 
 test.describe('opportunity detail page (wireframe-aligned)', () => {
   test.beforeEach(async ({ page }) => {
@@ -150,8 +151,9 @@ test.describe('opportunity detail page (wireframe-aligned)', () => {
     expect(scrollW).toBeLessThanOrEqual(375);
   });
 
-  test('opportunity detail screenshot saved for visual review', async ({ page }) => {
+  test('opportunity-detail renders true to its golden baseline', async ({ page }) => {
     await page.goto('/opportunities/O-2049');
-    await page.screenshot({ path: 'e2e/screenshots/opportunity-detail.png', fullPage: true });
+    await waitForStable(page);
+    await expectScreenshot(page, 'opportunity-detail');
   });
 });

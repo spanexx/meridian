@@ -312,7 +312,14 @@ interface OpportunityRow {
                 <span class="text-xs text-slate-400">Pool · <span data-chart-label>{{ period() }}</span></span>
                 <span class="text-xs text-emerald-400">+2.4%</span>
               </div>
-              <svg viewBox="0 0 200 50" class="w-full h-12" preserveAspectRatio="none">
+              <svg
+                viewBox="0 0 200 50"
+                class="w-full h-12"
+                preserveAspectRatio="none"
+                role="img"
+                aria-label="Pool Health chart"
+                data-testid="pool-health-chart"
+              >
                 <defs>
                   <linearGradient id="spark" x1="0" x2="0" y1="0" y2="1">
                     <stop offset="0%" stop-color="#10b981" stop-opacity="0.4"></stop>

@@ -121,8 +121,17 @@ interface Execution {
               </div>
             </div>
 
-            <!-- Progress bar -->
-            <div class="progress-track mb-2">
+            <!-- Progress bar (ARIA: progressbar + value for screen readers)
+                 BRIDGE 2026-08-20: added role/aria-valuenow so e2e can
+                 assert progress semantics, not the .progress-track class. -->
+            <div
+              class="progress-track mb-2"
+              role="progressbar"
+              [attr.aria-label]="e.ref + ' progress'"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              [attr.aria-valuenow]="progressPct(e.progress)"
+            >
               <div class="progress-fill" [class]="'progress-fill-' + e.badgeVariant" [style.width.%]="e.progress"></div>
             </div>
 
@@ -185,6 +194,11 @@ export class ExecutionsPageComponent {
     if (n === 0) return '0.0%';
     const sign = n > 0 ? '+' : '';
     return `${sign}${n.toFixed(1)}%`;
+  }
+
+  /** Round a progress 0..100 value for aria-valuenow (templates can't call Math). */
+  progressPct(n: number): number {
+    return Math.round(n);
   }
 
   private readonly client = inject(ApiClient);

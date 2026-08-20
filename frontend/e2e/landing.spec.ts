@@ -14,6 +14,7 @@
  * @reviewed 2026-08-17
  */
 import { test, expect } from '@playwright/test';
+import { expectScreenshot, waitForStable } from './helpers/visual';
 import { seedSession } from './helpers/auth';
 
 test.describe('landing page (wireframe-aligned)', () => {
@@ -65,8 +66,9 @@ test.describe('landing page (wireframe-aligned)', () => {
     await expect(page).toHaveURL(/\/(payouts|login)/);
   });
 
-  test('landing page screenshot saved for visual review', async ({ page }) => {
+  test('landing renders true to its golden baseline', async ({ page }) => {
     await page.goto('/');
-    await page.screenshot({ path: 'e2e/screenshots/landing.png', fullPage: true });
+    await waitForStable(page);
+    await expectScreenshot(page, 'landing');
   });
 });

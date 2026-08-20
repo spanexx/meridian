@@ -13,6 +13,7 @@
  * @reviewed 2026-08-17
  */
 import { test, expect } from '@playwright/test';
+import { expectScreenshot, waitForStable } from './helpers/visual';
 
 test.describe('login page (shell-less auth)', () => {
   test('route loads shell-less with title + tagline', async ({ page }) => {
@@ -50,8 +51,9 @@ test.describe('login page (shell-less auth)', () => {
     await expect(page.locator('h1', { hasText: 'Join the pool' })).toBeVisible();
   });
 
-  test('login page screenshot saved for visual review', async ({ page }) => {
+  test('login renders true to its golden baseline', async ({ page }) => {
     await page.goto('/login');
-    await page.screenshot({ path: 'e2e/screenshots/login.png', fullPage: true });
+    await waitForStable(page);
+    await expectScreenshot(page, 'login');
   });
 });

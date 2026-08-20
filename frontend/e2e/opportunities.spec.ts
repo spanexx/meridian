@@ -14,6 +14,7 @@
  * @reviewed 2026-08-11
  */
 import { test, expect } from '@playwright/test';
+import { expectScreenshot, waitForStable } from './helpers/visual';
 import { seedSession } from './helpers/auth';
 
 test.describe('opportunities page (wireframe-aligned)', () => {
@@ -79,29 +80,34 @@ test.describe('opportunities page (wireframe-aligned)', () => {
 
   test('table renders 8 rows by default', async ({ page }) => {
     await page.goto('/opportunities');
-    await expect(page.locator('tbody tr')).toHaveCount(8);
+    // Accessible row semantics: the table body exposes data rows.
+    await expect(page.getByRole('table').getByRole('row')).toHaveCount(9); // 1 header + 8 data
   });
 
   test('Capital cells render with thousands separator', async ({ page }) => {
     await page.goto('/opportunities');
-    const html = await page.locator('body').innerHTML();
-    expect(html).toMatch(/\$\d{1,3},\d{3}/);
+    // Assert on the visible cell text, not raw innerHTML.
+    await expect(page.getByRole('cell', { name: /\$\d{1,3},\d{3}/ }).first()).toBeVisible();
   });
 
   test('Est. ROI cells render with leading "+" and emerald color', async ({ page }) => {
     await page.goto('/opportunities');
-    const firstRoi = page.locator('tbody td .text-emerald-400').first();
+    // ROI values are user-visible text; the emerald class (wireframe-
+    // specified positive-ROI color) lives on the value span inside the
+    // cell, which is hidden on small screens via the td class.
+    const firstRoi = page.getByRole('cell', { name: /^\+\d+(\.\d)?%$/ }).first();
     await expect(firstRoi).toBeVisible();
-    const text = await firstRoi.textContent();
-    expect(text).toMatch(/^\+\d+(\.\d)?%$/);
+    await expect(firstRoi.locator('span')).toHaveClass(/text-emerald-400/);
   });
 
   test('Vote cells render "N↑ / N↓" when votes exist; "—" when not', async ({ page }) => {
     await page.goto('/opportunities');
-    const html = await page.locator('body').innerHTML();
-    expect(html).toMatch(/\d+↑/);
-    expect(html).toMatch(/\d+↓/);
-    expect(html).toContain('—');
+    // Visible cell text: at least one up-vote cell, one down-vote cell,
+    // and one em-dash placeholder cell (row-level retry avoids the
+    // innerHTML race seen on dashboard).
+    await expect(page.getByRole('cell', { name: /\d+↑/ }).first()).toBeVisible();
+    await expect(page.getByRole('cell', { name: /\d+↓/ }).first()).toBeVisible();
+    await expect(page.getByRole('cell', { name: '—' }).first()).toBeVisible();
   });
 
   test('Submitted-by cells show avatar circles + names', async ({ page }) => {
@@ -130,9 +136,10 @@ test.describe('opportunities page (wireframe-aligned)', () => {
     await expect(footer).toContainText('2 / 3');
   });
 
-  test('opportunities page screenshot saved for visual review', async ({ page }) => {
+  test('opportunities renders true to its golden baseline', async ({ page }) => {
     await page.goto('/opportunities');
-    await page.screenshot({ path: 'e2e/screenshots/opportunities.png', fullPage: true });
+    await waitForStable(page);
+    await expectScreenshot(page, 'opportunities');
   });
 
   test('mobile: status tabs collapse into a dropdown with all 6 options', async ({ page }) => {
