@@ -151,11 +151,15 @@
           </div>
           <div class="flex items-center justify-between">
             <span class="text-xs text-slate-400">KYC</span>
-            <span class="badge badge-success">{{ identity.kyc }}</span>
+            <!-- Pack C: KYC badge label + variant derive from session member's
+                 kyc_status (VERIFIED/PENDING/NOT_STARTED/REJECTED). -->
+            <span class="badge" [class]="kycBadgeVariant()" data-testid="kyc-badge">{{ kycLabel() }}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-xs text-slate-400">2FA</span>
-            <span class="badge badge-success">{{ identity.twofa }}</span>
+            <!-- Pack C: 2FA label derives from session member's
+                 two_factor_enabled (true → "TOTP", false → "Not enabled"). -->
+            <span class="badge" [class.badge-success]="twofaLabel() === 'TOTP'" data-testid="twofa-badge">{{ twofaLabel() }}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-xs text-slate-400">Country</span>
