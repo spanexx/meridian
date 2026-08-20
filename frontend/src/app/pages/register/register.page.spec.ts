@@ -85,7 +85,7 @@ describe('RegisterPage (wireframe-aligned)', () => {
     expect(root.textContent).toContain('integrity first.');
   });
 
-  it('submit() shows the success toast, then a 900ms setTimeout navigates to /dashboard', async () => {
+  it('submit() shows the success toast, then a 900ms setTimeout navigates to /login', async () => {
     const fixture = await renderStandalone();
     const c = fixture.componentInstance;
     const root = fixture.nativeElement as HTMLElement;
@@ -98,7 +98,8 @@ describe('RegisterPage (wireframe-aligned)', () => {
     expect(toast.textContent).toContain('Account created — welcome aboard');
     expect(nav).not.toHaveBeenCalled();
     vi.advanceTimersByTime(900);
-    expect(nav).toHaveBeenCalledWith(['/dashboard']);
+    // Pack C: registration issues no token → the next step is /login.
+    expect(nav).toHaveBeenCalledWith(['/login']);
     vi.useRealTimers();
   });
 

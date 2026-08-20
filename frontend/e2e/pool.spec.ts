@@ -9,9 +9,11 @@
  * @reviewed 2026-08-12
  */
 import { expect, test } from '@playwright/test';
+import { seedSession } from './helpers/auth';
 
 test.describe('Capital Pool page', () => {
   test.beforeEach(async ({ page }) => {
+    await seedSession(page);
     await page.goto('/pool');
   });
 

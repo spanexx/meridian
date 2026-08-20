@@ -15,8 +15,13 @@
  * @reviewed 2026-08-17
  */
 import { test, expect } from '@playwright/test';
+import { seedSession } from './helpers/auth';
 
 test.describe('submit-signal page (wireframe-aligned)', () => {
+  test.beforeEach(async ({ page }) => {
+    await seedSession(page);
+  });
+
   test('route loads and renders the title + subtitle', async ({ page }) => {
     const res = await page.goto('/submit-signal');
     expect(res?.status()).toBeLessThan(400);

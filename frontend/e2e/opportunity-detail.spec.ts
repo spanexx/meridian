@@ -11,8 +11,13 @@
  * @reviewed 2026-08-12
  */
 import { expect, test } from '@playwright/test';
+import { seedSession } from './helpers/auth';
 
 test.describe('opportunity detail page (wireframe-aligned)', () => {
+  test.beforeEach(async ({ page }) => {
+    await seedSession(page);
+  });
+
   test('route loads and renders the breadcrumb + title', async ({ page }) => {
     const res = await page.goto('/opportunities/O-2049');
     expect(res?.status()).toBeLessThan(400);

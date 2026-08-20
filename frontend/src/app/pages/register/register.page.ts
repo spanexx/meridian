@@ -204,7 +204,10 @@ export class RegisterPageComponent {
         terms_accepted: terms,
       });
       this.showToast('Account created — welcome aboard');
-      setTimeout(() => this.router.navigate(['/dashboard']), 900);
+      // Pack C: registration issues NO tokens (verify-email flow), so the
+      // protected /dashboard is unreachable right after signup — route to
+      // /login and let the new member sign in.
+      setTimeout(() => this.router.navigate(['/login']), 900);
     } catch {
       this.showToast('Registration failed — please try again');
     }

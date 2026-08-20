@@ -44,7 +44,7 @@ test.describe('register page (shell-less auth)', () => {
     await page.goto('/register');
     await page.locator('[data-testid="create-account"]').click();
     await expect(page.getByText('Account created — welcome aboard')).toBeVisible();
-    await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page).toHaveURL(/\/login/);
   });
 
   test('"Sign in" cross-links to /login', async ({ page }) => {

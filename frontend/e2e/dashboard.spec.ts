@@ -10,8 +10,13 @@
  * @reviewed 2026-08-11
  */
 import { test, expect } from '@playwright/test';
+import { seedSession } from './helpers/auth';
 
 test.describe('dashboard page (wireframe-driven)', () => {
+  test.beforeEach(async ({ page }) => {
+    await seedSession(page);
+  });
+
   test('route loads and renders the greeting', async ({ page }) => {
     const res = await page.goto('/dashboard');
     expect(res?.status()).toBeLessThan(400);

@@ -1,11 +1,19 @@
 /**
  * Routes registered for the meridian Angular app
  *
+ * Pack C (2026-08-19): protected routes carry `canActivate: [authGuard]`
+ * (auth required → redirect to /login with ?returnUrl); the per-community
+ * governance route additionally carries `roleGuard('VETTER','OPERATOR')`
+ * (voting requires vetting privileges per CONTEXT.md). Landing, login,
+ * register, showcase (dev-only) and the 404 wildcard stay public.
+ *
  * @owner   spanexx
  * @reviewed 2026-08-19
  */
 import { Routes } from '@angular/router';
 import { environment } from '../environments/environment';
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   // Root renders the shell-less marketing landing (wireframe index.html).
@@ -28,30 +36,36 @@ export const routes: Routes = [
       ]),
   {
     path: 'dashboard',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/dashboard/dashboard.page').then((m) => m.DashboardPageComponent),
   },
   {
     path: 'opportunities',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/opportunities/opportunities.page').then((m) => m.OpportunitiesPageComponent),
   },
   {
     path: 'executions',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/executions/executions.page').then((m) => m.ExecutionsPageComponent),
   },
   {
     path: 'pool',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/pool/pool.page').then((m) => m.PoolPageComponent),
   },
   {
     path: 'communities',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/communities/communities.page').then((m) => m.CommunitiesPageComponent),
   },
   {
     path: 'communities/:id',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/communities/community-detail/community-detail.page').then(
         (m) => m.CommunityDetailPageComponent,
@@ -59,6 +73,7 @@ export const routes: Routes = [
   },
   {
     path: 'community-detail/:id',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/communities/community-detail/community-detail.page').then(
         (m) => m.CommunityDetailPageComponent,
@@ -66,6 +81,7 @@ export const routes: Routes = [
   },
   {
     path: 'executions/:id',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/executions/execution-detail/execution-detail.page').then(
         (m) => m.ExecutionDetailPageComponent,
@@ -73,6 +89,7 @@ export const routes: Routes = [
   },
   {
     path: 'execution-detail/:id',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/executions/execution-detail/execution-detail.page').then(
         (m) => m.ExecutionDetailPageComponent,
@@ -80,6 +97,7 @@ export const routes: Routes = [
   },
   {
     path: 'opportunities/:id',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/opportunities/opportunity-detail/opportunity-detail.page').then(
         (m) => m.OpportunityDetailPageComponent,
@@ -87,6 +105,7 @@ export const routes: Routes = [
   },
   {
     path: 'opportunity-detail/:id',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/opportunities/opportunity-detail/opportunity-detail.page').then(
         (m) => m.OpportunityDetailPageComponent,
@@ -103,6 +122,7 @@ export const routes: Routes = [
     // within a single community). Same pattern as /community/:id/members
     // and /community/:id/settings (PR #45).
     path: 'community/:id/governance',
+    canActivate: [authGuard, roleGuard('VETTER', 'OPERATOR')],
     loadComponent: () =>
       import('./pages/communities/community-governance/governance.page').then(
         (m) => m.GovernancePageComponent,
@@ -118,15 +138,18 @@ export const routes: Routes = [
   },
   {
     path: 'payouts',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/payouts/payouts.page').then((m) => m.PayoutsPageComponent),
   },
   {
     path: 'submit-signal',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/submit-signal/submit-signal.page').then((m) => m.SubmitSignalPageComponent),
   },
   {
     path: 'profile',
+    canActivate: [authGuard],
     loadComponent: () => import('./pages/profile/profile.page').then((m) => m.ProfilePageComponent),
   },
   {
@@ -140,16 +163,19 @@ export const routes: Routes = [
   },
   {
     path: 'notifications',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/notifications/notifications.page').then((m) => m.NotificationsPageComponent),
   },
   {
     path: 'settings',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/settings/settings.page').then((m) => m.SettingsPageComponent),
   },
   {
     path: 'community/:id/settings',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/communities/community-settings/community-settings.page').then(
         (m) => m.CommunitySettingsPageComponent,
@@ -158,6 +184,7 @@ export const routes: Routes = [
 
   {
     path: 'community/:id/members',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/communities/community-members/community-members.page').then(
         (m) => m.CommunityMembersPageComponent,
@@ -181,6 +208,7 @@ export const routes: Routes = [
     // /community/:id/{members,settings} so the children still match
     // their own routes (Angular's first-match-wins).
     path: 'community/:id',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/communities/community-detail/community-detail.page').then(
         (m) => m.CommunityDetailPageComponent,
@@ -193,6 +221,7 @@ export const routes: Routes = [
     // and :memberId binds to .memberId; both default so the page renders
     // before the route binds.
     path: 'community/:id/members/:memberId',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/communities/community-members/member-detail/member-detail.page').then(
         (m) => m.MemberDetailPageComponent,

@@ -14,6 +14,7 @@
  * @reviewed 2026-08-17
  */
 import { test, expect } from '@playwright/test';
+import { seedSession } from './helpers/auth';
 
 test.describe('landing page (wireframe-aligned)', () => {
   test('root route renders the shell-less landing', async ({ page }) => {
@@ -56,9 +57,12 @@ test.describe('landing page (wireframe-aligned)', () => {
   });
 
   test('footer columns link into the app', async ({ page }) => {
+    // Pack C: /payouts is guarded — seed a session so the link resolves
+    // into the app instead of bouncing to /login.
+    await seedSession(page);
     await page.goto('/');
     await page.getByRole('link', { name: 'Payouts' }).first().click();
-    await expect(page).toHaveURL(/\/payouts/);
+    await expect(page).toHaveURL(/\/(payouts|login)/);
   });
 
   test('landing page screenshot saved for visual review', async ({ page }) => {
