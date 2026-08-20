@@ -30,8 +30,16 @@ import { TokenStore } from '../auth/token-store';
 import { AuthStore } from '../state/auth.store';
 import { HTTP_AUTH_TOKEN } from './http-context';
 
-/** Endpoints that must never carry a Bearer (and must never trigger refresh). */
-const SKIP_AUTH_PATHS = ['/auth/refresh', '/auth/login'];
+/**
+ * Endpoints that must never carry a Bearer (and must never trigger the
+ * 401-refresh dance). BRIDGE 2026-08-21 (audit nice-to-have 7): extended
+ * past /auth/refresh + /auth/login to the other token-FREE auth paths —
+ * login/2fa completes with the temp_token (no session yet), and register
+ * issues no token. /auth/2fa/setup|verify|disable intentionally stay OUT
+ * (an enrolled member performs them with a live session → Bearer + refresh
+ * on 401 are correct there).
+ */
+const SKIP_AUTH_PATHS = ['/auth/refresh', '/auth/login', '/auth/login/2fa', '/auth/register'];
 
 /** Single in-flight refresh shared by all concurrent 401s. */
 let refreshInFlight: Promise<boolean> | null = null;

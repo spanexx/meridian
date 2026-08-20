@@ -94,6 +94,26 @@ describe('authInterceptor', () => {
     expect(calledReq.headers.has('Authorization')).toBeFalsy();
   });
 
+  it('does not attach Authorization on /auth/login/2fa (temp-token flow, no session)', async () => {
+    tokenStore.set('test-token');
+    const req = new HttpRequest('POST', '/auth/login/2fa', { temp_token: 't', code: '123456' });
+    next.mockImplementationOnce((r: HttpRequest<unknown>) => of(new HttpResponse({ status: 200, url: r.url })));
+
+    await run(req);
+    const calledReq = next.mock.calls[0][0] as HttpRequest<unknown>;
+    expect(calledReq.headers.has('Authorization')).toBeFalsy();
+  });
+
+  it('does not attach Authorization on /auth/register requests (no token issued)', async () => {
+    tokenStore.set('test-token');
+    const req = new HttpRequest('POST', '/auth/register', { email: 'a@b', password: 'x' });
+    next.mockImplementationOnce((r: HttpRequest<unknown>) => of(new HttpResponse({ status: 200, url: r.url })));
+
+    await run(req);
+    const calledReq = next.mock.calls[0][0] as HttpRequest<unknown>;
+    expect(calledReq.headers.has('Authorization')).toBeFalsy();
+  });
+
   it('on 401, calls AuthStore.refresh and retries the request with the new token', async () => {
     // Setup: an existing session with a refresh token, and a mock
     // ApiClient whose refresh() succeeds (rotates to new-token).
