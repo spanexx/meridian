@@ -4,6 +4,14 @@ description: |
   PR against master. Run whenever you have one logical change ready to
   ship.
 
+  NOTE — this file is a PROCEDURE, not an executable. "Run the workflow"
+  means follow its steps in order (confirm tree, verify gates, stage,
+  commit, push, open PR). There is no `git-commit.yaml` script to invoke;
+  the steps below are the checklist itself. An equivalent proof counts:
+  e.g. every commit already passed the pre-commit hook and the full suite
+  was run green immediately before the PR — record the results in the PR
+  body's "Gates run" section.
+
 triggers:
   - Finished implementing one logical change (feature, fix, refactor, doc, test, skill, workflow, ci change)
   - User says "commit this", "ship it", "open a PR"
