@@ -100,6 +100,16 @@ doesn't expose (e.g. aria-pressed on a filter toggle), prefer raw
 `<button class="btn btn-primary">` markup in the page over extending
 the primitive's API.
 
+DISCOVERY 2026-08-19: the marker regex is `//\s*TEST-COUPLED:` — a
+`* TEST-COUPLED:` inside a `/** */` block comment does NOT match. The
+marker must sit on its own line directly above the declaration
+(`// TEST-COUPLED: <reason>`). Pack C hit this: an e2e helper carried
+`* TEST-COUPLED: exercised indirectly…` only in its header block, the
+TDD check blocked the commit, and the fix was adding the `//` line
+above the function. When a stage fails with "function has no matching
+test" and the file already mentions TEST-COUPLED in a block comment,
+convert that to the line-above form before touching test code.
+
 ## Retrofit Mode (Existing Code)
 
 Pre-TDD code that exists in the repo (e.g. the 19 primitives shipped

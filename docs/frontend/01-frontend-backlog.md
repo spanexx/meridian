@@ -1,9 +1,9 @@
 # Frontend Backlog — Pre-Backend Completion Plan
 
 Date: 2026-08-18 (updated 2026-08-19)
-Status: **Pack A SHIPPED, Pack B SHIPPED on `feat/frontend-data-layer` (local, unpushed);
-Packs C–E still open.** Execution was approved by the user on 2026-08-18
-("Everything A–E").
+Status: **Pack A SHIPPED, Pack B SHIPPED, Pack C SHIPPED on `feat/frontend-data-layer`
+(local, unpushed); Packs D–E still open.** Execution was approved by the user on
+2026-08-18 ("Everything A–E").
 Owner: agent-maintained
 Last reviewed: 2026-08-19
 
@@ -28,7 +28,7 @@ backend begins, the order to build it in, and the evidence for each gap.
 | Pre-commit guardrails | 11/11 — now incl. **strict ESLint** (errors AND warnings block; eslint 9 + angular-eslint flat config; CI mirrors it) |
 | HTTP / API layer (**Pack A**) | **Done** — typed `ApiClient` + transport seam (`API_TRANSPORT` token; MockTransport dev / HttpTransport prod, flip = `environment.useMock`), 31 seeded mock routes (incl. auth register + 2FA), HttpClient + functional interceptors (auth/correlation/error), canonical models, money/date/error utils, env files + fileReplacements |
 | State management | **Pack B SHIPPED** — ThemeService (single owner) + PoolStore + AuthStore; dashboard KPIs + greeting + profile identity now one-source via stores |
-| Auth | **Partial (Pack C)** — TokenStore + Bearer interceptor + login/register wired with token persistence; NO guards, no refresh, no 2FA UI, no KYC flow |
+| Auth | **Pack C SHIPPED** — TokenStore + Bearer interceptor + login/register wired with token persistence; authGuard + roleGuard on every protected route; silent 401→refresh retry (single-flight); 2FA challenge surface on /login; KYC + 2FA status + sign-out on /profile |
 | Flows (Pack D) | **Not started** — deposit/withdraw/vote/submit-signal still local state |
 | Maintainability (Pack E) | Partial — `_placeholder` deleted, `/showcase` gated out of prod, labels/aria a11y fixed; landing split + overview rewrite open |
 | Backend | Not started (docs-only: `docs/apis/*` now complete incl. executions/payouts/notifications contracts) |
@@ -213,6 +213,34 @@ explicitly deferred to Pack C/D.
 
 Verification (all green): eslint 0 problems; vitest 1001/1001;
 `ng build --configuration production` exit 0; Playwright 157/157.
+
+## Work history — Pack C execution (2026-08-19 → 2026-08-19)
+
+Pack C (auth) landed on `feat/frontend-data-layer` (local, unpushed) on
+top of Pack B. Scope per `docs/features/auth/PRD-TRD-auth.md` (B1–B6):
+
+- **Route guards** — `authGuard` (auth required → /login with
+  `?returnUrl`) + `roleGuard('VETTER','OPERATOR')` (governance voting
+  per CONTEXT.md); every app route carries `canActivate: [authGuard]`.
+- **E2E session helper** — `frontend/e2e/helpers/auth.ts`
+  (`seedSession`) so protected-route specs boot with a live token; 10
+  specs updated; register now routes to /login (signup issues no token).
+- **2FA challenge surface** — /login flips creds → 6-digit code step
+  (`pending2fa`/`step`/`code` signals), `submitCode()` →
+  `auth.login2fa()` → /dashboard; errors toast and stay on step.
+- **KYC + 2FA status** — profile identity card derives from
+  `auth.member()` (`kycLabel()`/`kycBadgeVariant()`/`twofaLabel()`)
+  instead of hardcoded "Verified"/"TOTP".
+- **Sign out** — profile `signOut()` calls `auth.logout()` (server flush
+  + local clear) and navigates to `/`.
+- **401→refresh retry** — `authInterceptor` single-flight refresh
+  (shared in-flight promise), retries once with rotated Bearer, clears
+  session + propagates on refresh failure; /auth/login + /auth/refresh
+  never carry Bearer.
+
+Verification (all green): eslint 0 problems; vitest 1048/1048; prod
+build exit 0 (11/11 pre-commit checks on each commit); Playwright
+157/157.
 
 ## Open decisions
 

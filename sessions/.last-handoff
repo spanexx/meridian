@@ -1,67 +1,66 @@
-# MERIDIAN — Handoff (2026-08-19, Pack B SHIPPED)
+# MERIDIAN — Handoff (2026-08-19, Pack C SHIPPED)
 
 ## Mode
 Operating mode is **AUTO** (`state` file = `auto`). The agent may decide HOW, never WHAT — follow `docs/`, `CONTEXT.md`, `decisions.md`. Every AUTO decision is logged in `sessions/decisions.md`.
 
 ## Branch
 `feat/frontend-data-layer` (local, unpushed; master at `2e0a9c8`).
-Current commit: was `f570b9a`; Pack B commit landed on top this session.
+Current commit: `e53aca4` (Pack C interceptor retry landed on top this session).
 
-## Current State (Pack B SHIPPED)
+## Current State (Pack C SHIPPED)
 
-**Shipped this round (Pack B — state stores):**
-- **ThemeService** — single owner of dark/light theme (replaces 6 copy-pasted implementations). All 6 consumers migrated.
-- **PoolStore** — shared pool status + balance; pool page + dashboard KPIs. Dashboard KPI tiles are one-source derivations (honest 16-open / 11-awaiting from seed, not the wireframe's fabricated 12/8).
-- **AuthStore** — session state (token + member): `login()`, `register()`, `loadMe()`, `logout()`; token persisted to TokenStore. Login + register pages migrated to `auth.login()`/`auth.register()`.
-- **Dashboard greeting** — `Good evening, {{ greetingName() }}` where `greetingName` reads `auth.member().profile.first_name` (single source). Page's own `client.me()` call removed in favor of `auth.loadMe()`.
-- **Profile identity** — hero display name + identity email source from `auth.member()` (`displayName()`/`email()` computeds); constructor calls `auth.loadMe()`.
+**Shipped this round (Pack C — auth, per `docs/features/auth/PRD-TRD-auth.md` B1–B6):**
+- **Route guards** — `authGuard` (auth required → /login with `?returnUrl`) + `roleGuard('VETTER','OPERATOR')` (per-community governance per CONTEXT.md); every protected route carries `canActivate: [authGuard]` in `app.routes.ts`.
+- **E2E session helper** — `frontend/e2e/helpers/auth.ts` (`seedSession`); 10 specs seed a live token; register routes to /login (signup issues no token).
+- **2FA challenge surface** — /login flips creds → 6-digit code step; `submitCode()` → `auth.login2fa()` → /dashboard; errors stay on step; back link returns to creds.
+- **KYC + 2FA status** — profile identity card derives `kycLabel()`/`kycBadgeVariant()`/`twofaLabel()` from `auth.member()` (was hardcoded "Verified"/"TOTP").
+- **Sign out** — profile `signOut()` calls `auth.logout()` (server flush + local clear) + navigates to `/`.
+- **401→refresh retry** — authInterceptor single-flight refresh (shared in-flight promise), retries once with rotated Bearer, clears session + propagates on failure; /auth/login + /auth/refresh never carry Bearer.
+
+**Commits (4 code + docs):** `60c9256` guards+e2e seeding → `36e8e74` 2FA surface → `ca033c0` profile KYC/2FA/signOut → `e53aca4` interceptor retry. Each passed the full 11-check pre-commit gate.
 
 **Verification (all green):**
 - eslint strict: 0 problems
-- vitest: 1001/1001
+- vitest: **1048/1048** (was 1001 at Pack B)
 - `ng build --configuration production`: exit 0
 - Playwright e2e: 157/157
 
-**Note on a found bug:** prod build caught a genuine strict-type error in `dashboard.page.ts` (`o.status` is optional → `string | undefined`, unsafe in `.includes()`); fixed with `o.status ?? ''`. This class of bug is invisible to eslint/vitest (lenient esbuild) — the prod build is the real gate.
+**Note on a hook gotcha:** the TDD check's `TEST-COUPLED` marker regex needs `// TEST-COUPLED:` on the line directly above the declaration — `* TEST-COUPLED:` inside a block comment does NOT count (blocked one commit; learned in `tdd-enforcement/SKILL.md`). A vitest run also flaked 6 unrelated page specs on 5s timeouts once under parallel load — rerun clean passes 1048/1048; not a code issue.
 
 ## Remaining packs (for future rounds)
-- **Pack C — Auth guards/refresh/2FA UI/KYC flow** (route guards, token refresh flow, 2FA challenge UI, KYC status).
-- **Pack D — Flows** (deposit/withdraw/vote/submit-signal mutations to ApiClient).
-- **Pack E — Remaining** (landing template split 1109 lines, any leftover docs).
-
-Single-consumer stores (opportunities/executions/payouts/communities/notifications) were deferred per the "delay complexity" decision — build them in Pack C/D as those features need them.
+- **Pack D — Flows** (deposit/withdraw/vote/submit-signal mutations to ApiClient; withdrawal 2FA gate + KYC submission were explicitly deferred here).
+- **Pack E — Remaining** (landing template split 1109 lines — also flagged by prod-build budget warning on `landing.page.ts` 5.90 kB vs 4.00 kB; any leftover docs).
+- Backend starts after A–C — the contract-complete consumer handoff point is reached.
 
 ## Key Files (this round)
-- `frontend/src/app/core/state/theme.service.ts/.spec.ts`
-- `frontend/src/app/core/state/pool.store.ts/.spec.ts`
-- `frontend/src/app/core/state/auth.store.ts/.spec.ts`
-- `frontend/src/app/pages/dashboard/dashboard.page.ts/.spec.ts`
-- `frontend/src/app/pages/profile/profile.page.ts/.template.html/.spec.ts`
+- `frontend/src/app/core/guards/auth.guard.ts`, `role.guard.ts`, `guards.spec.ts`
+- `frontend/e2e/helpers/auth.ts`
+- `frontend/src/app/core/api/auth.interceptor.ts/.spec.ts` (+ `http-transport.spec.ts` DI providers)
 - `frontend/src/app/pages/login/login.page.ts/.spec.ts`
-- `frontend/src/app/pages/register/register.page.ts/.spec.ts`
-- `docs/frontend/01-frontend-backlog.md` (Pack B SHIPPED)
-- `sessions/decisions.md` (AUTO entry added)
+- `frontend/src/app/pages/profile/profile.page.ts/.spec.ts/.template.html`
+- `docs/features/auth/PRD-TRD-auth.md`, `IMPL-auth.md` (both marked SHIPPED)
+- `docs/frontend/01-frontend-backlog.md` (Pack C row SHIPPED + work history)
+- `sessions/decisions.md` (AUTO entry)
 
 ## Next Steps (in order)
-1. **Pack C** — route guards (`AuthGuard` + role guard), token-refresh flow, 2FA challenge surface, KYC status flow.
-2. Run full verification after each Pack C feature: `npx vitest run && npx eslint . && npx ng build --configuration production && npx playwright test`.
-3. Commit per feature with conventional-commits; git identity `spanexx <spanexxvictor@gmail.com>`.
-4. Update `docs/frontend/01-frontend-backlog.md`, `sessions/decisions.md`, and this handoff.
+1. **Pack D — flows** (deposit/withdraw/vote/submit-signal) — largest remaining frontend pack; consider `feature-pipeline` via `execute-pack`.
+2. After Pack D, **Pack E** (landing template split — also fixes the prod budget warning).
+3. Run full verification after each feature: `npx vitest run && npx eslint . && npx ng build --configuration production && npx playwright test` (from `frontend/`).
+4. Commit per feature with conventional-commits; git identity `spanexx <spanexxvictor@gmail.com>`.
+5. Update `docs/frontend/01-frontend-backlog.md`, `sessions/decisions.md`, and this handoff.
+6. Branch is 30 commits ahead of master, still unpushed — pushing + PR is a user call (Orchestrator/CI not yet engaged).
 
 ## Commands to Verify
 ```bash
 cd /home/spanexx/Shared/Projects/meridian/frontend
-npx vitest run                    # full vitest
+npx vitest run                    # full vitest (1048/1048)
 npx eslint .                      # lint
 npx ng build --configuration production  # prod build (real strict gate)
-npx playwright test               # e2e
+npx playwright test               # e2e (157/157)
 ```
 
 ## Relevant Skills for Next Session
-- `feature-pipeline` (continue Pack C)
-- `tdd` (auth guards/refresh/2FA/KYC)
+- `execute-pack` / `feature-pipeline` (Pack D flows)
+- `tdd` (RED→GREEN for each flow mutation)
 - `git-conventions` (commit conventions)
 - `handoff` (write next handoff)
-
----
-*End of handoff — session continues in next round*
