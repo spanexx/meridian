@@ -38,7 +38,11 @@ jobs:
       - name: Lint
         # STRICT since 2026-08-19: eslint 9 + angular-eslint flat config are
         # wired; any error or warning fails the job (mirrors pre-commit [11/11]).
-        run: npm --prefix frontend run lint
+        # Bare `npm run lint`: defaults.run.working-directory is already
+        # `frontend` — `npm --prefix frontend` doubled the path to
+        # frontend/frontend/package.json, breaking CI on this branch's first
+        # ever push (2026-08-20, run 32338301784) and every run since.
+        run: npm run lint
 
       - name: Build
         run: npx ng build --configuration production
