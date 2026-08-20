@@ -15,8 +15,14 @@
  * @reviewed 2026-08-17
  */
 import { test, expect } from '@playwright/test';
+import { expectScreenshot, waitForStable } from './helpers/visual';
+import { seedSession } from './helpers/auth';
 
 test.describe('submit-signal page (wireframe-aligned)', () => {
+  test.beforeEach(async ({ page }) => {
+    await seedSession(page);
+  });
+
   test('route loads and renders the title + subtitle', async ({ page }) => {
     const res = await page.goto('/submit-signal');
     expect(res?.status()).toBeLessThan(400);
@@ -93,8 +99,9 @@ test.describe('submit-signal page (wireframe-aligned)', () => {
     await expect(panel).toContainText('+51.4%');
   });
 
-  test('submit-signal page screenshot saved for visual review', async ({ page }) => {
+  test('submit-signal renders true to its golden baseline', async ({ page }) => {
     await page.goto('/submit-signal');
-    await page.screenshot({ path: 'e2e/screenshots/submit-signal.png', fullPage: true });
+    await waitForStable(page);
+    await expectScreenshot(page, 'submit-signal');
   });
 });

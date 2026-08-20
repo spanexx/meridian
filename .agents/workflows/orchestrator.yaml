@@ -1,0 +1,66 @@
+name: orchestrator
+description: |
+  Orchestrator agent loop for multi-pack execution goals (frontend A–E,
+  backend packs). Routes each job to a delegated agent, runs independent
+  jobs concurrently, and integrates, tests, and commits each job before
+  starting the next.
+
+triggers:
+  - Multi-pack execution goal is active (frontend A–E, backend packs)
+  - User says "restart the goal" or "continue the packs"
+  - A backlog has multiple independent jobs to run in sequence
+
+routing:
+  cline-one: deep implementation, complex refactors
+  opencode-action: codebase research, prep, local/online searches
+
+rules:
+  - "Agents may run concurrently as long as their jobs do not conflict (disjoint files/areas)."
+  - "Serial only when two jobs touch the same files or depend on each other — run the second after the first integrates."
+  - "Scrutinize every job before delegating; match the job to the right agent from the routing table."
+  - "Prepare the codebase while agents work (read target files, check backlog state, set up the integration surface)."
+  - "Never commit red: every job passes the scope-appropriate gates before its commit."
+  - "One logical change = one commit, per git-conventions."
+
+steps:
+  - name: Route the job
+    run: "Match the job to an agent from the routing table; one agent per job"
+    expect: exactly one agent per job; jobs with disjoint files/areas may run concurrently
+
+  - name: Send job and wait
+    run: "Delegate to the chosen agent; jobs whose files overlap are sent only after the earlier one integrates"
+    expect: agent report recorded in its report file (.cline-one-reports/ or .opencode-reports/)
+
+  - name: Prepare integration while waiting
+    run: "Read the agent's target files, review the diff, check the backlog state"
+    expect: integration surface ready before the agent returns
+
+  - name: Review the job output
+    run: "Diff review against the locked direction (docs/, CONTEXT.md, PRD-TRD)"
+    expect: no scope drift; mismatches rejected or sent back
+
+  - name: Integrate
+    run: "Apply the reviewed changes to the working tree"
+    expect: files staged explicitly (git add <specific files>)
+
+  - name: Test
+    run: |
+      Run the scope-appropriate gates before committing:
+      frontend: npx vitest run && npx eslint . && npx ng build --configuration production
+                && npx playwright test && npm audit --omit=dev
+      backend:  go vet ./... && go test ./... && go build ./...
+    expect: all gates green; never commit red
+
+  - name: Commit
+    run: "git commit per git-conventions (one logical change = one commit)"
+    expect: pre-commit 12-check gate passes
+
+  - name: Repeat
+    run: "Next backlog job; stop when the pack is SHIPPED and handoff written"
+    expect: pack marked SHIPPED in docs/frontend/01-frontend-backlog.md
+
+verify:
+  - "sessions/decisions.md contains a row for each pack shipped under the loop"
+  - "each commit passed the pre-commit gate (12/12)"
+  - "full verification gate green at pack end (vitest / eslint / build / e2e / audit)"
+  - "docs/features/<slug>/ PRD-TRD + IMPL marked SHIPPED with the code"

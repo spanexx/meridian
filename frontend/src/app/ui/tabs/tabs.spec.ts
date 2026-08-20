@@ -3,8 +3,8 @@
  *
  * Retrofit test suite. Pins: .tabs wrapper, role="tablist", tab
  * buttons get role="tab", active tab gets .active + aria-selected=true,
- * select event emits the clicked tab id, click also flips active when
- * parent doesn't bind to (select).
+ * selectChange event emits the clicked tab id, click also flips active when
+ * parent doesn't bind to (selectChange).
  *
  * @owner   spanexx
  * @reviewed 2026-08-11
@@ -16,7 +16,7 @@ import { UiTabsComponent } from './tabs.component';
 @Component({
   standalone: true,
   imports: [UiTabsComponent],
-  template: `<ui-tabs [tabs]="tabs" [active]="active" (select)="onSelect($event)" />`,
+  template: `<ui-tabs [tabs]="tabs" [active]="active" (selectChange)="onSelect($event)" />`,
 })
 class HostComponent {
   tabs = [
@@ -80,7 +80,7 @@ describe('UiTabsComponent', () => {
     expect(tabButtons[2].textContent.trim()).toBe('Flow');
   });
 
-  it('emits the clicked tab id via (select) event', async () => {
+  it('emits the clicked tab id via (selectChange) event', async () => {
     const fixture = await renderHost();
     const tabButtons = fixture.nativeElement.querySelectorAll('.tab');
     tabButtons[2].click();

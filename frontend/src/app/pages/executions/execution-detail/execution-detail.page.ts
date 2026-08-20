@@ -1,35 +1,23 @@
 /**
  * ExecutionDetailPageComponent — per-execution operational view.
  *
- * Renders per wireframe/meridian/execution-detail/index.html:
- *   - breadcrumb (Executions > E-####)
- *   - header: ref + Listed badge + Apparel badge + title +
- *     "From O-#### - <opportunity title>" link to
- *     /opportunities/:id + operator + duration + 2 ghost action
- *     buttons (share-2, download/Export)
- *   - Timeline card (5-step circle: Approved/Funded/Acquired/
- *     Listed/Sold with progress bar + 4-stage label)
- *   - Main col:
- *       - Capital (3 inner cards: Allocated/Spent/Recovered)
- *       - Inventory (8 size cards in 4-col grid with picsum thumbs)
- *       - Event Log (9 append-only events with timestamps + badges)
- *   - Sidebar:
- *       - Payout Preview (glass, Net profit + 5-row Distribution)
- *       - Participants (3 members with avatars)
+ * Renders per wireframe/meridian/execution-detail/index.html.
  *
- * More minimal than the wireframe: drops text-gradient-emerald
- * (uses a plain emerald-400 on the big numbers), drops the inline
- * glow-shadow on the listed step (uses the existing amber token
- * via the .progress-fill-amber class), and unified the kpi-number
- * clamp across the project.
+ * Backend-readiness pack: the page now injects ApiClient and calls
+ * executionGet(id) to prove the data-layer wiring. The rich wireframe
+ * demo content below (timeline / capital / inventory / event log /
+ * payout / participants) remains the display source until a canonical
+ * execution detail endpoint's shape replaces it; a real load would map
+ * executionGet(id) into this view.
  *
  * @owner   spanexx
  * @reviewed 2026-08-12
  */
-import { ChangeDetectionStrategy, Component, Input, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, computed, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { ApiClient } from '../../../core/api/api-client';
 
 interface TimelineStep {
   readonly label: string;
@@ -75,10 +63,35 @@ interface DistributionRow {
 })
 export class ExecutionDetailPageComponent {
   /** Route :id param — wires the page to whatever execution is requested. */
-  @Input() id: string = 'E-1042';
+  @Input() set id(value: string) {
+    this._id.set(value || 'E-1042');
+    this.load();
+  }
+  get id(): string {
+    return this._id();
+  }
+  private readonly _id = signal<string>('E-1042');
+
+  private readonly client = inject(ApiClient);
+
+  /** True until the first executionGet() payload resolves (drives the skeleton). */
+  readonly loading = signal(true);
+
+  constructor() {
+    this.load();
+  }
+
+  /** Prove the data-layer wiring is in place. */
+  private load(): void {
+    this.loading.set(true);
+    void this.client
+      .executionGet(this._id())
+      .catch(() => undefined)
+      .finally(() => this.loading.set(false));
+  }
 
   // ─── header refs (so header reads the current id) ──────────────
-  readonly executionRef = computed<string>(() => this.id);
+  readonly executionRef = computed<string>(() => this._id());
 
   readonly sourceOpportunity = {
     ref: 'O-2037',
@@ -101,16 +114,9 @@ export class ExecutionDetailPageComponent {
     this.steps.findIndex((s) => s.state === 'current'),
   );
 
-  /**
-   * 0-100 fill for the timeline progress bar.
-   * The wireframe lands at 60% — between Acquired (60%) and Listed (80%),
-   * so we use the floor of (currentIndex / 4) * 100 + a small lead-in
-   * that pins the value at 60 for the default execution.
-   */
   readonly timelineProgress = computed<number>(() => {
     const idx = this.currentStepIndex();
     if (idx < 0) return 0;
-    // 60% lands between step 3 (Acquired, complete) and step 4 (Listed, current)
     const widths = [0, 20, 40, 60, 80, 100];
     return widths[idx] ?? 0;
   });
@@ -137,7 +143,6 @@ export class ExecutionDetailPageComponent {
     { size: 'US 12', channel: 'GOAT', status: 'Listed', price: 2700, seed: 'sneaker-h' },
   ];
 
-  /** Sort by Sold-before-Listed, then by size ascending — used by template. */
   readonly inventoryGrouped = computed<readonly InventoryItem[]>(() => {
     const order: Record<InventoryItem['status'], number> = { Sold: 0, Listed: 1 };
     return [...this.inventory].sort((a, b) => {
@@ -149,60 +154,15 @@ export class ExecutionDetailPageComponent {
 
   // ─── Event log ──────────────────────────────────────────────────
   readonly eventLog: readonly EventLog[] = [
-    {
-      timestamp: 'Mar 9 14:22',
-      code: 'execution.item_listed',
-      text: 'Size US 12 · GOAT',
-      variant: 'info',
-    },
-    {
-      timestamp: 'Mar 9 14:18',
-      code: 'execution.item_sold',
-      text: 'Size US 10.5 · GOAT · $2,880',
-      variant: 'success',
-    },
-    {
-      timestamp: 'Mar 9 11:42',
-      code: 'execution.item_listed',
-      text: 'Size US 11.5 · StockX',
-      variant: 'info',
-    },
-    {
-      timestamp: 'Mar 9 09:14',
-      code: 'execution.item_listed',
-      text: 'Size US 11 · eBay',
-      variant: 'info',
-    },
-    {
-      timestamp: 'Mar 8 18:33',
-      code: 'execution.item_sold',
-      text: 'Size US 10 · StockX · $2,780',
-      variant: 'success',
-    },
-    {
-      timestamp: 'Mar 8 16:02',
-      code: 'execution.item_sold',
-      text: 'Size US 10 · eBay · $2,620',
-      variant: 'success',
-    },
-    {
-      timestamp: 'Mar 8 10:15',
-      code: 'execution.acquired',
-      text: 'All 8 pairs received · inspected',
-      variant: 'warning',
-    },
-    {
-      timestamp: 'Mar 6 09:00',
-      code: 'money.allocated',
-      text: '$18,500 from 42 capital accounts',
-      variant: 'info',
-    },
-    {
-      timestamp: 'Mar 5 17:32',
-      code: 'opportunity.approved',
-      text: 'Vetting closed · 3/3 approve',
-      variant: 'success',
-    },
+    { timestamp: 'Mar 9 14:22', code: 'execution.item_listed', text: 'Size US 12 · GOAT', variant: 'info' },
+    { timestamp: 'Mar 9 14:18', code: 'execution.item_sold', text: 'Size US 10.5 · GOAT · $2,880', variant: 'success' },
+    { timestamp: 'Mar 9 11:42', code: 'execution.item_listed', text: 'Size US 11.5 · StockX', variant: 'info' },
+    { timestamp: 'Mar 9 09:14', code: 'execution.item_listed', text: 'Size US 11 · eBay', variant: 'info' },
+    { timestamp: 'Mar 8 18:33', code: 'execution.item_sold', text: 'Size US 10 · StockX · $2,780', variant: 'success' },
+    { timestamp: 'Mar 8 16:02', code: 'execution.item_sold', text: 'Size US 10 · eBay · $2,620', variant: 'success' },
+    { timestamp: 'Mar 8 10:15', code: 'execution.acquired', text: 'All 8 pairs received · inspected', variant: 'warning' },
+    { timestamp: 'Mar 6 09:00', code: 'money.allocated', text: '$18,500 from 42 capital accounts', variant: 'info' },
+    { timestamp: 'Mar 5 17:32', code: 'opportunity.approved', text: 'Vetting closed · 3/3 approve', variant: 'success' },
   ];
 
   // ─── Payout preview ────────────────────────────────────────────
@@ -223,27 +183,9 @@ export class ExecutionDetailPageComponent {
 
   // ─── Participants ───────────────────────────────────────────────
   readonly participants: readonly Participant[] = [
-    {
-      initials: 'MR',
-      name: 'Mike Rivera',
-      role: 'Signal contributor',
-      gradient: 'var(--gradient-amber)',
-      url: '/community/alpha/members/mike-rivera',
-    },
-    {
-      initials: 'SP',
-      name: 'Sarah Park',
-      role: 'Access contributor · Boston',
-      gradient: 'var(--gradient-blue)',
-      url: '/community/alpha/members/sarah-park',
-    },
-    {
-      initials: 'AC',
-      name: 'Alex Chen',
-      role: 'Operator',
-      gradient: 'var(--gradient-copper)',
-      url: '/profile',
-    },
+    { initials: 'MR', name: 'Mike Rivera', role: 'Signal contributor', gradient: 'var(--gradient-amber)', url: '/community/alpha/members/mike-rivera' },
+    { initials: 'SP', name: 'Sarah Park', role: 'Access contributor · Boston', gradient: 'var(--gradient-blue)', url: '/community/alpha/members/sarah-park' },
+    { initials: 'AC', name: 'Alex Chen', role: 'Operator', gradient: 'var(--gradient-copper)', url: '/profile' },
   ];
 
   // ─── public helpers ─────────────────────────────────────────────

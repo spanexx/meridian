@@ -19,12 +19,13 @@
  * @owner   spanexx
  * @reviewed 2026-08-11
  */
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UiIconComponent } from '../ui/icon/icon.component';
 import { UiLogoComponent } from '../ui/logo/ui-logo.component';
+import { ThemeService } from '../core/state/theme.service';
 
 /**
  * The navigation map mirrors wireframe/meridian/kit/app.js NAV.
@@ -89,11 +90,15 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
         class="sidebar-backdrop"
         [hidden]="!sidebarOpen()"
         data-sidebar-backdrop
+        role="presentation"
         (click)="closeSidebar()"
       ></div>
 
       <!-- The actual sidebar — 260px wide, fixed left, full height -->
       <aside class="sidebar" [class.open]="sidebarOpen()" data-testid="sidebar">
+        <!-- Scrollable region: brand + nav sections + Quick Actions. Only this
+             wrapper scrolls, so the pinned bottom-row below stays visible. -->
+        <div class="sidebar-scroll">
         <a routerLink="/" class="flex items-center gap-2.5 mb-2 px-2">
           <ui-logo [size]="30" ariaLabel="Meridian — go to dashboard"></ui-logo>
           <div>
@@ -126,9 +131,11 @@ export const ANGULAR_NAV_ITEMS: readonly NavItem[] = Object.freeze([
           <ui-icon name="plus-circle"></ui-icon>
           Submit Signal
         </a>
+        </div>
 
-        <!-- Bottom-row: notifications / theme / avatar menu -->
-        <div class="mt-auto pt-4 border-t" style="border-color: var(--border-subtle);">
+        <!-- Bottom-row: notifications / theme / avatar menu (pinned, sibling
+             of .sidebar-scroll so it never scrolls out of view) -->
+        <div class="sidebar-footer mt-auto pt-4 border-t" style="border-color: var(--border-subtle);">
           <div class="flex items-center justify-around px-2 py-1.5">
             <button type="button" class="icon-btn" data-dropdown="notifMenu" title="Notifications">
               <ui-icon name="bell"></ui-icon>
@@ -196,16 +203,15 @@ export class ShellComponent {
   /** Mobile sidebar open state — controlled by the mobile-bar menu button. */
   readonly sidebarOpen = signal(false);
 
-  /** Current theme key. */
-  private readonly theme = signal<'dark' | 'light'>(
-    (localStorage.getItem('meridian-theme') as 'dark' | 'light') ?? 'dark',
-  );
+  /** Pack B: theme lives in ThemeService (single owner, persisted). */
+  private readonly themeService = inject(ThemeService);
+
+  /** Current theme key — read from the single ThemeService. */
+  readonly theme = this.themeService.theme;
 
   /** Toggles the page theme. Wired to the data-theme-toggle buttons. */
   toggleTheme(): void {
-    this.theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
-    document.documentElement.dataset['theme'] = this.theme();
-    localStorage.setItem('meridian-theme', this.theme());
+    this.themeService.toggle();
   }
 
   /** Toggles the mobile sidebar. Called from the mobile-bar menu button. */

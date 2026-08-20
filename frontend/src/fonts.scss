@@ -1,0 +1,83 @@
+/**
+ * Self-hosted fonts (BRIDGE 2026-08-21).
+ *
+ * Previously Inter + Montserrat were loaded from fonts.googleapis.com /
+ * fonts.gstatic.com at build time (font-inlining) and runtime. That made
+ * prod builds, Playwright goldens, and e2e renders depend on live network
+ * access to Google Fonts — flaky locally and a CI hazard; when the fetch
+ * failed, pages fell back to system fonts and golden comparisons drifted.
+ *
+ * The latin woff2 subset of each weight is now committed here (assets/
+ * fonts/*.woff2) and served by the app itself: deterministic rendering,
+ * offline-safe builds, no third-party font CDN in prod.
+ *
+ * Weights: Inter 300/400/500/600/700, Montserrat 300/400/600 (the app's
+ * used set — see theme.css font stacks and index.html brand wordmark).
+ *
+ * @owner   agent-maintained
+ * @reviewed 2026-08-21
+ */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/inter-300.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/inter-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/inter-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/inter-700.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('/fonts/montserrat-300.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/montserrat-400.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/montserrat-600.woff2') format('woff2');
+}

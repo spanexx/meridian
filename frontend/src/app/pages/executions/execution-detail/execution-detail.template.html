@@ -6,6 +6,13 @@
     <span class="text-slate-300">{{ executionRef() }}</span>
   </div>
 
+  @if (loading()) {
+    <div class="empty px-5 py-12 text-center" data-testid="skeleton">
+      <ui-icon name="activity" [size]="40" class="mx-auto"></ui-icon>
+      <p class="text-sm font-medium text-slate-400 mb-1">Loading execution…</p>
+      <p class="text-xs text-slate-500">Fetching operational details from the API.</p>
+    </div>
+  } @else {
   <header class="mb-8">
     <!-- status + category badges: row at small, inline at sm+ -->
     <div class="flex items-center gap-3 mb-3 flex-wrap">
@@ -247,4 +254,5 @@
       </section>
     </div>
   </div>
+  }
 </section>

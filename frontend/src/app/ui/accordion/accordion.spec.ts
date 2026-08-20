@@ -106,4 +106,27 @@ describe('UiAccordionItemComponent', () => {
     const chevron = fixture.nativeElement.querySelector('.accordion-chevron');
     expect(chevron.classList.contains('open')).toBe(false);
   });
+
+  it('ngOnInit() seeds open() from defaultOpen', () => {
+    const fixture = TestBed.createComponent(UiAccordionItemComponent);
+    fixture.componentRef.setInput('title', 'T');
+    fixture.componentInstance.ngOnInit();
+    expect(fixture.componentInstance.open()).toBe(false);
+    fixture.componentRef.setInput('defaultOpen', true);
+    fixture.componentInstance.ngOnInit();
+    expect(fixture.componentInstance.open()).toBe(true);
+  });
+
+  it('onToggle() flips open() and emits openChange', () => {
+    const fixture = TestBed.createComponent(UiAccordionItemComponent);
+    fixture.componentRef.setInput('title', 'T');
+    fixture.componentInstance.ngOnInit();
+    const emitted: boolean[] = [];
+    fixture.componentInstance.openChange.subscribe((v) => emitted.push(v));
+    fixture.componentInstance.onToggle();
+    expect(fixture.componentInstance.open()).toBe(true);
+    fixture.componentInstance.onToggle();
+    expect(fixture.componentInstance.open()).toBe(false);
+    expect(emitted).toEqual([true, false]);
+  });
 });

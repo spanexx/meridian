@@ -19,8 +19,6 @@ import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import type { LandingPageComponent } from './landing.page';
 
-const NAV_LINKS = ['Open feed', 'View all signals', 'Browse members', 'View live opportunities'];
-
 async function renderStandalone(): Promise<ComponentFixture<LandingPageComponent>> {
   await TestBed.configureTestingModule({
     providers: [provideRouter([])],

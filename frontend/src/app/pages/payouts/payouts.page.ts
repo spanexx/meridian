@@ -1,5 +1,5 @@
 /**
- * PayoutsPageComponent — wireframe-aligned payout ledger.
+ * PayoutsPageComponent — wireframe-aligned payout ledger, API-driven.
  *
  * Per wireframe/meridian/payouts/index.html. Behavior pins:
  *   - title 'Payouts' + the community-governed split subtitle
@@ -8,24 +8,73 @@
  *   - 3 status tabs with counts: All (48) / Pending (3) / Paid (45)
  *   - 3 KPI cards (raw markup — do not use UiKpiCard here)
  *   - Split Formula card with 5 cells + a Governance link
- *   - 7-column table, 48-row dataset paginated 8 per page (6 pages)
- *   - Footer 'Showing N of 48' + prev/next + empty state
+ *   - 7-column table, 48-row ledger paginated 8 per page (6 pages)
+ *   - Footer 'Showing N of 48' + prev/next + empty state + a loading
+ *     skeleton while the first payload is in flight
  *
- * Demo data is hardcoded per the wireframe (see payouts.data.ts).
- * Backend wiring is a later pack.
+ * Data layer (Step 6 of the frontend data-layer plan): the page consumes
+ * the canonical pool-wide ledger through the injected
+ * ApiClient.payoutsList() (core/api/api-client.ts) instead of the deleted
+ * hardcoded payouts.data.ts. The canonical rows are mapped to the
+ * wireframe view by the MODULE-LOCAL helpers below.
+ *
+ * DISCOVERY 2026-08-18 (canonical → wireframe mapping): the canonical
+ * ledger uses UPPER_SNAKE status/type enums, string money and ISO dates
+ * while the wireframe renders lowercase badges ('pending'/'paid',
+ * 'capital'/'signal'/'access'), '+$X,XXX.XX' money and an 'est. ' date
+ * prefix for pending rows. The mapping lives in viewRow()/statusKey()/
+ * typeKey(). See core/api/mock-seed.ts (SEED_PAYOUTS) and
+ * core/utils/money.ts + core/utils/dates.ts.
  *
  * @owner   agent-maintained
- * @reviewed 2026-08-17
+ * @reviewed 2026-08-18
  */
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { PAYOUTS, type Payout, type PayoutStatus, type PayoutType } from './payouts.data';
+import { ApiClient } from '../../core/api/api-client';
+import type { PayoutLedgerRow } from '../../core/models';
+import { formatApiMoney } from '../../core/utils/money';
+import { formatIsoDate } from '../../core/utils/dates';
 import { UiIconComponent } from '../../ui/icon/icon.component';
 
-const STATUS_COUNT = {
-  pending: PAYOUTS.filter((p) => p.status === 'pending').length,
-  paid: PAYOUTS.filter((p) => p.status === 'paid').length,
+/** Wireframe avatar display keyed by canonical member_id (seed mock-seed.ts). */
+const MEMBER_DISPLAY: Record<string, { name: string; initials: string; gradient: string }> = {
+  mem_dv: { name: 'Dana Voss', initials: 'DV', gradient: 'var(--gradient-violet)' },
+  mem_mr: { name: 'Mike Rivera', initials: 'MR', gradient: 'var(--gradient-amber)' },
+  mem_jt: { name: 'Jules Tan', initials: 'JT', gradient: 'var(--gradient-blue)' },
+  mem_rk: { name: 'Ravi Kumar', initials: 'RK', gradient: 'var(--gradient-emerald)' },
+  mem_sp: { name: 'Sarah Park', initials: 'SP', gradient: 'var(--gradient-violet)' },
 };
+
+/** Wireframe view types (lowercased canonical enums — see file header). */
+type ViewType = 'capital' | 'signal' | 'access';
+type ViewStatus = 'pending' | 'paid';
+
+interface ViewRow {
+  ref: string;
+  member: { initials: string; name: string; gradient: string };
+  type: ViewType;
+  amount: string; // API money string, formatted only at display time
+  share: number;
+  status: ViewStatus;
+  date: string;
+}
+
+const statusKey = (s: PayoutLedgerRow['status']): ViewStatus =>
+  s === 'PENDING' ? 'pending' : 'paid';
+
+const typeKey = (t: PayoutLedgerRow['type']): ViewType =>
+  t === 'CAPITAL' ? 'capital' : t === 'SIGNAL' ? 'signal' : 'access';
+
+const viewRow = (row: PayoutLedgerRow): ViewRow => ({
+  ref: row.execution_ref,
+  member: MEMBER_DISPLAY[row.member_id],
+  type: typeKey(row.type),
+  amount: row.amount, // kept as the API string ("2340.80")
+  share: row.share,
+  status: statusKey(row.status),
+  date: (row.status === 'PENDING' ? 'est. ' : '') + formatIsoDate(row.created_at),
+});
 
 @Component({
   selector: 'app-payouts-page',
@@ -61,7 +110,7 @@ const STATUS_COUNT = {
               <ui-icon name="filter" [size]="16"></ui-icon>Type
             </button>
             @if (typeOpen()) {
-              <div class="fixed inset-0 z-40" data-click-away (click)="closeTypeMenu()"></div>
+              <div class="fixed inset-0 z-40" data-click-away role="presentation" (click)="closeTypeMenu()"></div>
             }
             <div class="menu" id="payMenu" [hidden]="!typeOpen()">
               <div class="menu-head">Contribution type</div>
@@ -83,7 +132,7 @@ const STATUS_COUNT = {
 
       <!-- Status tabs -->
       <div class="tabs mb-6" data-testid="status-filter">
-        @for (s of statuses; track s.key) {
+        @for (s of statuses(); track s.key) {
           <button
             type="button"
             class="tab"
@@ -160,7 +209,7 @@ const STATUS_COUNT = {
 
       <!-- Table -->
       <div class="card p-0 overflow-hidden">
-        @if (pagedRows().length === 0) {
+        @if (pagedRows().length === 0 && !loading()) {
           <div class="empty" data-testid="empty">
             <ui-icon name="circle-dollar-sign" [size]="40" class="mx-auto"></ui-icon>
             <p class="text-sm font-medium text-slate-400 mb-1">No payouts match</p>
@@ -181,7 +230,20 @@ const STATUS_COUNT = {
                 </tr>
               </thead>
               <tbody>
-                @for (p of pagedRows(); track $index) {
+                @if (loading()) {
+                  <!-- DISCOVERY 2026-08-18: loading skeleton row until the
+                  first payoutsList() payload resolves (Step 6 rewire). -->
+                  <tr data-testid="skeleton">
+                    <td class="hidden md:table-cell"><span class="text-slate-600">Loading payouts…</span></td>
+                    <td><span class="text-slate-600">Loading…</span></td>
+                    <td class="hidden sm:table-cell"><span class="text-slate-600">Loading…</span></td>
+                    <td><span class="text-slate-600">Loading…</span></td>
+                    <td class="hidden lg:table-cell"><span class="text-slate-600">Loading…</span></td>
+                    <td><span class="text-slate-600">Loading…</span></td>
+                    <td class="hidden md:table-cell"><span class="text-slate-600">Loading…</span></td>
+                  </tr>
+                } @else {
+                  @for (p of pagedRows(); track $index) {
                   <tr
                     class="table-row"
                     [attr.data-category]="p.type"
@@ -223,39 +285,42 @@ const STATUS_COUNT = {
                       <span class="text-xs text-slate-500">{{ p.date }}</span>
                     </td>
                   </tr>
+                  }
                 }
               </tbody>
             </table>
           </div>
 
-          <!-- Footer / pagination -->
-          <div
-            class="flex items-center justify-between px-5 py-3 text-xs text-slate-500"
-            data-testid="pagination"
-          >
-            <span>Showing {{ pagedRows().length }} of {{ total }}</span>
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                class="btn btn-ghost text-xs px-2 py-1"
-                data-page-prev
-                [disabled]="page() === 1"
-                (click)="prev()"
-              >
-                <ui-icon name="chevron-left" [size]="12"></ui-icon>
-              </button>
-              <span data-page-num>{{ page() }} / {{ totalPages() }}</span>
-              <button
-                type="button"
-                class="btn btn-ghost text-xs px-2 py-1"
-                data-page-next
-                [disabled]="page() === totalPages()"
-                (click)="next()"
-              >
-                <ui-icon name="chevron-right" [size]="12"></ui-icon>
-              </button>
+          @if (!loading()) {
+            <!-- Footer / pagination -->
+            <div
+              class="flex items-center justify-between px-5 py-3 text-xs text-slate-500"
+              data-testid="pagination"
+            >
+              <span>Showing {{ pagedRows().length }} of {{ total() }}</span>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  class="btn btn-ghost text-xs px-2 py-1"
+                  data-page-prev
+                  [disabled]="page() === 1"
+                  (click)="prev()"
+                >
+                  <ui-icon name="chevron-left" [size]="12"></ui-icon>
+                </button>
+                <span data-page-num>{{ page() }} / {{ totalPages() }}</span>
+                <button
+                  type="button"
+                  class="btn btn-ghost text-xs px-2 py-1"
+                  data-page-next
+                  [disabled]="page() === totalPages()"
+                  (click)="next()"
+                >
+                  <ui-icon name="chevron-right" [size]="12"></ui-icon>
+                </button>
+              </div>
             </div>
-          </div>
+          }
         }
       </div>
     </section>
@@ -263,40 +328,60 @@ const STATUS_COUNT = {
   styles: [],
 })
 export class PayoutsPageComponent {
-  /** Total rows in the dataset (the "of N" in the pagination footer). */
-  readonly total = PAYOUTS.length;
+  /** True until the first payoutsList() payload resolves (drives the skeleton). */
+  readonly loading = signal(true);
+
+  /** Raw canonical ledger rows from the injected ApiClient. */
+  readonly source = signal<PayoutLedgerRow[]>([]);
+
+  /** Total rows in the ledger (the "of N" in the pagination footer). */
+  readonly total = computed(() => this.source().length);
 
   /** Page size for the table; matches wireframe (8 rows / page). */
   readonly pageSize = 8;
 
   /** Currently active filters (signals back the template). */
   readonly search = signal('');
-  readonly type = signal<'all' | PayoutType>('all');
+  readonly type = signal<'all' | ViewType>('all');
   readonly typeOpen = signal(false);
-  readonly status = signal<'all' | PayoutStatus>('all');
+  readonly status = signal<'all' | ViewStatus>('all');
   readonly page = signal(1);
 
   /** The 4 type-dropdown items (first is the default active). */
-  readonly types: ReadonlyArray<{ key: 'all' | PayoutType; label: string; icon: string }> = [
+  readonly types: readonly { key: 'all' | ViewType; label: string; icon: string }[] = [
     { key: 'all', label: 'All types', icon: 'layout-grid' },
     { key: 'capital', label: 'Capital', icon: 'banknote' },
     { key: 'signal', label: 'Signal', icon: 'lightbulb' },
     { key: 'access', label: 'Access', icon: 'key' },
   ];
 
-  /** The 3 status tabs with wireframe counts. */
-  readonly statuses = [
-    { key: 'all' as const, label: 'All', count: PAYOUTS.length },
-    { key: 'pending' as const, label: 'Pending', count: STATUS_COUNT.pending },
-    { key: 'paid' as const, label: 'Paid', count: STATUS_COUNT.paid },
-  ];
+  /** Canonical ledger rows mapped to the wireframe view (see viewRow()). */
+  readonly rows = computed(() => this.source().map(viewRow));
+
+  /** The 3 status tabs with counts derived from the loaded ledger (48/3/45). */
+  readonly statuses = computed(() => {
+    const s = this.source();
+    return [
+      { key: 'all' as const, label: 'All', count: s.length },
+      {
+        key: 'pending' as const,
+        label: 'Pending',
+        count: s.filter((r) => statusKey(r.status) === 'pending').length,
+      },
+      {
+        key: 'paid' as const,
+        label: 'Paid',
+        count: s.filter((r) => statusKey(r.status) === 'paid').length,
+      },
+    ];
+  });
 
   /** Filter rows by search + type + status. */
-  readonly filtered = computed<Payout[]>(() => {
+  readonly filtered = computed<ViewRow[]>(() => {
     const q = this.search().trim().toLowerCase();
     const t = this.type();
     const s = this.status();
-    return PAYOUTS.filter((p) => {
+    return this.rows().filter((p) => {
       if (s !== 'all' && p.status !== s) return false;
       if (t !== 'all' && p.type !== t) return false;
       if (q && !p.member.name.toLowerCase().includes(q) && !p.ref.toLowerCase().includes(q))
@@ -314,6 +399,15 @@ export class PayoutsPageComponent {
     Math.max(1, Math.ceil(this.filtered().length / this.pageSize)),
   );
 
+  private readonly client = inject(ApiClient);
+
+  constructor() {
+    this.client
+      .payoutsList()
+      .then((r) => this.source.set(r.payouts))
+      .finally(() => this.loading.set(false));
+  }
+
   onSearchChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.search.set(value);
@@ -328,13 +422,13 @@ export class PayoutsPageComponent {
     this.typeOpen.set(false);
   }
 
-  selectType(t: 'all' | PayoutType): void {
+  selectType(t: 'all' | ViewType): void {
     this.type.set(t);
     this.typeOpen.set(false);
     this.page.set(1);
   }
 
-  setStatus(s: 'all' | PayoutStatus): void {
+  setStatus(s: 'all' | ViewStatus): void {
     this.status.set(s);
     this.page.set(1);
   }
@@ -347,20 +441,20 @@ export class PayoutsPageComponent {
     if (this.page() < this.totalPages()) this.page.set(this.page() + 1);
   }
 
-  /** Format an amount as "+$X,XXX.XX" (wireframe style). */
-  formatAmount(n: number): string {
-    return `+$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  /** Format an API money string as "+$X,XXX.XX" (wireframe style). */
+  formatAmount(amount: string): string {
+    return formatApiMoney(amount, 'always');
   }
 
-  typeLabel(t: PayoutType): string {
+  typeLabel(t: ViewType): string {
     return t.charAt(0).toUpperCase() + t.slice(1);
   }
 
-  statusLabel(s: PayoutStatus): string {
+  statusLabel(s: ViewStatus): string {
     return s === 'paid' ? 'Paid' : 'Pending';
   }
 
-  statusVariant(s: PayoutStatus): 'success' | 'warning' {
+  statusVariant(s: ViewStatus): 'success' | 'warning' {
     return s === 'paid' ? 'success' : 'warning';
   }
 

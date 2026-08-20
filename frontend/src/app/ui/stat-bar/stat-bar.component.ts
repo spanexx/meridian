@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, Input, computed, signal } from '@angular/core';
+/**
+ * UiStatBarComponent — animated progress bar primitive (theme.css
+ * .progress-track/.progress-fill). Width animates 0 → value via a
+ * queueMicrotask trigger so the CSS transition runs after first paint.
+ *
+ * @owner   agent-maintained
+ * @reviewed 2026-08-19
+ */
+import { ChangeDetectionStrategy, Component, Input, computed, signal, OnInit } from '@angular/core';
 
 export type UiStatBarVariant = 'emerald' | 'violet' | 'amber' | 'blue';
 
@@ -16,7 +24,7 @@ export type UiStatBarVariant = 'emerald' | 'violet' | 'amber' | 'blue';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UiStatBarComponent {
+export class UiStatBarComponent implements OnInit {
   @Input() value = 0;
   @Input() variant: UiStatBarVariant = 'emerald';
 

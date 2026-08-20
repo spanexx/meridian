@@ -14,8 +14,14 @@
  * @reviewed 2026-08-17
  */
 import { test, expect } from '@playwright/test';
+import { expectScreenshot, waitForStable } from './helpers/visual';
+import { seedSession } from './helpers/auth';
 
 test.describe('payouts page (wireframe-aligned)', () => {
+  test.beforeEach(async ({ page }) => {
+    await seedSession(page);
+  });
+
   test('route loads and renders the title + subtitle', async ({ page }) => {
     const res = await page.goto('/payouts');
     expect(res?.status()).toBeLessThan(400);
@@ -83,8 +89,9 @@ test.describe('payouts page (wireframe-aligned)', () => {
     }
   });
 
-  test('payouts page screenshot saved for visual review', async ({ page }) => {
+  test('payouts renders true to its golden baseline', async ({ page }) => {
     await page.goto('/payouts');
-    await page.screenshot({ path: 'e2e/screenshots/payouts.png', fullPage: true });
+    await waitForStable(page);
+    await expectScreenshot(page, 'payouts');
   });
 });

@@ -18,18 +18,28 @@
  */
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { CommunitySettingsPageComponent } from './community-settings.page';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { ApiClient } from '../../../core/api/api-client';
+import { SEED_COMMUNITY_PARAMETERS } from '../../../core/api/mock-seed';
+
+let mockClient: { communityParameters: ReturnType<typeof vi.fn> } | null = null;
 
 async function renderPage(id?: string) {
+  mockClient = {
+    communityParameters: vi.fn().mockResolvedValue({ parameters: SEED_COMMUNITY_PARAMETERS }),
+  } as unknown as { communityParameters: ReturnType<typeof vi.fn> };
   await TestBed.configureTestingModule({
     imports: [CommunitySettingsPageComponent, UiIconComponent],
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient as unknown as ApiClient }],
   }).compileComponents();
   const fixture = TestBed.createComponent(CommunitySettingsPageComponent);
   if (id) {
     fixture.componentInstance.id = id;
   }
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
@@ -284,7 +294,7 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
 
   it('safetyRails() returns the 5 fixed items (read-only)', async () => {
     const f = await renderPage('alpha');
-    const c = f.componentInstance as unknown as { safetyRails: () => ReadonlyArray<string> };
+    const c = f.componentInstance as unknown as { safetyRails: () => readonly string[] };
     const rails = c.safetyRails();
     expect(rails.length).toBe(5);
     expect(rails).toContain('Integrity verification');
@@ -406,6 +416,28 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
     expect(c.lastProposalLabel).toBe('ROI floor');
   });
 
+  it('calls ApiClient.communityParameters(id) and shows skeleton while loading', async () => {
+    const mc = {
+      communityParameters: vi.fn().mockResolvedValue({ parameters: SEED_COMMUNITY_PARAMETERS }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({
+      imports: [CommunitySettingsPageComponent, UiIconComponent],
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mc }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(CommunitySettingsPageComponent);
+    fixture.componentInstance.id = 'alpha';
+    fixture.detectChanges(); // loading = true, skeleton visible, no params
+    const pre = fixture.nativeElement as HTMLElement;
+    expect(pre.querySelector('[data-testid="skeleton"]')).toBeTruthy();
+    expect(pre.querySelectorAll('button[data-action="propose"]').length).toBe(0);
+    expect(mc.communityParameters).toHaveBeenCalledWith('alpha');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const post = fixture.nativeElement as HTMLElement;
+    expect(post.querySelector('[data-testid="skeleton"]')).toBeFalsy();
+    expect(post.querySelectorAll('button[data-action="propose"]').length).toBe(6);
+  });
+
   // ─── CHUNK 2/4: Members & Roles card ─────────────────────────────────────
 
   it('renders the Members & Roles card', async () => {
@@ -485,8 +517,6 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
     f.detectChanges();
     expect(c.archiveModalOpen).toBe(true);
     const root = f.nativeElement as HTMLElement;
-    // Dump body to figure out where the data-testid lands
-    const allTestIds = Array.from(root.querySelectorAll('[data-testid]')).map(e => e.getAttribute('data-testid'));
     expect(root.querySelector('[data-testid="archive-confirm-modal"]')).toBeTruthy();
   });
 
@@ -536,14 +566,14 @@ describe('CommunitySettingsPageComponent (chunk 1/4)', () => {
 
   it('howChangesSteps() returns the 4 step labels', async () => {
     const f = await renderPage('alpha');
-    const c = f.componentInstance as unknown as { howChangesSteps: () => ReadonlyArray<string> };
+    const c = f.componentInstance as unknown as { howChangesSteps: () => readonly string[] };
     expect(c.howChangesSteps()).toEqual(['Propose', 'Debate', 'Vote', 'Enact']);
   });
 
   it('governanceParameters() returns 6 entries with label + value', async () => {
     const f = await renderPage('alpha');
     const c = f.componentInstance as unknown as {
-      governanceParameters: () => ReadonlyArray<{ label: string; value: string }>;
+      governanceParameters: () => readonly { label: string; value: string }[];
     };
     const params = c.governanceParameters();
     expect(params.length).toBe(6);

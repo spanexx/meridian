@@ -19,9 +19,10 @@
  * @owner   spanexx
  * @reviewed 2026-08-12
  */
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { ApiClient } from '../../../core/api/api-client';
 
 type VettingPanel = 'checks' | 'votes' | 'comments';
 type UserVote = 'approve' | 'reject' | null;
@@ -348,7 +349,7 @@ export class OpportunityDetailPageComponent {
   });
 
   /** Vetting tab list (rendered as the .tabs row). */
-  readonly panels: ReadonlyArray<{ key: VettingPanel; label: string }> = [
+  readonly panels: readonly { key: VettingPanel; label: string }[] = [
     { key: 'checks',   label: 'Auto-checks' },
     { key: 'votes',    label: 'Votes' },
     { key: 'comments', label: 'Comments' },
@@ -358,16 +359,16 @@ export class OpportunityDetailPageComponent {
   readonly evidenceSeeds = ['sneaker1', 'sneaker2', 'sneaker3'];
 
   /** Auto-checks panel rows. */
-  readonly autoChecks: ReadonlyArray<{ label: string }> = [
+  readonly autoChecks: readonly { label: string }[] = [
     { label: 'Duplicate check' },
     { label: 'Fraud signals' },
     { label: 'Math validation (ROI vs. comps)' },
   ];
 
   /** Vetter votes (Votes panel). */
-  readonly vetterVotes: ReadonlyArray<{
+  readonly vetterVotes: readonly {
     name: string; initials: string; gradient: string; tier: number; quote: string; choice: 'approve' | 'reject';
-  }> = [
+  }[] = [
     { name: 'Jules Tan',     initials: 'JT', gradient: 'var(--gradient-blue)',   tier: 4, quote: 'Checked StockX — last 30 days sales match ROI. Approval.',  choice: 'approve' },
     { name: 'Sarah Park',    initials: 'SP', gradient: 'var(--gradient-copper)', tier: 3, quote: 'Boutique verified. Shipping window OK.',                   choice: 'approve' },
     { name: 'Marcus Rivera', initials: 'MR', gradient: 'var(--gradient-emerald)', tier: 3, quote: 'Boutique reputable. Approve.',                              choice: 'approve' },
@@ -375,15 +376,15 @@ export class OpportunityDetailPageComponent {
   ];
 
   /** Comments panel rows. */
-  readonly comments: ReadonlyArray<{
+  readonly comments: readonly {
     author: string; initials: string; gradient: string; tier: number; ago: string; body: string;
-  }> = [
+  }[] = [
     { author: 'Jules Tan',   initials: 'JT', gradient: 'var(--gradient-blue)',  tier: 4, ago: '4h ago', body: 'Anyone else see the 12 sales on StockX in the last 30 days? Solid volume for the size run.' },
     { author: 'Kenji Honda', initials: 'KH', gradient: 'var(--gradient-amber)', tier: 2, ago: '2h ago', body: 'The boutique confirmed the wholesale price? That\'s 12% over last drop.' },
   ];
 
   /** Timeline events (sidebar). */
-  readonly timeline: ReadonlyArray<{ label: string; meta: string; dot: string; future: boolean }> = [
+  readonly timeline: readonly { label: string; meta: string; dot: string; future: boolean }[] = [
     { label: 'Submitted',       meta: 'Mar 9, 14:23',                          dot: 'var(--e-500)',       future: false },
     { label: 'Auto-checks ran', meta: 'Mar 9, 14:24 · Recommendation: APPROVE', dot: 'var(--v-400)',       future: false },
     { label: 'Vetting opened',  meta: 'Mar 9, 14:25 · 18h remaining',           dot: 'var(--a-400)',       future: false },
@@ -393,5 +394,15 @@ export class OpportunityDetailPageComponent {
   /** Cast the user's vote; clicking the same button again clears it. */
   castVote(choice: 'approve' | 'reject'): void {
     this.userVote.update((v) => (v === choice ? null : choice));
+  }
+
+  private readonly client = inject(ApiClient);
+
+  constructor() {
+    // Backend-readiness pack: prove the data-layer wiring is in place.
+    // The wireframe demo content above remains the display source until a
+    // canonical opportunity detail endpoint's shape replaces it; a real
+    // load would map opportunityGet(id) into this view.
+    void this.client.opportunityGet('O-2049').catch(() => undefined);
   }
 }

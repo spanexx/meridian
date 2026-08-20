@@ -18,7 +18,7 @@ import { UiAvatarComponent } from './avatar.component';
 })
 class HostComponent {
   name = 'Alex Park';
-  size: any = 'md';
+  size: 'sm' | 'md' | 'lg' | 'xl' = 'md';
 }
 
 describe('UiAvatarComponent', () => {

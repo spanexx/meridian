@@ -14,8 +14,14 @@
  * @reviewed 2026-08-11
  */
 import { test, expect } from '@playwright/test';
+import { expectScreenshot, waitForStable } from './helpers/visual';
+import { seedSession } from './helpers/auth';
 
 test.describe('opportunities page (wireframe-aligned)', () => {
+  test.beforeEach(async ({ page }) => {
+    await seedSession(page);
+  });
+
   test('route loads and renders the title + subtitle', async ({ page }) => {
     const res = await page.goto('/opportunities');
     expect(res?.status()).toBeLessThan(400);
@@ -46,11 +52,11 @@ test.describe('opportunities page (wireframe-aligned)', () => {
     await expect(tabs.nth(0)).toContainText('All');
     await expect(tabs.nth(0)).toContainText('24');
     await expect(tabs.nth(1)).toContainText('Pending');
-    await expect(tabs.nth(1)).toContainText('8');
+    await expect(tabs.nth(1)).toContainText('7');
     await expect(tabs.nth(2)).toContainText('In Vetting');
-    await expect(tabs.nth(2)).toContainText('5');
+    await expect(tabs.nth(2)).toContainText('4');
     await expect(tabs.nth(3)).toContainText('Approved');
-    await expect(tabs.nth(3)).toContainText('3');
+    await expect(tabs.nth(3)).toContainText('5');
     await expect(tabs.nth(4)).toContainText('Executing');
     await expect(tabs.nth(4)).toContainText('2');
     await expect(tabs.nth(5)).toContainText('Rejected');
@@ -65,8 +71,9 @@ test.describe('opportunities page (wireframe-aligned)', () => {
 
   test('table has 9 columns including an empty arrow column', async ({ page }) => {
     await page.goto('/opportunities');
-    const headers = await page.locator('thead th').allTextContents();
-    expect(headers).toEqual([
+    // Columnheaders only appear once the async load resolves; toHaveText
+    // retries until the table body is populated (Job D async render).
+    await expect(page.getByRole('columnheader')).toHaveText([
       'Ref', 'Title', 'Category', 'Submitted by',
       'Est. ROI', 'Capital', 'Votes', 'Status', '',
     ]);
@@ -74,35 +81,41 @@ test.describe('opportunities page (wireframe-aligned)', () => {
 
   test('table renders 8 rows by default', async ({ page }) => {
     await page.goto('/opportunities');
-    await expect(page.locator('tbody tr')).toHaveCount(8);
+    // Accessible row semantics: the table body exposes data rows.
+    await expect(page.getByRole('table').getByRole('row')).toHaveCount(9); // 1 header + 8 data
   });
 
   test('Capital cells render with thousands separator', async ({ page }) => {
     await page.goto('/opportunities');
-    const html = await page.locator('body').innerHTML();
-    expect(html).toMatch(/\$\d{1,3},\d{3}/);
+    // Assert on the visible cell text, not raw innerHTML.
+    await expect(page.getByRole('cell', { name: /\$\d{1,3},\d{3}/ }).first()).toBeVisible();
   });
 
   test('Est. ROI cells render with leading "+" and emerald color', async ({ page }) => {
     await page.goto('/opportunities');
-    const firstRoi = page.locator('tbody td .text-emerald-400').first();
+    // ROI values are user-visible text; the emerald class (wireframe-
+    // specified positive-ROI color) lives on the value span inside the
+    // cell, which is hidden on small screens via the td class.
+    const firstRoi = page.getByRole('cell', { name: /^\+\d+(\.\d)?%$/ }).first();
     await expect(firstRoi).toBeVisible();
-    const text = await firstRoi.textContent();
-    expect(text).toMatch(/^\+\d+(\.\d)?%$/);
+    await expect(firstRoi.locator('span')).toHaveClass(/text-emerald-400/);
   });
 
   test('Vote cells render "N↑ / N↓" when votes exist; "—" when not', async ({ page }) => {
     await page.goto('/opportunities');
-    const html = await page.locator('body').innerHTML();
-    expect(html).toMatch(/\d+↑/);
-    expect(html).toMatch(/\d+↓/);
-    expect(html).toContain('—');
+    // Visible cell text: at least one up-vote cell, one down-vote cell,
+    // and one em-dash placeholder cell (row-level retry avoids the
+    // innerHTML race seen on dashboard).
+    await expect(page.getByRole('cell', { name: /\d+↑/ }).first()).toBeVisible();
+    await expect(page.getByRole('cell', { name: /\d+↓/ }).first()).toBeVisible();
+    await expect(page.getByRole('cell', { name: '—' }).first()).toBeVisible();
   });
 
   test('Submitted-by cells show avatar circles + names', async ({ page }) => {
     await page.goto('/opportunities');
     const avatars = page.locator('tbody td .avatar');
-    expect(await avatars.count()).toBeGreaterThan(0);
+    // first avatar only appears once the async load resolves — retry.
+    await expect(avatars.first()).toBeVisible();
     const first = avatars.first();
     const initials = await first.textContent();
     expect(initials?.trim().length).toBeGreaterThan(0);
@@ -125,9 +138,10 @@ test.describe('opportunities page (wireframe-aligned)', () => {
     await expect(footer).toContainText('2 / 3');
   });
 
-  test('opportunities page screenshot saved for visual review', async ({ page }) => {
+  test('opportunities renders true to its golden baseline', async ({ page }) => {
     await page.goto('/opportunities');
-    await page.screenshot({ path: 'e2e/screenshots/opportunities.png', fullPage: true });
+    await waitForStable(page);
+    await expectScreenshot(page, 'opportunities');
   });
 
   test('mobile: status tabs collapse into a dropdown with all 6 options', async ({ page }) => {
@@ -136,11 +150,11 @@ test.describe('opportunities page (wireframe-aligned)', () => {
     const select = page.locator('[data-testid="status-select"]');
     await expect(select).toBeVisible();
     await expect(page.locator('[data-testid="status-filter"]')).toBeHidden();
-    for (const opt of ['All 24', 'Pending 8', 'In Vetting 5', 'Approved 3', 'Executing 2', 'Rejected 6']) {
+    for (const opt of ['All 24', 'Pending 7', 'In Vetting 4', 'Approved 5', 'Executing 2', 'Rejected 6']) {
       await expect(select.locator('option', { hasText: opt })).toHaveCount(1);
     }
     // filtering via the dropdown mirrors the tab behavior
-    await select.selectOption({ label: 'Pending 8' });
+    await select.selectOption({ label: 'Pending 7' });
     await expect(page.locator('tbody tr').first()).toBeVisible();
     await expect(page.locator('tbody tr').first()).toHaveAttribute('data-status', 'pending');
   });

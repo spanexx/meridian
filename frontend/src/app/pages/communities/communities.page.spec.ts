@@ -1,24 +1,11 @@
 /**
  * RED spec — CommunitiesPageComponent (wireframe/meridian/communities/index.html).
  *
- * Page sections:
- *   - header: title "Communities" + subtitle, search input + Status dropdown button (right-aligned)
- *   - status dropdown menu (hidden by default, All/Active/Proposed/Archived items)
- *   - status tabs row (All / Active / Proposed / Archived with counts)
- *   - table card:
- *       - skeleton (hidden when data loaded)
- *       - 6-col table: Community | Status (md+) | Pool | Members (sm+) | ROI (md+) | Executions (lg+) | arrow
- *       - 3 rows: MERIDIAN Alpha (active), Tech Arbitrage (proposed), Vintage Collective (archived)
- *       - each row icon avatar with gradient bg + name + focus/scope line
- *       - badge (success/warning/neutral) in Status column
- *       - Pool amount: emerald-gradient when active, muted gray when proposed/archived
- *       - ROI: emerald +X% when positive, "—" when null
- *       - Executions: muted count or "0"
- *       - arrow link to /community-detail
- *       - empty state (hidden when 3 rows present)
- *       - pagination footer: "Showing 1-3 of 3 communities" + prev/next (disabled)
- *   - bottom row: v1 disclaimer + "Propose community" button
- *   - create-community modal (hidden by default)
+ * The page now consumes the injected ApiClient.communitiesList() (core/api/api-client.ts);
+ * the test provides a mock ApiClient returning SEED_COMMUNITIES so the rendered output
+ * is byte-equivalent to the wireframe (alpha active, helia proposed — the former
+ * 'Vintage Collective' archived row was a page-only fixture, not in the seed).
+ * Data arrives asynchronously, so every row-reading test awaits fixture.whenStable().
  *
  * Per the new-page pack:
  *   - red first
@@ -28,31 +15,36 @@
  *   - no internal [attr.href]
  *
  * @owner   spanexx
- * @reviewed 2026-08-12
+ * @reviewed 2026-08-18
  */
 
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { CommunitiesPageComponent } from './communities.page';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ApiClient } from '../../core/api/api-client';
+import { SEED_COMMUNITIES } from '../../core/api/mock-seed';
+
+let mockClient: { communitiesList: ReturnType<typeof vi.fn> } | null = null;
 
 async function renderPage() {
+  mockClient = {
+    communitiesList: vi.fn().mockResolvedValue({ communities: SEED_COMMUNITIES }),
+  } as unknown as { communitiesList: ReturnType<typeof vi.fn> };
   await TestBed.configureTestingModule({
     imports: [CommunitiesPageComponent, UiIconComponent],
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient as unknown as ApiClient }],
   }).compileComponents();
   const fixture = TestBed.createComponent(CommunitiesPageComponent);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
 
 describe('CommunitiesPageComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [CommunitiesPageComponent, UiIconComponent],
-      providers: [provideRouter([])],
-    }).compileComponents();
-  });
+  afterEach(() => TestBed.resetTestingModule());
 
   // ─────────────────────────────────────────────────────────────────────
   // HEADER (responsive, no duplicate ref, no actions stranded)
@@ -100,10 +92,10 @@ describe('CommunitiesPageComponent', () => {
     expect(labels[2]).toMatch(/Proposed/);
     expect(labels[3]).toMatch(/Archived/);
     // counts visible inside tabs
-    expect(labels[0]).toMatch(/3/);
+    expect(labels[0]).toMatch(/2/);
     expect(labels[1]).toMatch(/1/);
     expect(labels[2]).toMatch(/1/);
-    expect(labels[3]).toMatch(/1/);
+    expect(labels[3]).toMatch(/0/);
   });
 
   it('default tab is All and aria-selected=true; others aria-selected=false', async () => {
@@ -146,36 +138,33 @@ describe('CommunitiesPageComponent', () => {
     expect(ths.length).toBe(7);
   });
 
-  it('renders 3 community rows: MERIDIAN Alpha (active), Tech Arbitrage (proposed), Vintage Collective (archived)', async () => {
+  it('renders 2 community rows: MERIDIAN Alpha (active), Tech Arbitrage (proposed)', async () => {
     const f = await renderPage();
     const root = f.nativeElement as HTMLElement;
     const rows = Array.from(root.querySelectorAll('tr[data-filterable]'));
-    expect(rows.length).toBe(3);
+    expect(rows.length).toBe(2);
     const titles = rows.map((r) => r.querySelector('.text-sm.font-medium')?.textContent?.trim());
     expect(titles).toEqual([
       'MERIDIAN Alpha',
       'Tech Arbitrage',
-      'Vintage Collective',
     ]);
     const statuses = rows.map((r) => r.getAttribute('data-status'));
-    expect(statuses).toEqual(['active', 'proposed', 'archived']);
+    expect(statuses).toEqual(['active', 'proposed']);
   });
 
-  it('each row has an icon avatar (users/zap/archive) and a focus/scope subtitle line', async () => {
+  it('each row has an icon avatar (users/zap) and a focus/scope subtitle line', async () => {
     const f = await renderPage();
     const root = f.nativeElement as HTMLElement;
     const rows = Array.from(root.querySelectorAll('tr[data-filterable]'));
     // lucide SVGs render with data-icon="<name>"
     expect(rows[0].querySelector('svg[data-icon="users"]')).toBeTruthy();
     expect(rows[1].querySelector('svg[data-icon="zap"]')).toBeTruthy();
-    expect(rows[2].querySelector('svg[data-icon="archive"]')).toBeTruthy();
     // avatar containers are rounded-lg w-10 h-10
     const avatars = Array.from(rows.map((r) => r.querySelector('div.w-10.h-10.rounded-lg')));
     expect(avatars.every((a) => a !== null)).toBe(true);
     // subtitles
     expect(rows[0].textContent).toContain('General arbitrage');
     expect(rows[1].textContent).toContain('Electronics focus');
-    expect(rows[2].textContent).toContain('Closed · Merged into Alpha');
   });
 
   it('active row: Pool $1.42M emerald-gradient, ROI +18.4%, Executions 47', async () => {
@@ -198,22 +187,13 @@ describe('CommunitiesPageComponent', () => {
     expect(row.querySelector('.badge-warning')?.textContent).toContain('Proposed');
   });
 
-  it('archived row: ROI +12.1% (final), Executions 18', async () => {
-    const f = await renderPage();
-    const root = f.nativeElement as HTMLElement;
-    const row = root.querySelector('tr[data-status="archived"]') as HTMLElement;
-    expect(row.textContent).toContain('+12.1%');
-    expect(row.textContent).toContain('18');
-    expect(row.querySelector('.badge-neutral')?.textContent).toContain('Archived');
-  });
-
   it('community-row links resolve to /communities/:ref via routerLink (not raw href)', async () => {
     const f = await renderPage();
     const root = f.nativeElement as HTMLElement;
     const rowLinks = Array.from(
       root.querySelectorAll('tr[data-filterable] a[data-row-link]'),
     );
-    expect(rowLinks.length).toBe(3);
+    expect(rowLinks.length).toBe(2);
     for (const a of rowLinks) {
       // routerLink renders as an href to /communities/<ref>
       const href = a.getAttribute('href');
@@ -224,12 +204,12 @@ describe('CommunitiesPageComponent', () => {
   // ─────────────────────────────────────────────────────────────────────
   // PAGINATION
   // ─────────────────────────────────────────────────────────────────────
-  it('pagination footer shows "Showing 1-3 of 3 communities" with prev/next both disabled', async () => {
+  it('pagination footer shows "Showing 1-2 of 2 communities" with prev/next both disabled', async () => {
     const f = await renderPage();
     const root = f.nativeElement as HTMLElement;
     const pageNum = root.querySelector('[data-page-num]');
-    expect(pageNum?.textContent).toMatch(/1-3/);
-    expect(root.textContent).toMatch(/of 3 communities/);
+    expect(pageNum?.textContent).toMatch(/1-2/);
+    expect(root.textContent).toMatch(/of 2 communities/);
     const prev = root.querySelector('[data-page-prev]');
     const next = root.querySelector('[data-page-next]');
     expect(prev?.hasAttribute('disabled')).toBe(true);
@@ -300,40 +280,40 @@ describe('CommunitiesPageComponent', () => {
   // ─────────────────────────────────────────────────────────────────────
   // PUBLIC METHOD COVERAGE
   // ─────────────────────────────────────────────────────────────────────
-  it('statusCount(tab) returns the right counts: all=3, active=1, proposed=1, archived=1', async () => {
+  it('statusCount(tab) returns the right counts: all=2, active=1, proposed=1, archived=0', async () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as {
       statusCount: (k: 'all' | 'active' | 'proposed' | 'archived') => number;
     };
-    expect(c.statusCount('all')).toBe(3);
+    expect(c.statusCount('all')).toBe(2);
     expect(c.statusCount('active')).toBe(1);
     expect(c.statusCount('proposed')).toBe(1);
-    expect(c.statusCount('archived')).toBe(1);
+    expect(c.statusCount('archived')).toBe(0);
   });
 
-  it('totalCount() returns 3', async () => {
+  it('totalCount() returns 2', async () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as { totalCount: () => number };
-    expect(c.totalCount()).toBe(3);
+    expect(c.totalCount()).toBe(2);
   });
 
-  it('paginationRange() returns "1-3" when no filter applied', async () => {
+  it('paginationRange() returns "1-2" when no filter applied', async () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as { paginationRange: () => string };
-    expect(c.paginationRange()).toBe('1-3');
+    expect(c.paginationRange()).toBe('1-2');
   });
 
-  it('filteredRows() returns all 3 by default; only matching status when a tab is active', async () => {
+  it('filteredRows() returns all 2 by default; only matching status when a tab is active', async () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as {
       filteredRows: () => { ref: string; status: string }[];
       activeTab: { set: (v: string) => void };
     };
-    expect(c.filteredRows().length).toBe(3);
+    expect(c.filteredRows().length).toBe(2);
     c.activeTab.set('active');
     expect(c.filteredRows().length).toBe(1);
     c.activeTab.set('archived');
-    expect(c.filteredRows().length).toBe(1);
+    expect(c.filteredRows().length).toBe(0);
   });
 
   it('openCreateModal() shows the create-community modal (toggles hidden)', async () => {
@@ -399,13 +379,13 @@ describe('CommunitiesPageComponent', () => {
       activeTab: () => string;
     };
     expect(c.activeTab()).toBe('all');
-    expect(c.filteredRows().length).toBe(3);
+    expect(c.filteredRows().length).toBe(2);
     c.setTab('active');
     expect(c.activeTab()).toBe('active');
     expect(c.filteredRows().length).toBe(1);
     c.setTab('archived');
-    expect(c.filteredRows().length).toBe(1);
+    expect(c.filteredRows().length).toBe(0);
     c.setTab('all');
-    expect(c.filteredRows().length).toBe(3);
+    expect(c.filteredRows().length).toBe(2);
   });
 });

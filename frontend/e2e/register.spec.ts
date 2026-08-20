@@ -12,6 +12,7 @@
  * @reviewed 2026-08-17
  */
 import { test, expect } from '@playwright/test';
+import { expectScreenshot, waitForStable } from './helpers/visual';
 
 test.describe('register page (shell-less auth)', () => {
   test('route loads shell-less with title + subtitle', async ({ page }) => {
@@ -40,11 +41,11 @@ test.describe('register page (shell-less auth)', () => {
     await expect(page.getByText('integrity first.')).toBeVisible();
   });
 
-  test('create account toasts then navigates to /dashboard', async ({ page }) => {
+  test('create account toasts then lands on /login (no token issued at signup)', async ({ page }) => {
     await page.goto('/register');
     await page.locator('[data-testid="create-account"]').click();
     await expect(page.getByText('Account created — welcome aboard')).toBeVisible();
-    await expect(page).toHaveURL(/\/dashboard/);
+    await expect(page).toHaveURL(/\/login/);
   });
 
   test('"Sign in" cross-links to /login', async ({ page }) => {
@@ -54,8 +55,9 @@ test.describe('register page (shell-less auth)', () => {
     await expect(page.locator('h1', { hasText: 'Welcome back' })).toBeVisible();
   });
 
-  test('register page screenshot saved for visual review', async ({ page }) => {
+  test('register renders true to its golden baseline', async ({ page }) => {
     await page.goto('/register');
-    await page.screenshot({ path: 'e2e/screenshots/register.png', fullPage: true });
+    await waitForStable(page);
+    await expectScreenshot(page, 'register');
   });
 });

@@ -16,7 +16,7 @@
       </div>
       <div class="flex-1">
         <div class="flex items-center gap-3 mb-1 flex-wrap">
-          <h1 class="text-xl sm:text-2xl font-semibold tracking-tight">{{ user.name }}</h1>
+          <h1 class="text-xl sm:text-2xl font-semibold tracking-tight">{{ displayName() }}</h1>
           <span class="badge badge-premium">
             {{ user.role }} · {{ user.tier }}
           </span>
@@ -147,15 +147,19 @@
         <div class="space-y-3 text-sm">
           <div class="flex items-center justify-between">
             <span class="text-xs text-slate-400">Email</span>
-            <span class="text-xs">{{ identity.email }}</span>
+            <span class="text-xs">{{ email() }}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-xs text-slate-400">KYC</span>
-            <span class="badge badge-success">{{ identity.kyc }}</span>
+            <!-- Pack C: KYC badge label + variant derive from session member's
+                 kyc_status (VERIFIED/PENDING/NOT_STARTED/REJECTED). -->
+            <span class="badge" [class]="kycBadgeVariant()" data-testid="kyc-badge">{{ kycLabel() }}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-xs text-slate-400">2FA</span>
-            <span class="badge badge-success">{{ identity.twofa }}</span>
+            <!-- Pack C: 2FA label derives from session member's
+                 two_factor_enabled (true → "TOTP", false → "Not enabled"). -->
+            <span class="badge" [class.badge-success]="twofaLabel() === 'TOTP'" data-testid="twofa-badge">{{ twofaLabel() }}</span>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-xs text-slate-400">Country</span>

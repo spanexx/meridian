@@ -13,8 +13,14 @@
  * @reviewed 2026-08-11
  */
 import { test, expect } from '@playwright/test';
+import { expectScreenshot, waitForStable } from './helpers/visual';
+import { seedSession } from './helpers/auth';
 
 test.describe('executions page (wireframe-aligned)', () => {
+  test.beforeEach(async ({ page }) => {
+    await seedSession(page);
+  });
+
   test('route loads and renders the title + subtitle', async ({ page }) => {
     const res = await page.goto('/executions');
     expect(res?.status()).toBeLessThan(400);
@@ -48,28 +54,38 @@ test.describe('executions page (wireframe-aligned)', () => {
     await expect(all).toHaveAttribute('aria-selected', 'true');
   });
 
-  test('cards have a status badge + Deployed/Recovered/ROI grid + progress bar', async ({ page }) => {
+  test('cards show status + Deployed/Recovered/ROI stats + progress bar', async ({ page }) => {
     await page.goto('/executions');
+    // Cards render ASYNC from GET /executions (Job C, 2026-08-21) — wait
+    // for the first card instead of an immediate count() (DISCOVERY
+    // 2026-08-19 pattern; the sync fixture masked this race before).
     const cards = page.locator('a.card.card-hover');
+    await expect(cards.first()).toBeVisible();
     expect(await cards.count()).toBeGreaterThan(0);
     const first = cards.first();
+    // Semantics over classes: status badge + labeled stats + accessible
+    // progressbar (role added BRIDGE 2026-08-20).
+    await expect(first.getByRole('progressbar').first()).toBeVisible();
     await expect(first.locator('.badge').first()).toBeVisible();
-    await expect(first.locator('.kpi-label', { hasText: 'Deployed' }).first()).toBeVisible();
-    await expect(first.locator('.kpi-label', { hasText: 'Recovered' }).first()).toBeVisible();
-    await expect(first.locator('.kpi-label', { hasText: 'ROI' }).first()).toBeVisible();
-    await expect(first.locator('.progress-track').first()).toBeVisible();
+    for (const label of ['Deployed', 'Recovered', 'ROI']) {
+      await expect(first.getByText(label, { exact: false })).toBeVisible();
+    }
   });
 
   test('clicking "Failed" filters to exactly 1 card', async ({ page }) => {
     await page.goto('/executions');
+    // Wait for the async board to render before clicking a filter tab
+    // (Job C data race, same pattern as the cards test above).
+    await expect(page.locator('a.card.card-hover').first()).toBeVisible();
     const tabs = page.locator('[data-testid="status-filter"] button');
     const failed = tabs.nth(3);
     await failed.click();
     await expect(page.locator('a.card.card-hover')).toHaveCount(1);
   });
 
-  test('executions page screenshot saved for visual review', async ({ page }) => {
+  test('executions renders true to its golden baseline', async ({ page }) => {
     await page.goto('/executions');
-    await page.screenshot({ path: 'e2e/screenshots/executions.png', fullPage: true });
+    await waitForStable(page);
+    await expectScreenshot(page, 'executions');
   });
 });

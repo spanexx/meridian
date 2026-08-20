@@ -16,15 +16,25 @@
  */
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { CommunityMembersPageComponent } from './community-members.page';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { ApiClient } from '../../../core/api/api-client';
+import { SEED_COMMUNITY_MEMBERS } from '../../../core/api/mock-seed';
+
+let mockClient: { communityMembers: ReturnType<typeof vi.fn> } | null = null;
 
 async function renderPage() {
+  mockClient = {
+    communityMembers: vi.fn().mockResolvedValue({ members: SEED_COMMUNITY_MEMBERS }),
+  } as unknown as { communityMembers: ReturnType<typeof vi.fn> };
   await TestBed.configureTestingModule({
     imports: [CommunityMembersPageComponent, UiIconComponent],
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient as unknown as ApiClient }],
   }).compileComponents();
   const fixture = TestBed.createComponent(CommunityMembersPageComponent);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
@@ -134,7 +144,7 @@ describe('CommunityMembersPageComponent', () => {
 
   it('members() returns 10 (unfiltered dataset)', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { members: () => ReadonlyArray<unknown> };
+    const c = f.componentInstance as unknown as { members: () => readonly unknown[] };
     expect(c.members().length).toBe(10);
   });
 
@@ -290,7 +300,7 @@ describe('CommunityMembersPageComponent', () => {
   // ─── Public methods (TDD pin) ───────────────────────────────────────
   it('members returns 10 members on first render', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { members: () => ReadonlyArray<unknown> };
+    const c = f.componentInstance as unknown as { members: () => readonly unknown[] };
     expect(c.members().length).toBe(10);
   });
 
@@ -307,7 +317,7 @@ describe('CommunityMembersPageComponent', () => {
   // ─── Coverage pins for TDD enforcement (public methods) ──────────────
   it('filteredMembers() returns 10 when filters are all=all', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { filteredMembers: () => ReadonlyArray<unknown> };
+    const c = f.componentInstance as unknown as { filteredMembers: () => readonly unknown[] };
     expect(c.filteredMembers().length).toBe(10);
   });
 
@@ -315,7 +325,7 @@ describe('CommunityMembersPageComponent', () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as {
       selectTier: (t: string) => void;
-      filteredMembers: () => ReadonlyArray<{ tier: string }>;
+      filteredMembers: () => readonly { tier: string }[];
     };
     c.selectTier('t4');
     expect(c.filteredMembers().every((m) => m.tier === 't4')).toBe(true);
@@ -323,7 +333,7 @@ describe('CommunityMembersPageComponent', () => {
 
   it('pagedMembers() returns 8 on page 1', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { pagedMembers: () => ReadonlyArray<unknown> };
+    const c = f.componentInstance as unknown as { pagedMembers: () => readonly unknown[] };
     expect(c.pagedMembers().length).toBe(8);
   });
 
@@ -331,7 +341,7 @@ describe('CommunityMembersPageComponent', () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as {
       nextPage: () => void;
-      pagedMembers: () => ReadonlyArray<unknown>;
+      pagedMembers: () => readonly unknown[];
     };
     c.nextPage();
     f.detectChanges();
@@ -508,6 +518,27 @@ describe('CommunityMembersPageComponent', () => {
     c.closeRoleMenu();
     expect(c.roleMenuOpen).toBe(false);
     expect(c.activeRole).toBe('all');
+  });
+
+  it('calls ApiClient.communityMembers(id) and shows skeleton while loading', async () => {
+    const mc = {
+      communityMembers: vi.fn().mockResolvedValue({ members: SEED_COMMUNITY_MEMBERS }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({
+      imports: [CommunityMembersPageComponent, UiIconComponent],
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mc }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(CommunityMembersPageComponent);
+    fixture.detectChanges(); // loading = true, skeleton visible, no rows
+    const pre = fixture.nativeElement as HTMLElement;
+    expect(pre.querySelector('[data-testid="skeleton"]')).toBeTruthy();
+    expect(pre.querySelectorAll('[data-testid="member-row"]').length).toBe(0);
+    expect(mc.communityMembers).toHaveBeenCalledTimes(1);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const post = fixture.nativeElement as HTMLElement;
+    expect(post.querySelector('[data-testid="skeleton"]')).toBeFalsy();
+    expect(post.querySelectorAll('[data-testid="member-row"]').length).toBe(8);
   });
 
   it('toggleRoleMenu() flips open/closed', async () => {

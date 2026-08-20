@@ -23,23 +23,31 @@
 
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { MemberDetailPageComponent } from './member-detail.page';
+import { ApiClient } from '../../../../core/api/api-client';
+import { SEED_COMMUNITY_MEMBERS } from '../../../../core/api/mock-seed';
 
-async function renderPage(communityId: string = 'alpha', memberId: string = 'dana-voss') {
+let mockClient: { communityMembers: ReturnType<typeof vi.fn> } | null = null;
+
+async function renderPage(communityId = 'alpha', memberId = 'dana-voss') {
+  mockClient = {
+    communityMembers: vi.fn().mockResolvedValue({ members: SEED_COMMUNITY_MEMBERS }),
+  } as unknown as { communityMembers: ReturnType<typeof vi.fn> };
+  await TestBed.configureTestingModule({
+    imports: [MemberDetailPageComponent],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient as unknown as ApiClient }],
+  }).compileComponents();
   const f = TestBed.createComponent(MemberDetailPageComponent);
   f.componentRef.setInput('id', communityId);
   f.componentRef.setInput('memberId', memberId);
+  f.detectChanges();
+  await f.whenStable();
   f.detectChanges();
   return f;
 }
 
 describe('MemberDetailPageComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [MemberDetailPageComponent],
-      providers: [provideRouter([])],
-    }).compileComponents();
-  });
   // ─── Header / hero ─────────────────────────────────────────────────
   it('renders the breadcrumb Members > <name>', async () => {
     const f = await renderPage('alpha', 'dana-voss');
@@ -234,9 +242,7 @@ describe('MemberDetailPageComponent', () => {
 
   // ─── Routing ───────────────────────────────────────────────────────
   it('id defaults to "alpha" and memberId defaults to "dana-voss" so the page renders before the route binds', async () => {
-    const f = TestBed.createComponent(MemberDetailPageComponent);
-    // no setInput call — inputs stay at their field defaults
-    f.detectChanges();
+    const f = await renderPage(); // uses renderPage so ApiClient is provided
     const c = f.componentInstance as unknown as {
       id: () => string;
       memberId: () => string;
@@ -245,6 +251,29 @@ describe('MemberDetailPageComponent', () => {
     expect(c.id()).toBe('alpha');
     expect(c.memberId()).toBe('dana-voss');
     expect(c.member().ref).toBe('dana-voss');
+  });
+
+  it('calls ApiClient.communityMembers(id) and shows skeleton while loading', async () => {
+    const mc = {
+      communityMembers: vi.fn().mockResolvedValue({ members: SEED_COMMUNITY_MEMBERS }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({
+      imports: [MemberDetailPageComponent],
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mc }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(MemberDetailPageComponent);
+    fixture.componentRef.setInput('id', 'alpha');
+    fixture.componentRef.setInput('memberId', 'dana-voss');
+    fixture.detectChanges(); // loading = true, skeleton visible
+    const pre = fixture.nativeElement as HTMLElement;
+    expect(pre.querySelector('[data-testid="skeleton"]')).toBeTruthy();
+    expect(pre.querySelector('[data-testid="follow-button"]')).toBeFalsy();
+    expect(mc.communityMembers).toHaveBeenCalledWith('alpha');
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const post = fixture.nativeElement as HTMLElement;
+    expect(post.querySelector('[data-testid="skeleton"]')).toBeFalsy();
+    expect(post.querySelector('[data-testid="follow-button"]')).toBeTruthy();
   });
 
   it('breadcrumb links back to /communities (the members list)', async () => {

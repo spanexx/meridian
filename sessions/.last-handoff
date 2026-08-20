@@ -1,33 +1,66 @@
-# Session handoff — 2026-08-13 (evening close)
+# MERIDIAN — Handoff (2026-08-19, Pack C SHIPPED)
 
-## Soul
+## Mode
+Operating mode is **AUTO** (`state` file = `auto`). The agent may decide HOW, never WHAT — follow `docs/`, `CONTEXT.md`, `decisions.md`. Every AUTO decision is logged in `sessions/decisions.md`.
 
-A small, surgical session that closed out two long-standing inconsistencies in the meridian shell and theme. We came in mid-flow on PR #55 (the copper rename) and the user mid-task caught a related header bug on governance, then mid-evening the user pivoted to a sharper question — "is governance supposed to be a top-level page or a child page under communities?" — and that question, more than any of the actual code, set the tone. The answer was "child page, and the sidebar entry was the last leftover from the old top-level world." The energy was the user noticing what the rest of the codebase had quietly absorbed: governance doesn't live in the global menu, it lives inside a community. Two PRs shipped, both merged, both clean. The session has the feel of a week-end cleanup — surface-level polish that reveals a deeper structural lesson underneath.
+## Branch
+`feat/frontend-data-layer` (local, unpushed; master at `2e0a9c8`).
+Current commit: `e53aca4` (Pack C interceptor retry landed on top this session).
 
-## What We Did
+## Current State (Pack C SHIPPED)
 
-We shipped **PR #55** (the copper rename + governance header alignment) and **PR #56** (sidebar governance removal). The copper rename was the bigger lift — 19 files, 40 occurrences, a token that was always copper but named `violet` because nobody had time to fix it. The full cascade: `theme.css` got the new `--gradient-copper` tokens (dark `#a86a2d`, light bumped from `#7c4a1a` to `#9a5b1f` to match `--v-300` and avoid the muddy brown the old value rendered as), every reference across 18 component and page files got renamed via `sed`, and `UiKpiCardComponent` gained a private `gradientClass` mapping record so the legacy `'violet'` semantic key in the TS type union maps cleanly to the new `text-gradient-copper` CSS class. The semantic key stayed intact because it's a tier concept, not a color name — renaming it would have broken every fixture and every type union for no visual benefit. The user found a related header alignment bug on governance (the `sm:items-center` from the old header pattern was still there even though PR #41 had switched community-settings to `sm:items-start`); the fix was a one-liner with a comment back-pointer to the lesson, and a computed-style probe at 768px confirmed `button.top - title.top = 0px`.
+**Shipped this round (Pack C — auth, per `docs/features/auth/PRD-TRD-auth.md` B1–B6):**
+- **Route guards** — `authGuard` (auth required → /login with `?returnUrl`) + `roleGuard('VETTER','OPERATOR')` (per-community governance per CONTEXT.md); every protected route carries `canActivate: [authGuard]` in `app.routes.ts`.
+- **E2E session helper** — `frontend/e2e/helpers/auth.ts` (`seedSession`); 10 specs seed a live token; register routes to /login (signup issues no token).
+- **2FA challenge surface** — /login flips creds → 6-digit code step; `submitCode()` → `auth.login2fa()` → /dashboard; errors stay on step; back link returns to creds.
+- **KYC + 2FA status** — profile identity card derives `kycLabel()`/`kycBadgeVariant()`/`twofaLabel()` from `auth.member()` (was hardcoded "Verified"/"TOTP").
+- **Sign out** — profile `signOut()` calls `auth.logout()` (server flush + local clear) + navigates to `/`.
+- **401→refresh retry** — authInterceptor single-flight refresh (shared in-flight promise), retries once with rotated Bearer, clears session + propagates on failure; /auth/login + /auth/refresh never carry Bearer.
 
-**PR #56** came from the user noticing that governance was the only child page in the menu. That question led to a careful read of `ANGULAR_NAV_ITEMS`, which surfaced a hardcoded `/community/alpha/governance` slug that always pointed at Alpha Syndicate regardless of context — the worst form of a context-aware link. The fix was a RED test asserting `not.toContain('Governance')`, a GREEN commit removing the entry, and a visual probe confirming the sidebar now shows Dashboard / Opportunities / Executions / Capital Pool / Communities / Payouts / Submit Signal with Communities as the top-level entry point to all per-community pages. The `/governance` → `/community/:id/governance` redirect alias keeps every inbound link from profile, community-detail, community-settings, member-detail, and dashboard working transparently.
+**Commits (4 code + docs):** `60c9256` guards+e2e seeding → `36e8e74` 2FA surface → `ca033c0` profile KYC/2FA/signOut → `e53aca4` interceptor retry. Each passed the full 11-check pre-commit gate.
 
-## What We Found
+**Verification (all green):**
+- eslint strict: 0 problems
+- vitest: **1048/1048** (was 1001 at Pack B)
+- `ng build --configuration production`: exit 0
+- Playwright e2e: 157/157
 
-The biggest lesson of the session was **the semantic-key vs CSS-class distinction**. The codebase has two parallel vocabularies: `'violet'` as a semantic key (in TS types, data fixtures, component Inputs) and `text-gradient-violet` / `var(--gradient-violet)` as a CSS concept. The user's complaint was about the CSS name, not the semantic key. Renaming both would have broken every fixture and every type union for no visual benefit. The right move was to rename only the CSS layer, keep the semantic key intact, and bridge them with an explicit mapping inside the component that uses both. `UiKpiCardComponent.gradientClass` is the canonical example of this pattern. Future renames of either layer should follow the same recipe.
+**Note on a hook gotcha:** the TDD check's `TEST-COUPLED` marker regex needs `// TEST-COUPLED:` on the line directly above the declaration — `* TEST-COUPLED:` inside a block comment does NOT count (blocked one commit; learned in `tdd-enforcement/SKILL.md`). A vitest run also flaked 6 unrelated page specs on 5s timeouts once under parallel load — rerun clean passes 1048/1048; not a code issue.
 
-The second lesson was **the pre-commit TDD rule has a heuristic gap**. `[10/10] TDD enforcement` checks that every exported symbol name appears in some test file. `numberClass()` had three tests that exercised its rendered DOM output, but the symbol name itself wasn't mentioned in any spec. The rule treated this as "no test" and blocked the commit. The right fix was a direct unit test — a free win, because the new test is shorter and more explicit than the indirect DOM assertions it joins. The lesson: rough heuristics are useful guards but sometimes flag coverage that is real-but-implicit. The fix is to add the explicit test, not to mute the rule.
+## Remaining packs (for future rounds)
+- **Pack D — Flows** (deposit/withdraw/vote/submit-signal mutations to ApiClient; withdrawal 2FA gate + KYC submission were explicitly deferred here).
+- **Pack E — Remaining** (landing template split 1109 lines — also flagged by prod-build budget warning on `landing.page.ts` 5.90 kB vs 4.00 kB; any leftover docs).
+- Backend starts after A–C — the contract-complete consumer handoff point is reached.
 
-The third discovery was the **sibling-bug pattern that keeps recurring**. PR #41 fixed `sm:items-start` on community-settings; governance was missed during the per-community restructure in PR #54. PR #55 shipped the governance fix; community-members still has the same `sm:items-center` issue. PR #56 fixed the sidebar governance entry; Payouts has the exact same problem (`/payouts` is a top-level route but payouts are per-community). Each "lesson learned" PR ships with sibling bugs that aren't in scope. The discipline: every such PR should explicitly call out the sibling in a "Sibling bug (not in this PR)" line in the description, and the next PR should pick it up. Without that line, the lesson is half-learned and the bug recurs. I saved this as pitfall #19 in the `visual-fidelity-check` skill.
+## Key Files (this round)
+- `frontend/src/app/core/guards/auth.guard.ts`, `role.guard.ts`, `guards.spec.ts`
+- `frontend/e2e/helpers/auth.ts`
+- `frontend/src/app/core/api/auth.interceptor.ts/.spec.ts` (+ `http-transport.spec.ts` DI providers)
+- `frontend/src/app/pages/login/login.page.ts/.spec.ts`
+- `frontend/src/app/pages/profile/profile.page.ts/.spec.ts/.template.html`
+- `docs/features/auth/PRD-TRD-auth.md`, `IMPL-auth.md` (both marked SHIPPED)
+- `docs/frontend/01-frontend-backlog.md` (Pack C row SHIPPED + work history)
+- `sessions/decisions.md` (AUTO entry)
 
-A small tool friction worth noting: the `patch` tool requires `mode='replace'` to use `path/old_string/new_string`; using `mode='replace'` and also passing a `patch` V4A arg causes the "path required" error. The trap avoided for the rest of the session after one diagnostic.
+## Next Steps (in order)
+1. **Pack D — flows** (deposit/withdraw/vote/submit-signal) — largest remaining frontend pack; consider `feature-pipeline` via `execute-pack`.
+2. After Pack D, **Pack E** (landing template split — also fixes the prod budget warning).
+3. Run full verification after each feature: `npx vitest run && npx eslint . && npx ng build --configuration production && npx playwright test` (from `frontend/`).
+4. Commit per feature with conventional-commits; git identity `spanexx <spanexxvictor@gmail.com>`.
+5. Update `docs/frontend/01-frontend-backlog.md`, `sessions/decisions.md`, and this handoff.
+6. Branch is 30 commits ahead of master, still unpushed — pushing + PR is a user call (Orchestrator/CI not yet engaged).
 
-## How to Continue
+## Commands to Verify
+```bash
+cd /home/spanexx/Shared/Projects/meridian/frontend
+npx vitest run                    # full vitest (1048/1048)
+npx eslint .                      # lint
+npx ng build --configuration production  # prod build (real strict gate)
+npx playwright test               # e2e (157/157)
+```
 
-**State:** master at `647edd4`. 729/729 tests pass (40 files), pre-commit 10/10, both PRs merged. Dev server running at `127.0.0.1:4200`. Mode: AUTO.
-
-**Sibling bug to fix in PR #57:** `Payouts` has the same problem as Governance had — `/payouts` is a top-level route but payouts are per-community. Two paths forward: remove from sidebar (the same one-line fix as PR #56), or convert payouts to a per-community pattern matching governance (`/community/:id/payouts`). The second is the more structural answer if payouts have community-specific semantics (which is likely, given the same community-scoped reputation model). The decision is the user's, not the agent's.
-
-**Conventions to preserve:** the rename proved that the CSS layer and the semantic-key layer can diverge cleanly. Future renames of either layer should follow the same pattern: rename in `theme.css` + `sed` across CSS references, leave TS semantic keys alone, document the mapping in the component that bridges them. The `UiKpiCardComponent.gradientClass` record is the canonical example. The companion rule: every "lesson learned" PR must name its sibling bugs in the description, not bury them.
-
-**Pitfalls to remember:** (1) the semantic-key vs CSS-class distinction, (2) the pre-commit TDD rule's name-matching heuristic — when it flags a method, write a direct unit test rather than a TEST-COUPLED bypass, (3) sibling bugs are the recurring pattern — propagate the lesson or it doesn't stick, (4) the `patch` tool requires either `mode='replace'` with `path/old_string/new_string` OR `mode='patch'` with the V4A `patch` arg; never both.
-
-**Tests:** 729/729 passing as of `647edd4`. Pre-commit: 10/10. CI: 5/5. Decisions log: `sessions/decisions.md` updated with both PRs.
+## Relevant Skills for Next Session
+- `execute-pack` / `feature-pipeline` (Pack D flows)
+- `tdd` (RED→GREEN for each flow mutation)
+- `git-conventions` (commit conventions)
+- `handoff` (write next handoff)

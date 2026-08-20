@@ -18,7 +18,7 @@ import { UiBadgeComponent } from './badge.component';
   template: `<ui-badge [variant]="variant" [extraClass]="extraClass">label</ui-badge>`,
 })
 class HostComponent {
-  variant: any = 'neutral';
+  variant: 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'premium' = 'neutral';
   extraClass = '';
 }
 

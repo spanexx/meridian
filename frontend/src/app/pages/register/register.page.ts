@@ -19,11 +19,13 @@
  * @owner   agent-maintained
  * @reviewed 2026-08-17
  */
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { UiToastComponent, type UiToastVariant } from '../../ui/toast/toast.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ThemeService } from '../../core/state/theme.service';
+import { AuthStore } from '../../core/state/auth.store';
 
 interface ToastState {
   readonly title: string;
@@ -81,43 +83,47 @@ interface ToastState {
 
           <form (ngSubmit)="submit()" class="space-y-4" data-auth-form>
             <div>
-              <label>Full name</label>
+              <label for="register-name">Full name</label>
               <input
                 type="text"
                 class="input"
                 data-field="fullname"
                 placeholder="Your name"
+                id="register-name"
                 required
               />
             </div>
             <div>
-              <label>Email</label>
+              <label for="register-email">Email</label>
               <input
                 type="email"
                 class="input"
                 data-field="email"
                 placeholder="you@example.com"
+                id="register-email"
                 required
               />
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label>Password</label>
+                <label for="register-password">Password</label>
                 <input
                   type="password"
                   class="input"
                   data-field="password"
                   placeholder="••••••••"
+                  id="register-password"
                   required
                 />
               </div>
               <div>
-                <label>Confirm</label>
+                <label for="register-confirm">Confirm</label>
                 <input
                   type="password"
                   class="input"
                   data-field="confirm"
                   placeholder="••••••••"
+                  id="register-confirm"
                   required
                 />
               </div>
@@ -167,26 +173,44 @@ interface ToastState {
 })
 export class RegisterPageComponent {
   private readonly router = inject(Router);
-
-  /** Current theme key — mirrors ShellComponent's private theme signal. */
-  private readonly theme = signal<'dark' | 'light'>(
-    (localStorage.getItem('meridian-theme') as 'dark' | 'light') ?? 'dark',
-  );
+  private readonly auth = inject(AuthStore);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  // Pack B: theme owned by ThemeService (single owner, persisted) —
+  // auth pages live outside the shell so they call it directly.
+  private readonly themeService = inject(ThemeService);
 
   /** In-page toast state (ui-toast primitive rendered behind @if). */
   readonly toast = signal<ToastState | null>(null);
 
   /** Toggles the page theme. Auth pages live outside the shell. */
   toggleTheme(): void {
-    this.theme.update((t) => (t === 'dark' ? 'light' : 'dark'));
-    document.documentElement.dataset['theme'] = this.theme();
-    localStorage.setItem('meridian-theme', this.theme());
+    this.themeService.toggle();
   }
 
-  /** Create-account submit — success toast, then 900ms → /dashboard. */
-  submit(): void {
-    this.showToast('Account created — welcome aboard');
-    setTimeout(() => this.router.navigate(['/dashboard']), 900);
+  /** Create-account submit — via AuthStore (one-source registration). */
+  async submit(): Promise<void> {
+    const root = this.host.nativeElement;
+    const email = (root.querySelector('input[data-field="email"]') as HTMLInputElement | null)?.value ?? '';
+    const password = (root.querySelector('input[data-field="password"]') as HTMLInputElement | null)?.value ?? '';
+    const terms = !!(
+      root.querySelector('input[data-field="terms"]') as HTMLInputElement | null
+    )?.checked;
+
+    try {
+      await this.auth.register({
+        email,
+        password,
+        password_confirm: password,
+        terms_accepted: terms,
+      });
+      this.showToast('Account created — welcome aboard');
+      // Pack C: registration issues NO tokens (verify-email flow), so the
+      // protected /dashboard is unreachable right after signup — route to
+      // /login and let the new member sign in.
+      setTimeout(() => this.router.navigate(['/login']), 900);
+    } catch {
+      this.showToast('Registration failed — please try again');
+    }
   }
 
   private showToast(message: string): void {

@@ -29,13 +29,34 @@
  */
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
+import { ApiClient } from '../../core/api/api-client';
+import { formatApiMoney } from '../../core/utils/money';
+import {
+  SEED_BALANCE,
+  SEED_COMMUNITIES,
+  SEED_OPPORTUNITIES,
+  SEED_AUTH_ME_MEMBER,
+  SEED_EXECUTIONS,
+  SEED_POOL_STATUS,
+} from '../../core/api/mock-seed';
 
 async function renderDashboard(): Promise<ComponentFixture<unknown>> {
+  const mockClient = {
+    me: vi.fn().mockResolvedValue({ member: SEED_AUTH_ME_MEMBER, session: { created_at: '', expires_at: '' } }),
+    opportunitiesList: vi.fn().mockResolvedValue({ opportunities: SEED_OPPORTUNITIES }),
+    executionsList: vi.fn().mockResolvedValue({ executions: SEED_EXECUTIONS }),
+    poolStatus: vi.fn().mockResolvedValue(SEED_POOL_STATUS),
+    balance: vi.fn().mockResolvedValue(SEED_BALANCE),
+    communitiesList: vi.fn().mockResolvedValue({ communities: SEED_COMMUNITIES }),
+  } as unknown as ApiClient;
   await TestBed.configureTestingModule({
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
   }).compileComponents();
   const { DashboardPageComponent: Comp } = await import('./dashboard.page');
   const fixture = TestBed.createComponent(Comp);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
@@ -64,6 +85,23 @@ describe('DashboardPage (wireframe-driven)', () => {
     for (const num of kpiNumbers) {
       expect((num.textContent ?? '').trim().length).toBeGreaterThan(0);
     }
+  });
+
+  // Pack B (2026-08-19): the KPI numbers come from ONE source — the
+  // seeded ApiClient (PoolStore for pool totals, communitiesList for
+  // member count, opportunitiesList for open/awaiting counts). The
+  // wireframe's fabricated 12/8 counters are replaced by derivations.
+  it('KPI values derive from the seeded ApiClient (one-source)', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    const text = root.textContent ?? '';
+    expect(text).toContain('$1,423,580'); // poolStatus().totals.total_capital
+    expect(text).toContain('$487,230'); // poolStatus().totals.deployed_capital
+    expect(text).toContain('3 executions in flight'); // activity.active_executions
+    expect(text).toContain('124'); // communitiesList()[0].member_count
+    // opportunitiesList rows: 24 (16 non-terminal, 11 SUBMITTED/VETTING)
+    expect(text).toContain('16');
+    expect(text).toContain('11 awaiting your vote');
   });
 
   it('renders the Active Executions section with execution rows', async () => {
@@ -182,19 +220,31 @@ describe('DashboardPage (wireframe-driven)', () => {
     expect(text).not.toContain('new this month');
   });
 
-  it('Open Opportunities KPI says "8 awaiting your vote"', async () => {
+  it('Open Opportunities KPI derives the awaiting count from the seed', async () => {
     const fixture = await renderDashboard();
     const html = (fixture.nativeElement as HTMLElement).innerHTML;
-    expect(html).toContain('8 awaiting your vote');
+    // 11 SUBMITTED/VETTING rows in SEED_OPPORTUNITIES (one-source derivation).
+    expect(html).toContain('11 awaiting your vote');
+  });
+
+  it('KPI money formatting delegates to formatApiMoney (one-source util)', async () => {
+    const fixture = await renderDashboard();
+    const root = fixture.nativeElement as HTMLElement;
+    // formatApiMoney is the single formatter behind the pool totals;
+    // its output is what the KPI tiles render (e.g. grouped thousands).
+    expect(root.textContent).toContain(formatApiMoney('1423580.00'));
+    expect(root.textContent).toContain(formatApiMoney('487230.00'));
   });
 
   it('Each Active Execution row carries a status subtitle on the right', async () => {
     const fixture = await renderDashboard();
     const html = (fixture.nativeElement as HTMLElement).innerHTML;
-    // Per wireframe: "3 of 8 sold", "Closing", "ETA 4 days"
+    // Status subtitles derive from the canonical seed (one source):
+    // E-1042 HOLDING → "3 of 8 sold", E-1039 LIQUIDATING → "Closing",
+    // E-1036 ACQUIRING → "ETA n days".
     expect(html).toContain('3 of 8 sold');
     expect(html).toContain('Closing');
-    expect(html).toContain('ETA 4 days');
+    expect(html).toContain('ETA');
   });
 
   it('Active Executions use multi-color progress bars (emerald / violet / blue)', async () => {

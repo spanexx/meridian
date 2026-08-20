@@ -13,8 +13,14 @@
  * @reviewed 2026-08-17
  */
 import { test, expect } from '@playwright/test';
+import { expectScreenshot, waitForStable } from './helpers/visual';
+import { seedSession } from './helpers/auth';
 
 test.describe('notifications page (wireframe-aligned)', () => {
+  test.beforeEach(async ({ page }) => {
+    await seedSession(page);
+  });
+
   test('route loads and renders the title + subtitle', async ({ page }) => {
     const res = await page.goto('/notifications');
     expect(res?.status()).toBeLessThan(400);
@@ -40,6 +46,10 @@ test.describe('notifications page (wireframe-aligned)', () => {
 
   test('Mark all read clears dots and drives Unread count to 0', async ({ page }) => {
     await page.goto('/notifications');
+    // List is async (ApiClient via the mock): wait for it to render
+    // before clicking, or mark-all-read acts on an empty list
+    // (DISCOVERY 2026-08-19 pattern; flaked 2026-08-20 on a cold run).
+    await expect(page.locator('[data-notif-item]')).toHaveCount(8);
     await page.locator('[data-mark-read]').click();
     await expect(page.locator('[data-unread-dot]')).toHaveCount(0);
     await expect(page.locator('[data-filter-tab="unread"]')).toContainText('0');
@@ -51,14 +61,17 @@ test.describe('notifications page (wireframe-aligned)', () => {
     await page.getByRole('button', { name: 'Preferences' }).click();
     const modal = page.locator('[data-testid="prefs-modal"]');
     await expect(modal).toBeVisible();
-    await expect(modal.locator('.switch')).toHaveCount(4);
-    await page.locator('#savePrefsBtn').click();
+    // The ui-switch primitive exposes role="switch": assert the four
+    // toggles by accessible role, not the .switch class.
+    await expect(modal.getByRole('switch')).toHaveCount(4);
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText('Notification preferences saved')).toBeVisible();
     await expect(modal).toBeHidden();
   });
 
-  test('notifications page screenshot saved for visual review', async ({ page }) => {
+  test('notifications renders true to its golden baseline', async ({ page }) => {
     await page.goto('/notifications');
-    await page.screenshot({ path: 'e2e/screenshots/notifications.png', fullPage: true });
+    await waitForStable(page);
+    await expectScreenshot(page, 'notifications');
   });
 });

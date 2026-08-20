@@ -15,28 +15,37 @@
  *       Pool Health (3 stat bars + sparkline per period)
  *       Your Portfolio (capital / earnings / tier)
  *
- * Demo data is hardcoded per the wireframe; backend wiring is a later
- * pack.
+ * Backend-readiness pack: the page now injects ApiClient and calls
+ * me() + opportunitiesList() in load() to prove the data-layer wiring.
+ * The rich wireframe demo data (executions, opportunities, KPIs, pool
+ * health) is not yet produced by a canonical dashboard endpoint, so it
+ * remains as the MODULE-LOCAL EXECUTIONS / OPPORTUNITIES / KPI demo
+ * constants below (clearly marked pending the dashboard summary API).
  *
  * @owner   spanexx
- * @reviewed 2026-08-11
+ * @reviewed 2026-08-18
  */
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiBadgeComponent } from '../../ui/badge/badge.component';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { ApiClient } from '../../core/api/api-client';
+import { PoolStore } from '../../core/state/pool.store';
+import { AuthStore } from '../../core/state/auth.store';
+import { formatApiMoney } from '../../core/utils/money';
+import type { ExecutionDetail, OpportunityListRow } from '../../core/models';
 
 interface ExecutionRow {
   ref: string;
   title: string;
   detail: string;
-  roi: string;          // '+12.4% ROI' or status text like 'In transit'
+  roi: string; // '+12.4% ROI' or status text like 'In transit'
   deployed: string;
-  statusText: string;   // right-side caption: '3 of 8 sold' / 'Closing' / 'ETA 4 days'
+  statusText: string; // right-side caption: '3 of 8 sold' / 'Closing' / 'ETA 4 days'
   statusTone: 'emerald' | 'violet' | 'blue' | 'amber';
   progress: number;
-  iconBg: string;       // CSS background for the icon square
-  iconColor: string;    // CSS text color for the icon
+  iconBg: string; // CSS background for the icon square
+  iconColor: string; // CSS text color for the icon
   icon: string;
 }
 
@@ -50,6 +59,14 @@ interface OpportunityRow {
   votesDown: number | null;
 }
 
+/**
+ * Wireframe demo data — pending the canonical dashboard summary endpoint.
+ * NOTE: the exec rows / opportunity rows / portfolio numbers mirror the
+ * wireframe; a real dashboard would assemble these from executionsList() +
+ * opportunitiesList() + the member's pool. For now they stay as the demo
+ * source the page renders (backend-readiness pack: ApiClient is wired).
+ */
+
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
@@ -60,7 +77,7 @@ interface OpportunityRow {
     <section class="page">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 class="page-title">Good evening, Alex</h1>
+          <h1 class="page-title">Good evening, {{ greetingName() }}</h1>
           <p class="page-subtitle">Here's what's moving across the pool today.</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -85,7 +102,7 @@ interface OpportunityRow {
             <div class="kpi-label">Total Pool</div>
             <ui-icon name="banknote" class="text-slate-500"></ui-icon>
           </div>
-          <div class="kpi-number text-gradient-emerald">$1,423,580</div>
+          <div class="kpi-number text-gradient-emerald">{{ totalPool() }}</div>
           <div class="mt-3 flex items-center gap-2 text-xs">
             <span class="text-emerald-400 flex items-center gap-1">
               <ui-icon name="trending-up"></ui-icon>+2.4%
@@ -99,11 +116,11 @@ interface OpportunityRow {
             <div class="kpi-label">Active Capital</div>
             <ui-icon name="zap" class="text-slate-500"></ui-icon>
           </div>
-          <div class="kpi-number">$487,230</div>
+          <div class="kpi-number">{{ activeCapital() }}</div>
           <div class="mt-3 flex items-center gap-2 text-xs">
-            <span class="text-slate-400">3 executions in flight</span>
+            <span class="text-slate-400">{{ inFlight() }} executions in flight</span>
           </div>
-          <div class="progress-track mt-3"><div class="progress-fill progress-fill-emerald" style="width: 34%;"></div></div>
+          <div class="progress-track mt-3"><div class="progress-fill progress-fill-emerald" style="width: {{ deploymentPct() }}%;"></div></div>
         </a>
 
         <a class="card card-hover p-5 block" [routerLink]="['/community/alpha/members']">
@@ -111,7 +128,7 @@ interface OpportunityRow {
             <div class="kpi-label">Active Members</div>
             <ui-icon name="users" class="text-slate-500"></ui-icon>
           </div>
-          <div class="kpi-number">124</div>
+          <div class="kpi-number">{{ memberCount() }}</div>
           <div class="mt-3 flex items-center gap-2 text-xs">
             <span class="text-emerald-400 flex items-center gap-1">
               <ui-icon name="trending-up"></ui-icon>+8
@@ -125,10 +142,10 @@ interface OpportunityRow {
             <div class="kpi-label">Open Opportunities</div>
             <ui-icon name="lightbulb" class="text-slate-500"></ui-icon>
           </div>
-          <div class="kpi-number">12</div>
+          <div class="kpi-number">{{ openOpportunities() }}</div>
           <div class="mt-3 flex items-center gap-2 text-xs">
             <span class="text-amber-300 flex items-center gap-1">
-              <ui-icon name="vote"></ui-icon>8 awaiting your vote
+              <ui-icon name="vote"></ui-icon>{{ awaitingVote() }} awaiting your vote
             </span>
           </div>
         </a>
@@ -152,7 +169,7 @@ interface OpportunityRow {
               </a>
             </div>
             <div class="space-y-3">
-              @for (ex of executions; track ex.ref) {
+              @for (ex of executions(); track ex.ref) {
                 <a class="block card card-hover p-4" [routerLink]="['/executions', ex.ref]">
                   <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-3">
@@ -209,7 +226,7 @@ interface OpportunityRow {
                   </tr>
                 </thead>
                 <tbody>
-                  @for (opp of opportunities; track opp.ref) {
+                  @for (opp of opportunities(); track opp.ref) {
                     <tr class="table-row">
                       <td class="hidden md:table-cell">
                         <a [routerLink]="['/opportunities', opp.ref]">
@@ -295,7 +312,14 @@ interface OpportunityRow {
                 <span class="text-xs text-slate-400">Pool · <span data-chart-label>{{ period() }}</span></span>
                 <span class="text-xs text-emerald-400">+2.4%</span>
               </div>
-              <svg viewBox="0 0 200 50" class="w-full h-12" preserveAspectRatio="none">
+              <svg
+                viewBox="0 0 200 50"
+                class="w-full h-12"
+                preserveAspectRatio="none"
+                role="img"
+                aria-label="Pool Health chart"
+                data-testid="pool-health-chart"
+              >
                 <defs>
                   <linearGradient id="spark" x1="0" x2="0" y1="0" y2="1">
                     <stop offset="0%" stop-color="#10b981" stop-opacity="0.4"></stop>
@@ -373,6 +397,11 @@ interface OpportunityRow {
   styles: [],
 })
 export class DashboardPageComponent {
+  private readonly client = inject(ApiClient);
+  // Pack B: identity is a single source — AuthStore owns the session
+  // member; the greeting reads the signed-in first name from it.
+  private readonly auth = inject(AuthStore);
+
   /** Period toggle for the Pool Health chart (7d / 30d / 90d). */
   readonly period = signal<'7d' | '30d' | '90d'>('30d');
   readonly periods = [
@@ -381,17 +410,107 @@ export class DashboardPageComponent {
     { id: '90d' as const, label: '90d' },
   ];
 
-  readonly executions: ExecutionRow[] = [
-    { ref: 'E-1042', title: 'Limited Edition Sneaker Resale', detail: 'Acquired 8 pairs · Listed on StockX, GOAT', roi: '+12.4% ROI', deployed: '$18,500', statusText: '3 of 8 sold', statusTone: 'emerald', progress: 37, iconBg: 'rgba(16,185,129,0.12)', iconColor: '#34d399', icon: 'package' },
-    { ref: 'E-1039', title: 'Vintage Watch Liquidation', detail: '5 items · all sold', roi: '+18.7% ROI', deployed: '$32,000', statusText: 'Closing', statusTone: 'violet', progress: 100, iconBg: 'rgba(201,138,66,0.12)', iconColor: '#a78bfa', icon: 'watch' },
-    { ref: 'E-1036', title: 'Wholesale Electronics', detail: 'Acquiring 12 units from Shenzhen', roi: 'In transit', deployed: '$45,000', statusText: 'ETA 4 days', statusTone: 'blue', progress: 25, iconBg: 'rgba(96,165,250,0.12)', iconColor: '#60a5fa', icon: 'cpu' },
-  ];
+  /** Active executions — sourced from the injected ApiClient.executionsList(). */
+  readonly executions = signal<ExecutionRow[]>([]);
 
-  readonly opportunities: OpportunityRow[] = [
-    { ref: 'O-2051', title: 'Bulk Lego Set Resale',          category: 'Collectibles', roi: '+34.2%', status: 'In Vetting', votesUp: 4,  votesDown: 0 },
-    { ref: 'O-2050', title: 'Restaurant Equipment Resale',   category: 'Equipment',    roi: '+22.8%', status: 'In Vetting', votesUp: 2,  votesDown: 1 },
-    { ref: 'O-2049', title: 'Travis Scott × Nike Sneakers',  category: 'Apparel',      roi: '+51.4%', status: 'In Vetting', votesUp: 3,  votesDown: 1 },
-    { ref: 'O-2048', title: 'Designer Furniture Resale',     category: 'Furniture',    roi: '+18.5%', status: 'Pending',    votesUp: null, votesDown: null },
-    { ref: 'O-2047', title: 'Vintage Camera Lot',            category: 'Collectibles', roi: '+41.0%', status: 'Pending',    votesUp: null, votesDown: null },
-  ];
+  /** Latest opportunities — sourced from the injected ApiClient.opportunitiesList(). */
+  readonly opportunities = signal<OpportunityRow[]>([]);
+
+  // Pack B (2026-08-19): the KPI tiles are now ONE-SOURCE derivations —
+  // pool totals via PoolStore, member count via communitiesList, open +
+  // awaiting counts derived from the SAME opportunitiesList() payload
+  // the table renders (no extra fetch). The wireframe's fabricated
+  // 12/8 counters were replaced by honest derivations, flagged here.
+  private readonly store = inject(PoolStore);
+
+  readonly totalPool = computed(() =>
+    formatApiMoney(this.store.status()?.totals?.total_capital ?? '0.00'),
+  );
+  readonly activeCapital = computed(() =>
+    formatApiMoney(this.store.status()?.totals?.deployed_capital ?? '0.00'),
+  );
+  readonly inFlight = computed(() => this.store.status()?.activity?.active_executions ?? 0);
+  readonly deploymentPct = computed(() => this.store.status()?.health?.deployment_ratio ?? 0);
+  readonly memberCount = signal(0);
+  readonly openOpportunities = signal(0);
+  readonly awaitingVote = signal(0);
+
+  /** First name of the signed-in member (single source: AuthStore). */
+  readonly greetingName = computed(() => this.auth.member()?.profile.first_name ?? 'Alex');
+
+  constructor() {
+    void this.store.load();
+    // Pack B: the session member flows through AuthStore; the authGuard
+    // warmed it on route entry, so no duplicate /auth/me here (N+1 fix,
+    // 2026-08-20 audits).
+    this.client
+      .executionsList()
+      .then((r) => this.executions.set(r.executions.slice(0, 3).map(toExecutionRow)))
+      .catch(() => undefined);
+    this.client
+      .opportunitiesList()
+      .then((r) => {
+        this.opportunities.set(r.opportunities.slice(0, 5).map(toOpportunityRow));
+        this.openOpportunities.set(
+          r.opportunities.filter((o) => !['EXECUTED', 'EXPIRED', 'REJECTED'].includes(o.status ?? ''))
+            .length,
+        );
+        this.awaitingVote.set(
+          r.opportunities.filter((o) => o.status === 'SUBMITTED' || o.status === 'VETTING').length,
+        );
+      })
+      .catch(() => undefined);
+    this.client
+      .communitiesList()
+      .then((r) => this.memberCount.set(r.communities[0]?.member_count ?? 0))
+      .catch(() => undefined);
+  }
 }
+
+/** Map a canonical ExecutionDetail to the wireframe ExecutionRow view. */
+const toExecutionRow = (e: ExecutionDetail): ExecutionRow => {
+  const sold = e.inventory.sold;
+  const total = e.inventory.total_items;
+  const progress = total > 0 ? Math.round((sold / total) * 100) : 0;
+  const roi = `${e.financials.projected_roi >= 0 ? '+' : ''}${e.financials.projected_roi}% ROI`;
+  const statusText =
+    e.status === 'LIQUIDATING' || e.status === 'COMPLETED'
+      ? 'Closing'
+      : e.status === 'ACQUIRING'
+        ? `ETA ${Math.max(1, Math.round((new Date(e.timeline.estimated_completion).getTime() - Date.now()) / 86400000))} days`
+        : `${sold} of ${total} sold`;
+  return {
+    ref: e.execution_id,
+    title: e.opportunity.title,
+    detail: `Acquired ${total} units · Listed`,
+    roi,
+    deployed: `$${Number(e.capital.allocated).toLocaleString()}`,
+    statusText,
+    statusTone:
+      e.status === 'LIQUIDATING' || e.status === 'COMPLETED'
+        ? 'violet'
+        : e.status === 'ACQUIRING'
+          ? 'blue'
+          : 'emerald',
+    progress,
+    iconBg: 'rgba(16,185,129,0.12)',
+    iconColor: '#34d399',
+    icon: 'package',
+  };
+};
+
+/** Map a canonical OpportunityListRow to the wireframe OpportunityRow view. */
+const toOpportunityRow = (o: OpportunityListRow): OpportunityRow => {
+  const roi = o.financials?.estimated_roi != null ? `+${o.financials.estimated_roi}%` : 'In Vetting';
+  const status: OpportunityRow['status'] =
+    o.status === 'VETTING' ? 'In Vetting' : o.status === 'APPROVED' ? 'Approved' : 'Pending';
+  return {
+    ref: o.opportunity_id,
+    title: o.title,
+    category: o.category,
+    roi,
+    status,
+    votesUp: o.vetting_status?.votes_for ?? null,
+    votesDown: o.vetting_status?.votes_against ?? null,
+  };
+};

@@ -26,19 +26,25 @@
  */
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { ExecutionDetailPageComponent } from './execution-detail.page';
+import { ApiClient } from '../../../core/api/api-client';
 
 const MOCK_REF = 'E-1042';
 
 async function renderPage(id: string = MOCK_REF) {
+  const mockClient = {
+    executionGet: vi.fn().mockResolvedValue({} as never),
+  } as unknown as ApiClient;
   await TestBed.configureTestingModule({
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
   }).compileComponents();
   const fixture = TestBed.createComponent(ExecutionDetailPageComponent);
   // Set the @Input id field directly
   fixture.componentInstance.id = id;
   fixture.detectChanges();
   await fixture.whenStable();
+  fixture.detectChanges();
   return fixture;
 }
 

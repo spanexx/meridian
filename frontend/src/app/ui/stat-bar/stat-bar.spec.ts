@@ -18,7 +18,7 @@ import { UiStatBarComponent } from './stat-bar.component';
 })
 class HostComponent {
   value = 62;
-  variant: any = 'emerald';
+  variant: 'emerald' | 'violet' | 'amber' | 'blue' = 'emerald';
 }
 
 describe('UiStatBarComponent', () => {
@@ -80,5 +80,23 @@ describe('UiStatBarComponent', () => {
     await flushMicrotask();
     fixture.detectChanges();
     expect(fill.style.width).toBe('100%');
+  });
+
+  it('fillClass() maps the variant to the progress-fill-<variant> class', () => {
+    const fixture = TestBed.createComponent(UiStatBarComponent);
+    fixture.componentRef.setInput('variant', 'amber');
+    expect(fixture.componentInstance.fillClass()).toBe('progress-fill-amber');
+    fixture.componentRef.setInput('variant', 'blue');
+    expect(fixture.componentInstance.fillClass()).toBe('progress-fill-blue');
+  });
+
+  it('ngOnInit() queues the ready flag that starts the animation', async () => {
+    const fixture = TestBed.createComponent(UiStatBarComponent);
+    fixture.componentRef.setInput('value', 80);
+    // Before ngOnInit: the computed stays at 0 (no animation trigger yet).
+    expect(fixture.componentInstance.animated()).toBe(0);
+    fixture.componentInstance.ngOnInit();
+    await flushMicrotask();
+    expect(fixture.componentInstance.animated()).toBe(80);
   });
 });

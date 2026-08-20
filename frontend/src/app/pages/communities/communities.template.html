@@ -102,6 +102,12 @@
   <div data-list data-page-size="6">
     <section class="card p-0 overflow-hidden" data-list-body>
       <div class="table-scroll">
+        @if (loading()) {
+          <div class="empty" data-testid="skeleton">
+            <ui-icon name="activity" [size]="40" class="mx-auto"></ui-icon>
+            <p class="text-sm font-medium text-slate-400 mb-1">Loading communities…</p>
+          </div>
+        } @else {
         <table>
           <thead>
             <tr>
@@ -180,6 +186,7 @@
             }
           </tbody>
         </table>
+        }
       </div>
 
       <!-- empty state (hidden by default since 3 rows present) -->
@@ -236,12 +243,12 @@
     </div>
     <form class="space-y-4" data-auth-form data-success="Community proposal submitted for voting">
       <div>
-        <label>Community name</label>
-        <input type="text" class="input" placeholder="e.g., Tech Arbitrage Collective" required />
+        <label for="community-name">Community name</label>
+        <input id="community-name" type="text" class="input" placeholder="e.g., Tech Arbitrage Collective" required />
       </div>
       <div>
-        <label>Focus area</label>
-        <select class="input">
+        <label for="community-focus">Focus area</label>
+        <select id="community-focus" class="input">
           <option>General arbitrage</option>
           <option>Electronics</option>
           <option>Collectibles</option>
@@ -250,8 +257,8 @@
         </select>
       </div>
       <div>
-        <label>Geographic scope</label>
-        <select class="input">
+        <label for="community-geo">Geographic scope</label>
+        <select id="community-geo" class="input">
           <option>Global</option>
           <option>North America</option>
           <option>Europe</option>
@@ -260,8 +267,8 @@
         </select>
       </div>
       <div>
-        <label>Description</label>
-        <textarea class="input" rows="3" placeholder="Explain the community's purpose and focus..."></textarea>
+        <label for="community-description">Description</label>
+        <textarea id="community-description" class="input" rows="3" placeholder="Explain the community's purpose and focus..."></textarea>
       </div>
       <div class="flex items-center gap-2">
         <input type="checkbox" id="terms" required />

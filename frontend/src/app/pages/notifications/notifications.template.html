@@ -41,7 +41,9 @@
               role="switch"
               [attr.aria-checked]="switches()[i]"
               (click)="togglePref(i)"
-            ></button>
+            >
+              <span class="sr-only">Toggle {{ p.label }}</span>
+            </button>
           </div>
         }
         <div class="flex justify-end gap-3 pt-2">
@@ -71,7 +73,12 @@
   </div>
 
   <section class="card p-0 overflow-hidden">
-    @if (filtered().length > 0) {
+    @if (loading()) {
+      <div class="empty" data-testid="skeleton">
+        <ui-icon name="activity" [size]="40" class="mx-auto"></ui-icon>
+        <p class="text-sm font-medium text-slate-400 mb-1">Loading notifications…</p>
+      </div>
+    } @else if (filtered().length > 0) {
       <div
         class="divide-y"
         style="--tw-divide-y-reverse: 0; border-bottom: 1px solid var(--border-subtle)"

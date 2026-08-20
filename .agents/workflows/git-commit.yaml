@@ -4,6 +4,14 @@ description: |
   PR against master. Run whenever you have one logical change ready to
   ship.
 
+  NOTE — this file is a PROCEDURE, not an executable. "Run the workflow"
+  means follow its steps in order (confirm tree, verify gates, stage,
+  commit, push, open PR). There is no `git-commit.yaml` script to invoke;
+  the steps below are the checklist itself. An equivalent proof counts:
+  e.g. every commit already passed the pre-commit hook and the full suite
+  was run green immediately before the PR — record the results in the PR
+  body's "Gates run" section.
+
 triggers:
   - Finished implementing one logical change (feature, fix, refactor, doc, test, skill, workflow, ci change)
   - User says "commit this", "ship it", "open a PR"
@@ -71,12 +79,42 @@ steps:
       If gh CLI is not authenticated, instruct the user to run the
       command manually or run gh auth login first.
 
+  - name: Merge PR to master
+    run: |
+      gh pr merge <number> --squash --delete-branch
+      git checkout master && git pull --ff-only
+    expect: |
+      PR merged via squash (no merge commits, per git-conventions);
+      --delete-branch removes the remote head branch at merge time;
+      local master is in sync with origin/master
+    rule: |
+      Merge only when CI is green AND the branch is up to date with
+      master. If the PR has conflicts, rebase the branch onto master
+      first (git rebase master) and force-push — never merge red.
+
+  - name: Confirm master contains the change
+    run: |
+      git log --oneline origin/master -3
+      git diff master~1..master --stat
+    expect: the change is the tip commit of master (squash = one commit)
+
+  - name: Clean up after merge
+    run: |
+      Run the canonical cleanup workflow:
+        ./.agents/workflows/branch-cleanup.yaml
+    expect: |
+      remote head branch already deleted by --delete-branch;
+      stale remote branches pruned (git remote prune origin);
+      stale local branches deleted; only master + open-PR branches remain
+
 verify:
   - "git log --oneline master..HEAD shows at least one commit on the branch"
   - "git diff master --stat shows only intended files changed"
   - "Frontend change: cd frontend && npx playwright test is green"
   - "Backend change: cd backend && go test ./... is green"
   - "PR exists with title + body filled from the PR template"
+  - "PR merged to master (squash) and remote branch deleted"
+  - "git branch -a shows only master + branches with open PRs"
 
 notes:
   - One commit per logical change. Multiple commits OK if a single change
@@ -86,3 +124,5 @@ notes:
   - Do not push red. If a gate fails, fix or revert before pushing.
   - When the repo is fresh with no remote yet, the push step is a no-op
     and a follow-up git remote add origin <url> is needed.
+  - "This workflow is the FULL lifecycle: commit → push → PR → merge → cleanup. Merging and cleanup are part of it, not separate chores — a merged branch that lingers locally or remotely is drift."
+  - "If the PR is closed without merging, delete its branch anyway (dead weight) — see branch-cleanup.yaml. Never `git branch -D` a branch with unmerged commits unless the user confirms."

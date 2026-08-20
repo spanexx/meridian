@@ -19,7 +19,9 @@
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
+import { vi } from 'vitest';
 import type { RegisterPageComponent } from './register.page';
+import { ApiClient } from '../../core/api/api-client';
 
 /** Minimal routable content so routerLink hrefs resolve in the test router. */
 @Component({ selector: 'stub-route', standalone: true, template: '' })
@@ -32,8 +34,11 @@ const AUTH_ROUTES = [
 ];
 
 async function renderStandalone(): Promise<ComponentFixture<RegisterPageComponent>> {
+  const mockClient = {
+    register: vi.fn().mockResolvedValue({ member_id: 'm1', email: 'x', status: 'ok', message: 'ok' }),
+  } as unknown as ApiClient;
   await TestBed.configureTestingModule({
-    providers: [provideRouter(AUTH_ROUTES)],
+    providers: [provideRouter(AUTH_ROUTES), { provide: ApiClient, useValue: mockClient }],
   }).compileComponents();
   const { RegisterPageComponent: Comp } = await import('./register.page');
   const fixture = TestBed.createComponent(Comp);
@@ -80,20 +85,21 @@ describe('RegisterPage (wireframe-aligned)', () => {
     expect(root.textContent).toContain('integrity first.');
   });
 
-  it('submit() shows the success toast, then a 900ms setTimeout navigates to /dashboard', async () => {
+  it('submit() shows the success toast, then a 900ms setTimeout navigates to /login', async () => {
     const fixture = await renderStandalone();
     const c = fixture.componentInstance;
     const root = fixture.nativeElement as HTMLElement;
     const router = TestBed.inject(Router);
     const nav = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     vi.useFakeTimers();
-    c.submit();
+    await c.submit();
     fixture.detectChanges();
     const toast = root.querySelector('ui-toast') as HTMLElement;
     expect(toast.textContent).toContain('Account created — welcome aboard');
     expect(nav).not.toHaveBeenCalled();
     vi.advanceTimersByTime(900);
-    expect(nav).toHaveBeenCalledWith(['/dashboard']);
+    // Pack C: registration issues no token → the next step is /login.
+    expect(nav).toHaveBeenCalledWith(['/login']);
     vi.useRealTimers();
   });
 

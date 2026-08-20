@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MERIDIAN — Session Handoff 2026-08-13</title>
+<title>MERIDIAN — Session Handoff 2026-08-18</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config={theme:{extend:{borderRadius:{lg:'0.5rem',md:'calc(0.5rem - 2px)',sm:'calc(0.5rem - 4px)'},fontFamily:{sans:['system-ui','-apple-system','sans-serif']}}}}
@@ -27,14 +27,14 @@ body{background:var(--bg);color:var(--fg)}.bg-card{background:var(--card)}
       </span>
     </button>
     <h1 class="text-xl font-bold tracking-tight" style="color:var(--copper)">MERIDIAN — Session Handoff</h1>
-    <p class="text-xs" style="color:var(--muted-fg)">2026-08-13 · PR #55 + PR #56 (copper rename + sidebar governance removal)</p>
+    <p class="text-xs" style="color:var(--muted-fg)">2026-08-18 · feat/frontend-data-layer · backend-readiness audit</p>
   </div>
 
   <!-- Soul -->
   <div class="bg-card border rounded-lg p-5 space-y-2" style="border-color:var(--border)">
     <h2 class="text-sm font-semibold" style="color:var(--fg)">Soul</h2>
     <p class="text-sm leading-relaxed" style="color:var(--muted-fg)">
-      A small, surgical session that closed out two long-standing inconsistencies in the meridian shell and theme. We came in mid-flow on the copper rename and the user mid-task caught a related header bug on governance, then mid-evening the user pivoted to a sharper question — "is governance supposed to be a top-level page or a child page under communities?" — and that question, more than any of the actual code, set the tone. The answer was "child page, and the sidebar entry was the last leftover from the old top-level world." The energy was the user noticing what the rest of the codebase had quietly absorbed: governance doesn't live in the global menu, it lives inside a community. Two PRs shipped, both merged, both clean. The session has the feel of a week-end cleanup — surface-level polish that reveals a deeper structural lesson underneath.
+      This session was about proving the frontend could someday talk to a real backend without a rewrite — and finding out, honestly, that it mostly can't yet. We finished the data layer (payouts page rewired, transport seam closed), fixed a small but real mobile sidebar bug that bit the user on their phone, then ran a cold audit of how ready the frontend is to flip from mock data to a live database. The mood was pragmatic: ship the pieces that are done, name the gap precisely, and hand the next agent a clean map instead of a vague "almost there."
     </p>
   </div>
 
@@ -42,8 +42,9 @@ body{background:var(--bg);color:var(--fg)}.bg-card{background:var(--card)}
   <div class="bg-card border rounded-lg p-5 space-y-3" style="border-color:var(--border)">
     <h2 class="text-sm font-semibold" style="color:var(--fg)">What We Did</h2>
     <div class="text-sm space-y-3" style="color:var(--muted-fg)">
-      <p><span style="color:var(--copper);font-weight:600">PR #55 — copper rename + governance header alignment.</span> The bigger lift of the session. 19 files, 40 occurrences, a token that was always copper but named <code>violet</code> because nobody had time to fix it. The full cascade: <code>theme.css</code> got the new <code>--gradient-copper</code> tokens (dark <code>#a86a2d</code>, light bumped from <code>#7c4a1a</code> to <code>#9a5b1f</code> to match <code>--v-300</code> and avoid the muddy brown the old value rendered as), every reference across 18 component and page files got renamed via <code>sed</code>, and <code>UiKpiCardComponent</code> gained a private <code>gradientClass</code> mapping record so the legacy <code>'violet'</code> semantic key in the TS type union maps cleanly to the new <code>text-gradient-copper</code> CSS class. The semantic key stayed intact because it's a tier concept, not a color name — renaming it would have broken every fixture and every type union for no visual benefit. The user found a related header alignment bug on governance (the <code>sm:items-center</code> from the old header pattern was still there even though PR #41 had switched community-settings to <code>sm:items-start</code>); the fix was a one-liner with a comment back-pointer to the lesson, and a computed-style probe at 768px confirmed <code>button.top - title.top = 0px</code>.</p>
-      <p><span style="color:var(--copper);font-weight:600">PR #56 — sidebar governance removal.</span> Came from the user noticing that governance was the only child page in the menu. That question led to a careful read of <code>ANGULAR_NAV_ITEMS</code>, which surfaced a hardcoded <code>/community/alpha/governance</code> slug that always pointed at Alpha Syndicate regardless of context — the worst form of a context-aware link. The fix was a RED test asserting <code>not.toContain('Governance')</code>, a GREEN commit removing the entry, and a visual probe confirming the sidebar now shows Dashboard / Opportunities / Executions / Capital Pool / Communities / Payouts / Submit Signal with Communities as the top-level entry point to all per-community pages. The <code>/governance</code> → <code>/community/:id/governance</code> redirect alias keeps every inbound link from profile, community-detail, community-settings, member-detail, and dashboard working transparently.</p>
+      <p><span style="color:var(--copper);font-weight:600">Closed the data layer (Steps 6 + 7).</span> Rewired the payouts page to inject the single <code>ApiClient</code> and deleted its old hardcoded <code>payouts.data.ts</code>, then wired <code>app.config.ts</code> so the mock transport (dev) and HTTP transport (prod) are chosen in exactly one place — the only switch point that will ever matter. A latent mock-seed bug (hardcoded <code>risk_level</code>) was found and fixed so the suite is fully green.</p>
+      <p><span style="color:var(--copper);font-weight:600">Fixed a real mobile sidebar bug (cline-one job 6).</span> The user reported that on a short phone screen the sidebar's action buttons required scrolling the sidebar itself. We pinned the bottom row so only the nav scrolls, and confirmed it live on the user's device at the running dev server. Shipped as <code>e27eebb</code>.</p>
+      <p><span style="color:var(--copper);font-weight:600">Ran a backend-readiness audit (cline-one job 7).</span> A read-only delegation asking the blunt question: if we implement the backend tomorrow, is flipping the data source the only change needed? The answer was <span style="color:var(--copper);font-weight:600">no</span>, and we documented exactly why. Full report: <code>.cline-one-reports/20260818-backend-readiness.md</code>.</p>
     </div>
   </div>
 
@@ -51,9 +52,10 @@ body{background:var(--bg);color:var(--fg)}.bg-card{background:var(--card)}
   <div class="bg-card border rounded-lg p-5 space-y-3" style="border-color:var(--border)">
     <h2 class="text-sm font-semibold" style="color:var(--fg)">What We Found</h2>
     <div class="text-sm space-y-3" style="color:var(--muted-fg)">
-      <p><span style="color:var(--copper);font-weight:600">Semantic-key vs CSS-class distinction.</span> The codebase has two parallel vocabularies: <code>'violet'</code> as a semantic key (in TS types, data fixtures, component Inputs) and <code>text-gradient-violet</code> / <code>var(--gradient-violet)</code> as a CSS concept. The user's complaint was about the CSS name, not the semantic key. Renaming both would have broken every fixture and every type union for no visual benefit. The right move was to rename only the CSS layer, keep the semantic key intact, and bridge them with an explicit mapping inside the component that uses both. <code>UiKpiCardComponent.gradientClass</code> is the canonical example of this pattern. Future renames of either layer should follow the same recipe.</p>
-      <p><span style="color:var(--copper);font-weight:600">Pre-commit TDD rule has a heuristic gap.</span> <code>[10/10] TDD enforcement</code> checks that every exported symbol name appears in some test file. <code>numberClass()</code> had three tests that exercised its rendered DOM output, but the symbol name itself wasn't mentioned in any spec. The rule treated this as "no test" and blocked the commit. The right fix was a direct unit test — a free win, because the new test is shorter and more explicit than the indirect DOM assertions it joins. The lesson: rough heuristics are useful guards but sometimes flag coverage that is real-but-implicit. The fix is to add the explicit test, not to mute the rule.</p>
-      <p><span style="color:var(--copper);font-weight:600">Sibling-bug pattern that keeps recurring.</span> PR #41 fixed <code>sm:items-start</code> on community-settings; governance was missed during the per-community restructure in PR #54. PR #55 shipped the governance fix; community-members still has the same <code>sm:items-center</code> issue. PR #56 fixed the sidebar governance entry; Payouts has the exact same problem (<code>/payouts</code> is a top-level route but payouts are per-community). Each "lesson learned" PR ships with sibling bugs that aren't in scope. The discipline: every such PR should explicitly call out the sibling in a "Sibling bug (not in this PR)" line in the description, and the next PR should pick it up. Without that line, the lesson is half-learned and the bug recurs. I saved this as pitfall #19 in the <code>visual-fidelity-check</code> skill.</p>
+      <p><span style="color:var(--copper);font-weight:600">The transport seam is correct.</span> Only <code>app.config.ts</code> decides mock versus HTTP, and flipping the <code>useMock</code> flag is the entire switch — no page touches a transport directly. <code>HttpTransport</code> already reads a backend base URL, attaches a Bearer token, and unwraps the same <code>{success,data}</code> envelope the mock returns.</p>
+      <p><span style="color:var(--copper);font-weight:600">But the page wiring is not.</span> Only <code>payouts.page.ts</code> injects <code>ApiClient</code>. Every other page — dashboard, opportunities, executions, communities, profile, notifications, pool, and the auth flows — renders hardcoded wireframe fixtures from local consts. A backend flip would leave them frozen on fake data while only payouts went live (verified by grep: only payouts.page.ts + core/api + app.config reference ApiClient).</p>
+      <p><span style="color:var(--copper);font-weight:600">Five ApiClient methods have no backend contract.</span> <code>/executions</code>, <code>/executions/{id}</code>, <code>/payouts</code>, <code>/members/me/payouts</code>, and <code>/notifications</code> are absent from <code>docs/apis/</code>, so they would 404 the moment the switch happened. The auth token provider is still a stub returning <code>null</code>.</p>
+      <p><span style="color:var(--copper);font-weight:600">Uncommitted spec expansion.</span> <code>api-client.spec.ts</code> has 95 insertions of new test coverage (memberSettings, login2fa, opportunitiesMine, vettingQueue, executions, payoutsMine, communities, governance) that were not authored this session — a prior in-flight expansion. It needs a commit decision, not a silent drop.</p>
     </div>
   </div>
 
@@ -61,22 +63,20 @@ body{background:var(--bg);color:var(--fg)}.bg-card{background:var(--card)}
   <div class="bg-card border rounded-lg p-5 space-y-3" style="border-color:var(--border)">
     <h2 class="text-sm font-semibold" style="color:var(--fg)">How to Continue</h2>
     <div class="text-sm space-y-2" style="color:var(--muted-fg)">
-      <p><span style="color:var(--copper);font-weight:600">State.</span> Master at <code>647edd4</code>. 729/729 tests pass (40 files), pre-commit 10/10, both PRs merged. Dev server running at <code>127.0.0.1:4200</code>. Mode: AUTO.</p>
-      <p><span style="color:var(--copper);font-weight:600">Sibling bug to fix in PR #57.</span> Payouts has the same problem as Governance had — <code>/payouts</code> is a top-level route but payouts are per-community. Two paths forward: remove from sidebar (the same one-line fix as PR #56), or convert payouts to a per-community pattern matching governance (<code>/community/:id/payouts</code>). The second is the more structural answer if payouts have community-specific semantics (which is likely, given the same community-scoped reputation model). The decision is the user's, not the agent's.</p>
-      <p><span style="color:var(--copper);font-weight:600">Conventions to preserve.</span> The rename proved that the CSS layer and the semantic-key layer can diverge cleanly. Future renames of either layer should follow the same pattern: rename in <code>theme.css</code> + <code>sed</code> across CSS references, leave TS semantic keys alone, document the mapping in the component that bridges them. The <code>UiKpiCardComponent.gradientClass</code> record is the canonical example. The companion rule: every "lesson learned" PR must name its sibling bugs in the description, not bury them.</p>
-      <p><span style="color:var(--copper);font-weight:600">Pitfalls to remember.</span> (1) the semantic-key vs CSS-class distinction, (2) the pre-commit TDD rule's name-matching heuristic — when it flags a method, write a direct unit test rather than a TEST-COUPLED bypass, (3) sibling bugs are the recurring pattern — propagate the lesson or it doesn't stick, (4) the <code>patch</code> tool requires either <code>mode='replace'</code> with <code>path/old_string/new_string</code> OR <code>mode='patch'</code> with the V4A <code>patch</code> arg; never both.</p>
+      <p><span style="color:var(--copper);font-weight:600">State.</span> Branch <code>feat/frontend-data-layer</code> (local, unpushed). Last commit <code>e27eebb</code>. tsc clean · vitest 956/956 · Playwright e2e 9/9. Mode is <span style="color:var(--copper)">AUTO</span> (<code>state</code> file = <code>auto</code>) — agent decides how, never what; document every decision in <code>decisions.md</code>.</p>
+      <p><span style="color:var(--copper);font-weight:600">The big next chunk.</span> "Flip one config = done" is blocked until ~14 pages are rewired to <code>ApiClient</code> and 5 API contracts exist in <code>docs/apis/</code>. That is large and multi-session — do not improvise it. Let the user trigger <code>wayfinder</code> or approve a plan first (plan-first rule).</p>
+      <p><span style="color:var(--copper);font-weight:600">Pending decisions.</span> (1) Commit or fold the dangling <code>api-client.spec.ts</code> change. (2) PR the data-layer branch to master, or keep stacking. (3) Kill the resident dev server (proc_3a3f25c5e0d0) if still alive, per the no-daemons rule.</p>
+      <p><span style="color:var(--copper);font-weight:600">Verify before any PR.</span> <code>cd frontend && npx tsc -p tsconfig.app.json --noEmit &amp;&amp; npx vitest run &amp;&amp; npx playwright test e2e/payouts.spec.ts --reporter=list</code></p>
     </div>
   </div>
 
-  <div class="text-center text-xs py-4" style="color:var(--muted-fg);opacity:.5">MERIDIAN · Session Handoff · 2026-08-13</div>
+  <footer class="text-center text-xs" style="color:var(--muted-fg)">
+    Generated 2026-08-18 · reads <code>.last-handoff</code> via <code>situ</code> · next agent: run situation-awareness first
+  </footer>
 </div>
+
 <script>
-function toggleTheme() {
-  const html=document.documentElement,moon=document.getElementById('moonIcon'),sun=document.getElementById('sunIcon');
-  if(html.getAttribute('data-theme')==='light'){html.removeAttribute('data-theme');moon.style.display='flex';sun.style.display='none';localStorage.setItem('theme','dark')}
-  else{html.setAttribute('data-theme','light');moon.style.display='none';sun.style.display='flex';localStorage.setItem('theme','light')}
-}
-(function(){const s=localStorage.getItem('theme');if(s==='light'){document.documentElement.setAttribute('data-theme','light');document.getElementById('moonIcon').style.display='none';document.getElementById('sunIcon').style.display='flex'}})();
+function toggleTheme(){const r=document.documentElement;const cur=r.dataset.theme==='light'?'dark':'light';r.dataset.theme=cur;document.getElementById('moonIcon').style.display=cur==='light'?'none':'flex';document.getElementById('sunIcon').style.display=cur==='light'?'flex':'none';}
 </script>
 </body>
 </html>

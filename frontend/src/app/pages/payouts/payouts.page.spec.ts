@@ -1,5 +1,11 @@
 /**
- * Unit tests for PayoutsPageComponent — wireframe-aligned.
+ * Unit tests for PayoutsPageComponent — wireframe-aligned, now API-driven.
+ *
+ * The page consumes the canonical pool-wide ledger through the injected
+ * ApiClient.payoutsList() (core/api/api-client.ts); the test provides a
+ * mock ApiClient returning SEED_PAYOUTS so the rendered output is
+ * byte-identical to the wireframe (and to the e2e target). Data arrives
+ * asynchronously, so every row-reading test awaits fixture.whenStable().
  *
  * Per wireframe/meridian/payouts/index.html:
  *   - title 'Payouts' + 'Profit distribution across the pool — the
@@ -10,33 +16,50 @@
  *   - 3 KPI cards with exact labels + values
  *   - Split Formula card with 5 cells + a Governance link
  *   - 7-column table whose first 7 rows match the wireframe exactly
- *   - 48 rows total in the dataset, 8 per page (6 pages)
+ *   - 48 rows total in the ledger, 8 per page (6 pages)
  *   - Footer 'Showing 8 of 48' + '1 / 6' pagination
  *   - Empty state when filters match zero rows
+ *   - Loading skeleton while the first payload is in flight
+ *
+ * DISCOVERY 2026-08-18: the page was rewired from hardcoded payouts.data
+ * to the injected ApiClient (Step 6, see docs/features/frontend-data-layer/
+ * IMPL-frontend-data-layer.md Step 6). The mock is provided via TestBed so
+ * the test never needs the real transport; async data means tests must
+ * await whenStable() before asserting on rows/counts.
  *
  * @owner   agent-maintained
- * @reviewed 2026-08-17
+ * @reviewed 2026-08-18
  */
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import type { PayoutsPageComponent } from './payouts.page';
-import { PAYOUTS } from './payouts.data';
+import { ApiClient } from '../../core/api/api-client';
+import { SEED_PAYOUTS } from '../../core/api/mock-seed';
+
+let mockClient: { payoutsList: ReturnType<typeof vi.fn> } | null = null;
 
 async function renderStandalone(): Promise<ComponentFixture<PayoutsPageComponent>> {
+  mockClient = {
+    payoutsList: vi.fn().mockResolvedValue({ payouts: SEED_PAYOUTS }),
+  } as unknown as { payoutsList: ReturnType<typeof vi.fn> };
   await TestBed.configureTestingModule({
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient as unknown as ApiClient }],
   }).compileComponents();
   const { PayoutsPageComponent: Comp } = await import('./payouts.page');
   const fixture = TestBed.createComponent(Comp);
+  fixture.detectChanges();
+  await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
 }
 
 const TYPES = ['All types', 'Capital', 'Signal', 'Access'];
-const STATUSES = ['All', 'Pending', 'Paid'];
 const COLUMNS = ['Execution', 'Member', 'Type', 'Amount', 'Share', 'Status', 'Date'];
 
-describe('PayoutsPage (wireframe-aligned)', () => {
+describe('PayoutsPage (wireframe-aligned, API-driven)', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
   it('renders the page title "Payouts"', async () => {
     const fixture = await renderStandalone();
     const h1 = fixture.nativeElement.querySelector('h1');
@@ -318,18 +341,18 @@ describe('PayoutsPage (wireframe-aligned)', () => {
   });
 
   // ─── format helpers (unit) + dataset contract ────────────────────
-  it('PAYOUTS totals 48 rows with 3 pending + 45 paid', async () => {
-    expect(PAYOUTS.length).toBe(48);
-    expect(PAYOUTS.filter((p) => p.status === 'pending').length).toBe(3);
-    expect(PAYOUTS.filter((p) => p.status === 'paid').length).toBe(45);
+  it('SEED_PAYOUTS totals 48 rows with 3 pending + 45 paid', async () => {
+    expect(SEED_PAYOUTS.length).toBe(48);
+    expect(SEED_PAYOUTS.filter((p) => p.status === 'PENDING').length).toBe(3);
+    expect(SEED_PAYOUTS.filter((p) => p.status === 'COMPLETED').length).toBe(45);
   });
 
-  it('formatAmount() renders "+$X,XXX.XX" with thousands separator', async () => {
+  it('formatAmount() renders "+$X,XXX.XX" with thousands separator from an API money string', async () => {
     const fixture = await renderStandalone();
     const c = fixture.componentInstance;
-    expect(c.formatAmount(2340.8)).toBe('+$2,340.80');
-    expect(c.formatAmount(1890.2)).toBe('+$1,890.20');
-    expect(c.formatAmount(1232)).toBe('+$1,232.00');
+    expect(c.formatAmount('2340.80')).toBe('+$2,340.80');
+    expect(c.formatAmount('1890.20')).toBe('+$1,890.20');
+    expect(c.formatAmount('1232.00')).toBe('+$1,232.00');
   });
 
   it('typeLabel()/statusLabel() return the wireframe badges', async () => {
@@ -354,5 +377,28 @@ describe('PayoutsPage (wireframe-aligned)', () => {
     const c = fixture.componentInstance;
     expect(c.slugForName('Dana Voss')).toBe('dana-voss');
     expect(c.memberUrl('Jules Tan')).toBe('/community/alpha/members/jules-tan');
+  });
+
+  // ─── Step 6: loading → loaded transition + ApiClient contract ──────
+  it('calls ApiClient.payoutsList() once, shows skeleton while loading, then 8 rows', async () => {
+    const mc = {
+      payoutsList: vi.fn().mockResolvedValue({ payouts: SEED_PAYOUTS }),
+    } as unknown as ApiClient;
+    await TestBed.configureTestingModule({
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mc }],
+    }).compileComponents();
+    const { PayoutsPageComponent: Comp } = await import('./payouts.page');
+    const fixture = TestBed.createComponent(Comp);
+    fixture.detectChanges(); // loading = true, skeleton visible, no rows
+    const pre = fixture.nativeElement as HTMLElement;
+    expect(pre.querySelector('[data-testid="skeleton"]')).toBeTruthy();
+    // Only the skeleton row is present; no data rows yet.
+    expect(pre.querySelector('tbody .table-row')).toBeFalsy();
+    expect(mc.payoutsList).toHaveBeenCalledTimes(1);
+    await fixture.whenStable();
+    fixture.detectChanges();
+    const post = fixture.nativeElement as HTMLElement;
+    expect(post.querySelector('[data-testid="skeleton"]')).toBeFalsy();
+    expect(post.querySelectorAll('tbody .table-row').length).toBe(8);
   });
 });

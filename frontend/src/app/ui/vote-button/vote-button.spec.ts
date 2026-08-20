@@ -18,9 +18,9 @@ import { UiVoteButtonComponent } from './vote-button.component';
   template: `<ui-vote-button [vote]="vote" (voteChange)="onVote($event)">label</ui-vote-button>`,
 })
 class HostComponent {
-  vote: any = null;
-  lastVote: any = null;
-  onVote(v: any) {
+  vote: 'approve' | 'reject' | null = null;
+  lastVote: 'approve' | 'reject' | null = null;
+  onVote(v: 'approve' | 'reject' | null) {
     this.lastVote = v;
     this.vote = v;
   }

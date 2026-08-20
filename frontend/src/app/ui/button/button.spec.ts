@@ -24,10 +24,10 @@ import { UiButtonComponent } from './button.component';
   `,
 })
 class HostComponent {
-  variant: any = 'secondary';
-  size: any = 'md';
+  variant: 'primary' | 'secondary' | 'ghost' | 'icon' = 'secondary';
+  size: 'sm' | 'md' | 'lg' = 'md';
   disabled = false;
-  type: any = 'button';
+  type: 'button' | 'submit' | 'reset' = 'button';
   ariaLabel: string | null = null;
   extraClass = '';
 }

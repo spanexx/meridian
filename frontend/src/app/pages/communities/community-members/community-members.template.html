@@ -2,9 +2,9 @@
   CommunityMembersPageComponent template (wireframe/meridian/members/index.html).
 
   @owner   spanexx
-  @reviewed 2026-08-12
+  @reviewed 2026-08-18
 -->
-<section class="page" (document:click)="closeOnOutsideClick($event.target)">
+<section class="page">
 
   <!-- breadcrumb -->
   <nav class="breadcrumb text-xs text-slate-500 mb-4" data-testid="members-breadcrumb">
@@ -13,8 +13,10 @@
     <span class="text-slate-400">Members</span>
   </nav>
 
-  <!-- header -->
-  <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+  <!-- header (PR #41 lesson: multi-line subtitle + side controls need
+       sm:items-start, not sm:items-center — same fix as settings +
+       governance headers) -->
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
     <div>
       <h1 class="page-title" data-testid="community-members-title">Members</h1>
       <p class="page-subtitle" data-testid="community-members-subtitle">{{ communityName }} — {{ counts.total }} members · {{ counts.capital }} capital · {{ counts.signal }} signal · {{ counts.access }} access contributors.</p>
@@ -146,6 +148,12 @@
 
   <!-- table card -->
   <section class="card p-0 overflow-hidden">
+    @if (loading()) {
+      <div class="empty px-5 py-12 text-center" data-testid="skeleton">
+        <ui-icon name="activity" [size]="40" class="mx-auto mb-3 text-slate-500"></ui-icon>
+        <p class="text-sm font-medium text-slate-400 mb-1">Loading members…</p>
+      </div>
+    } @else {
     <div class="table-scroll overflow-x-auto" data-testid="members-table-body">
       <table class="min-w-full">
         <thead>
@@ -240,6 +248,7 @@
           </button>
         </div>
       </div>
+    }
     }
   </section>
 </section>

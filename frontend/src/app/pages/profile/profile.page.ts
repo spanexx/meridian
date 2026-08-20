@@ -20,14 +20,18 @@
  * from a service keyed by the signed-in user.
  *
  * @owner   spanexx
- * @reviewed 2026-08-13
+ * @reviewed 2026-08-19
  */
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  inject,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
+import { AuthStore } from '../../core/state/auth.store';
+import type { KycStatus } from '../../core/models';
 
 interface Reputation {
   readonly key: 'signal' | 'capital' | 'access' | 'community';
@@ -54,6 +58,22 @@ interface Activity {
   readonly impactVariant: 'positive' | 'neutral';
 }
 
+/** Pack C: human label for each KycStatus enum value. */
+const KYC_LABEL: Record<KycStatus, string> = {
+  VERIFIED: 'Verified',
+  PENDING: 'Pending',
+  NOT_STARTED: 'Not started',
+  REJECTED: 'Rejected',
+};
+
+/** Pack C: badge variant per KYC status (success/warning/default/error). */
+const KYC_BADGE_VARIANT: Record<KycStatus, 'badge-success' | 'badge-warning' | 'badge-error' | 'badge'> = {
+  VERIFIED: 'badge-success',
+  PENDING: 'badge-warning',
+  NOT_STARTED: 'badge',
+  REJECTED: 'badge-error',
+};
+
 @Component({
   selector: 'app-profile-page',
   standalone: true,
@@ -62,7 +82,36 @@ interface Activity {
   templateUrl: './profile.template.html',
 })
 export class ProfilePageComponent {
-  // ─── Dataset (mock for the signed-in user) ───────────────────────────
+  // ─── Session (single source: AuthStore) ──────────────────────────────
+  // Pack B (2026-08-19): the signed-in identity now flows from AuthStore
+  // (member()), not a per-page mock. loadMe() fills it from /auth/me;
+  // the wireframe's static demo content below remains the display source
+  // for reputation / payouts / activity until those endpoints land.
+  private readonly auth = inject(AuthStore);
+  // Pack C: signOut() now flushes the session server-side + navigates /.
+  private readonly router = inject(Router);
+
+  /** Display name from the session member (falls back to the wireframe name). */
+  readonly displayName = computed(() => this.auth.member()?.profile.display_name ?? 'Alex Chen');
+  /** Email from the session member (falls back to the wireframe email). */
+  readonly email = computed(() => this.auth.member()?.email ?? 'alex@meridian.com');
+  /**
+   * Pack C: KYC label reads from the session member. Fallback chain:
+   * member.kyc_status → 'NOT_STARTED' (a fresh signed-in user with no
+   * KYC record yet) → 'Verified' (preserves the wireframe copy for
+   * dev mock data until the member loads).
+   */
+  readonly kycLabel = computed(() => {
+    const status = this.auth.member()?.kyc_status ?? 'NOT_STARTED';
+    return KYC_LABEL[status] ?? 'Not started';
+  });
+  /** Pack C: KYC badge variant mirrors the status (success/warning/etc). */
+  readonly kycBadgeVariant = computed(() => {
+    const status = this.auth.member()?.kyc_status ?? 'NOT_STARTED';
+    return KYC_BADGE_VARIANT[status] ?? 'badge';
+  });
+  /** Pack C: 2FA label reads `two_factor_enabled` from the session member. */
+  readonly twofaLabel = computed(() => (this.auth.member()?.two_factor_enabled ? 'TOTP' : 'Not enabled'));
   readonly user = {
     name: 'Alex Chen',
     initials: 'AC',
@@ -135,10 +184,13 @@ export class ProfilePageComponent {
   /** Sum of the payout rows. */
   readonly totalPayout = this.payouts.reduce((acc, p) => acc + p.amount, 0);
 
+  /**
+   * Pack C: identity card now derives email/kyc/2fa from the session
+   * member (see computed signals above). The static fallback (country,
+   * display name) remains until the wireframe port ships a per-member
+   * country — out of Pack C scope.
+   */
   readonly identity = {
-    email: 'alex@meridian.com',
-    kyc: 'Verified',
-    twofa: 'TOTP',
     country: 'USA',
     countryFlag: '🇺🇸',
   };
@@ -180,11 +232,23 @@ export class ProfilePageComponent {
     return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
-  /** Sign out handler (no-op for mock; production would clear session). */
-  signOut(): void {
-    // DISCOVERY 2026-08-13: no real auth wired in this scaffold.
-    // See .agents/skills/playwright-cli/SKILL.md.
-    // The user click is acknowledged so the button is testable, but the
-    // session-clearing pipeline is owned by the auth feature pack.
+  /**
+   * Pack C (2026-08-19): sign-out end-to-end. Calls AuthStore.logout()
+   * (server-side revoke best-effort, then local clear) and routes to /
+   * where the shell-less marketing landing renders. The auth guard
+   * re-evaluates on every navigation, so the cleared session means
+   * any /dashboard, /payouts, etc. click bounces back to /login.
+   */
+  async signOut(): Promise<void> {
+    await this.auth.logout();
+    await this.router.navigate(['/']);
+  }
+
+  constructor() {
+    // Pack B: the session member now flows through AuthStore (one
+    // source). loadMe() calls /auth/me and fills member(); the hero
+    // reads firstName()/email() so a real session replaces the demo
+    // identity without touching the wireframe template.
+    void this.auth.loadMe();
   }
 }

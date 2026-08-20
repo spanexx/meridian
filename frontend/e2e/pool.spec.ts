@@ -9,9 +9,11 @@
  * @reviewed 2026-08-12
  */
 import { expect, test } from '@playwright/test';
+import { seedSession } from './helpers/auth';
 
 test.describe('Capital Pool page', () => {
   test.beforeEach(async ({ page }) => {
+    await seedSession(page);
     await page.goto('/pool');
   });
 
@@ -23,14 +25,16 @@ test.describe('Capital Pool page', () => {
     await expect(page.getByRole('button', { name: /Deposit/ })).toBeVisible();
   });
 
-  test('renders the 4 KPI cards with wireframe values', async ({ page }) => {
+  test('renders the 4 KPI cards with one-source values (formatted pool totals)', async ({ page }) => {
     const kpi = page.getByTestId('kpi-row');
     await expect(kpi.getByText('Total Available')).toBeVisible();
-    await expect(page.getByText('$1,423,580')).toBeVisible();
+    // Values flow from ApiClient.poolStatus() (SEED_POOL_STATUS) formatted
+    // via formatApiMoney — the wireframe "$936,350" presentation, one source.
+    await expect(page.getByText('$936,350')).toBeVisible();
     await expect(kpi.getByText('Total Locked')).toBeVisible();
     await expect(page.getByText('$487,230')).toBeVisible();
     await expect(kpi.getByText('Reserve', { exact: true })).toBeVisible();
-    await expect(page.getByText('$258,952')).toBeVisible();
+    await expect(page.getByText('$1,423,580')).toBeVisible();
     await expect(kpi.getByText('Pending', { exact: true })).toBeVisible();
     await expect(page.getByText('$42,100')).toBeVisible();
   });

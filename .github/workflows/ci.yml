@@ -36,9 +36,13 @@ jobs:
         run: npm install --legacy-peer-deps --no-audit
 
       - name: Lint
-        run: npm run lint 2>/dev/null || npx ng lint || true
-        # Lint step is non-blocking while the project has no eslint config.
-        # Tighten to fail-on-error once eslint is wired in.
+        # STRICT since 2026-08-19: eslint 9 + angular-eslint flat config are
+        # wired; any error or warning fails the job (mirrors pre-commit [12/12]).
+        # Bare `npm run lint`: defaults.run.working-directory is already
+        # `frontend` — `npm --prefix frontend` doubled the path to
+        # frontend/frontend/package.json, breaking CI on this branch's first
+        # ever push (2026-08-20, run 32338301784) and every run since.
+        run: npm run lint
 
       - name: Build
         run: npx ng build --configuration production

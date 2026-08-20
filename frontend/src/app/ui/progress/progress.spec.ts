@@ -18,7 +18,7 @@ import { UiProgressComponent } from './progress.component';
 })
 class HostComponent {
   value = 50;
-  variant: any = 'emerald';
+  variant: 'emerald' | 'violet' | 'amber' | 'blue' = 'emerald';
 }
 
 describe('UiProgressComponent', () => {

@@ -3,14 +3,15 @@
  *
  * Retrofit test suite. Pins: hidden by default (open=false renders
  * nothing), open=true renders .modal-overlay + .modal with role=dialog,
- * aria-modal=true, close button emits (close), overlay click emits
- * (close) when closeOnOverlay=true.
+ * aria-modal=true, close button emits (closed), overlay click emits
+ * (closed) when closeOnOverlay=true.
  *
  * @owner   spanexx
  * @reviewed 2026-08-11
  */
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { UiModalComponent } from './modal.component';
 
 @Component({
@@ -18,7 +19,7 @@ import { UiModalComponent } from './modal.component';
   imports: [UiModalComponent],
   template: `
     <ui-modal [open]="open" [title]="title" [closeOnOverlay]="closeOnOverlay"
-              (close)="onClose()">
+              (closed)="onClose()">
       <p>body</p>
     </ui-modal>
   `,
@@ -69,31 +70,52 @@ describe('UiModalComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('body');
   });
 
-  it('clicking the close button emits (close) once', async () => {
+  it('clicking the close button emits (closed) once', async () => {
     const fixture = await renderHost({ open: true });
     const closeBtn = fixture.nativeElement.querySelector('.icon-btn[aria-label="Close"]');
     closeBtn.click();
     expect(fixture.componentInstance.closeCount).toBe(1);
   });
 
-  it('clicking the overlay emits (close) when closeOnOverlay=true', async () => {
+  it('clicking the overlay emits (closed) when closeOnOverlay=true', async () => {
     const fixture = await renderHost({ open: true, closeOnOverlay: true });
     const overlay = fixture.nativeElement.querySelector('.modal-overlay');
     overlay.click();
     expect(fixture.componentInstance.closeCount).toBe(1);
   });
 
-  it('clicking the overlay does NOT emit (close) when closeOnOverlay=false', async () => {
+  it('clicking the overlay does NOT emit (closed) when closeOnOverlay=false', async () => {
     const fixture = await renderHost({ open: true, closeOnOverlay: false });
     const overlay = fixture.nativeElement.querySelector('.modal-overlay');
     overlay.click();
     expect(fixture.componentInstance.closeCount).toBe(0);
   });
 
-  it('clicking inside .modal does not emit (close) on overlay click', async () => {
+  it('clicking inside .modal does not emit (closed) on overlay click', async () => {
     const fixture = await renderHost({ open: true });
     const modal = fixture.nativeElement.querySelector('.modal');
     modal.click();
+    expect(fixture.componentInstance.closeCount).toBe(0);
+  });
+
+  it('onOverlay() closes only for outside clicks (target check)', async () => {
+    const fixture = await renderHost({ open: true, closeOnOverlay: true });
+    const modalCmp = fixture.debugElement.query(By.directive(UiModalComponent))
+      .componentInstance as unknown as { onOverlay: (e: MouseEvent) => void };
+    // Direct method call with a target outside the dialog → closes.
+    modalCmp.onOverlay(new MouseEvent('click'));
+    expect(fixture.componentInstance.closeCount).toBe(1);
+  });
+
+  it('onOverlay() ignores clicks whose target lives inside the dialog', async () => {
+    const fixture = await renderHost({ open: true, closeOnOverlay: true });
+    const modal = fixture.nativeElement.querySelector('.modal') as HTMLElement;
+    // A bubbling click from inside the dialog reaches the overlay handler
+    // with the inner node as target → the closest('.modal') check bails.
+    modal
+      .querySelector('.modal-title')!
+      .dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
     expect(fixture.componentInstance.closeCount).toBe(0);
   });
 });

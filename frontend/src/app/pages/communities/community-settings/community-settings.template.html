@@ -54,38 +54,38 @@
         <form class="space-y-4" data-testid="general-form" (submit)="submitGeneral($event)">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label>Community name</label>
-              <input type="text" class="input" [value]="formName" (input)="setFormName($any($event.target).value)">
+              <label for="cs-name">Community name</label>
+              <input id="cs-name" type="text" class="input" [value]="formName" (input)="setFormName($any($event.target).value)">
             </div>
             <div>
-              <label>Community ID</label>
-              <input type="text" class="input font-mono" [value]="community?.id" disabled>
+              <label for="cs-id">Community ID</label>
+              <input id="cs-id" type="text" class="input font-mono" [value]="community?.id" disabled>
             </div>
           </div>
           <div>
-            <label>Description</label>
-            <textarea class="input" rows="3" [value]="formDescription" (input)="setFormDescription($any($event.target).value)"></textarea>
+            <label for="cs-description">Description</label>
+            <textarea id="cs-description" class="input" rows="3" [value]="formDescription" (input)="setFormDescription($any($event.target).value)"></textarea>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label>Focus</label>
-              <select class="input" [value]="formFocus" (change)="setFormFocus($any($event.target).value)">
+              <label for="cs-focus">Focus</label>
+              <select id="cs-focus" class="input" [value]="formFocus" (change)="setFormFocus($any($event.target).value)">
                 @for (opt of focusOptions; track opt) {
                   <option [value]="opt" [selected]="opt === formFocus">{{ opt }}</option>
                 }
               </select>
             </div>
             <div>
-              <label>Region</label>
-              <select class="input" [value]="formRegion" (change)="setFormRegion($any($event.target).value)">
+              <label for="cs-region">Region</label>
+              <select id="cs-region" class="input" [value]="formRegion" (change)="setFormRegion($any($event.target).value)">
                 @for (opt of regionOptions; track opt) {
                   <option [value]="opt" [selected]="opt === formRegion">{{ opt }}</option>
                 }
               </select>
             </div>
             <div>
-              <label>Minimum contribution (USD)</label>
-              <input type="number" class="input" [value]="formMinContribution" min="0" step="100" (input)="setFormMinContribution($any($event.target).value)">
+              <label for="cs-min-contribution">Minimum contribution (USD)</label>
+              <input id="cs-min-contribution" type="number" class="input" [value]="formMinContribution" min="0" step="100" (input)="setFormMinContribution($any($event.target).value)">
             </div>
           </div>
           <div class="flex justify-end">
@@ -110,6 +110,12 @@
           Changes to these values open a public vote. Member reputation determines vote weight.
         </div>
         <ul class="space-y-3">
+          @if (loading()) {
+            <li class="empty text-center py-6" data-testid="skeleton">
+              <ui-icon name="activity" [size]="40" class="mx-auto"></ui-icon>
+              <p class="text-sm font-medium text-slate-400 mt-2">Loading parameters…</p>
+            </li>
+          }
           @for (p of governanceParameters(); track p.label) {
             <li class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-700/30 pb-3 last:border-none">
               <div>

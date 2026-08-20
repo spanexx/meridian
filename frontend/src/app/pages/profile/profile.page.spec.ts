@@ -17,24 +17,63 @@
  * The shell sidebar sets the active route to "profile".
  *
  * @owner   spanexx
- * @reviewed 2026-08-13
+ * @reviewed 2026-08-19
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { vi } from 'vitest';
 import { ProfilePageComponent } from './profile.page';
+import { ApiClient } from '../../core/api/api-client';
+import { TokenStore } from '../../core/auth/token-store';
+import { AuthStore } from '../../core/state/auth.store';
+import { SEED_AUTH_ME_MEMBER } from '../../core/api/mock-seed';
+import type { AuthMeMember } from '../../core/models';
 
 async function renderPage() {
   const f = TestBed.createComponent(ProfilePageComponent);
   f.detectChanges();
+  await f.whenStable();
+  // Pack C: the constructor fires loadMe() (fire-and-forget) which
+  // populates auth.member(). We re-call + await so the member signal
+  // is settled before any textContent assertion runs — otherwise the
+  // identity card shows fallback labels (Not started / Not enabled)
+  // until the next detectChanges tick.
+  const auth = TestBed.inject(AuthStore);
+  await auth.loadMe();
+  f.detectChanges();
+  await f.whenStable();
   return f;
+}
+
+async function renderPageWithMember(overrides: Partial<AuthMeMember>) {
+  const overridden: AuthMeMember = { ...SEED_AUTH_ME_MEMBER, ...overrides };
+  const mockClient = {
+    me: vi.fn().mockResolvedValue({ member: overridden, session: { created_at: '', expires_at: '' } }),
+  } as unknown as ApiClient;
+  // The TestBed.configureTestingModule in beforeEach already configured
+  // an ApiClient provider — re-configure to swap the mock.
+  TestBed.resetTestingModule();
+  await TestBed.configureTestingModule({
+    imports: [ProfilePageComponent],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }, TokenStore],
+  }).compileComponents();
+  return renderPage();
 }
 
 describe('ProfilePageComponent', () => {
   beforeEach(async () => {
+    const mockClient = {
+      // Pack B: profile reads the session member from AuthStore, which
+      // calls /auth/me (real response shape, not the Member record).
+      me: vi.fn().mockResolvedValue({ member: SEED_AUTH_ME_MEMBER, session: { created_at: '', expires_at: '' } }),
+      // Pack C: signOut() calls AuthStore.logout() which calls
+      // ApiClient.logout() — the mock must resolve cleanly.
+      logout: vi.fn().mockResolvedValue(undefined),
+    } as unknown as ApiClient;
     await TestBed.configureTestingModule({
       imports: [ProfilePageComponent],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }, TokenStore],
     }).compileComponents();
   });
 
@@ -189,6 +228,50 @@ describe('ProfilePageComponent', () => {
     const f = await renderPage();
     const c = f.componentInstance as unknown as { signOut: () => void };
     expect(() => c.signOut()).not.toThrow();
+  });
+
+  // ─── Pack C: KYC + 2FA read from session member ───────────────────
+  it('KYC badge label tracks auth.member().kyc_status (VERIFIED → "Verified")', async () => {
+    const f = await renderPage(); // SEED_AUTH_ME_MEMBER has kyc_status: 'VERIFIED'
+    const html = (f.nativeElement as HTMLElement).textContent ?? '';
+    expect(html).toContain('Verified');
+  });
+
+  it('KYC badge label changes to "Pending" when kyc_status is PENDING', async () => {
+    const f = await renderPageWithMember({ kyc_status: 'PENDING' });
+    const c = f.componentInstance as unknown as { kycLabel: () => string };
+    expect(c.kycLabel()).toBe('Pending');
+  });
+
+  it('KYC badge label changes to "Not started" when kyc_status is NOT_STARTED', async () => {
+    const f = await renderPageWithMember({ kyc_status: 'NOT_STARTED' });
+    const c = f.componentInstance as unknown as { kycLabel: () => string };
+    expect(c.kycLabel()).toBe('Not started');
+  });
+
+  it('2FA label is "TOTP" when two_factor_enabled is true', async () => {
+    const f = await renderPage(); // SEED_AUTH_ME_MEMBER has two_factor_enabled: true
+    const c = f.componentInstance as unknown as { twofaLabel: () => string };
+    expect(c.twofaLabel()).toBe('TOTP');
+  });
+
+  it('2FA label is "Not enabled" when two_factor_enabled is false', async () => {
+    const f = await renderPageWithMember({ two_factor_enabled: false });
+    const c = f.componentInstance as unknown as { twofaLabel: () => string };
+    expect(c.twofaLabel()).toBe('Not enabled');
+  });
+
+  // ─── Pack C: signOut wires through AuthStore + Router ─────────────
+  it('signOut() calls AuthStore.logout() and navigates to /', async () => {
+    const f = await renderPage();
+    const c = f.componentInstance as unknown as { signOut: () => Promise<void> | void };
+    const router = TestBed.inject(Router);
+    const nav = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const auth = TestBed.inject(AuthStore) as unknown as { logout: ReturnType<typeof vi.fn> };
+    const logoutSpy = vi.spyOn(auth, 'logout').mockResolvedValue(undefined);
+    await c.signOut();
+    expect(logoutSpy).toHaveBeenCalledTimes(1);
+    expect(nav).toHaveBeenCalledWith(['/']);
   });
 });
 

@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal } from '@angular/core';
+/**
+ * UiAccordionItemComponent — collapsible section primitive (theme.css
+ * .accordion-item). Native <button> toggle with aria-expanded; open state
+ * initializes from defaultOpen in ngOnInit, toggling emits openChange.
+ *
+ * @owner   agent-maintained
+ * @reviewed 2026-08-19
+ */
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal, OnInit } from '@angular/core';
 
 @Component({
   selector: 'ui-accordion-item',
@@ -21,7 +29,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UiAccordionItemComponent {
+export class UiAccordionItemComponent implements OnInit {
   @Input({ required: true }) title!: string;
   @Input() defaultOpen = false;
   @Output() openChange = new EventEmitter<boolean>();

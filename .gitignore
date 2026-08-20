@@ -54,6 +54,8 @@ coverage/
 .parcel-cache/
 .rpt2_cache/
 .eslintcache
+__pycache__/
+*.pyc
 
 # Logs
 *.log
@@ -67,3 +69,5 @@ coverage/
 
 # cline-one one-shot subagent reports (orchestrator artifacts)
 .cline-one-reports/
+.opencode-reports/
+frontend/e2e/screenshots

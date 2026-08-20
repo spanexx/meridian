@@ -30,14 +30,29 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets"
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/fonts.scss",
+              "src/styles.scss",
+              "src/app/pages/landing/landing.styles.scss"
             ]
           },
           "configurations": {
             "production": {
+              "optimization": {
+                "fonts": false
+              },
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -88,10 +103,25 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets"
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/fonts.scss",
+              "src/styles.scss",
+              "src/app/pages/landing/landing.styles.scss"
+            ]
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
             ]
           }
         }
