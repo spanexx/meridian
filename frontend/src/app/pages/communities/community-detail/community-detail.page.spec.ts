@@ -512,7 +512,6 @@ describe('CommunityDetailPageComponent', () => {
     // when clicked — this test catches that drift early.
     const KNOWN_ROUTES: readonly string[] = [
       '/',
-      '/showcase',
       '/dashboard',
       '/opportunities',
       '/opportunities/:ref',

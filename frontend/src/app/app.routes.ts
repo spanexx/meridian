@@ -5,13 +5,16 @@
  * (auth required → redirect to /login with ?returnUrl); the per-community
  * governance route additionally carries `roleGuard('VETTER','OPERATOR')`
  * (voting requires vetting privileges per CONTEXT.md). Landing, login,
- * register, showcase (dev-only) and the 404 wildcard stay public.
+ * register and the 404 wildcard stay public.
+ *
+ * Pack E (2026-08-21): the dev-only /showcase primitives catalog and its
+ * dependent primitive e2e specs were REMOVED (user decision) — the page
+ * existed solely as a test host; primitives keep their vitest unit specs.
  *
  * @owner   spanexx
- * @reviewed 2026-08-19
+ * @reviewed 2026-08-21
  */
 import { Routes } from '@angular/router';
-import { environment } from '../environments/environment';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
@@ -22,18 +25,6 @@ export const routes: Routes = [
     pathMatch: 'full',
     loadComponent: () => import('./pages/landing/landing.page').then((m) => m.LandingPageComponent),
   },
-  // /showcase is a DEV-ONLY primitives catalog (Pack E: gate the dev page
-  // out of production). environment.production flips via angular.json
-  // fileReplacements, so the route physically disappears from prod bundles.
-  ...(environment.production
-    ? []
-    : [
-        {
-          path: 'showcase',
-          loadComponent: () =>
-            import('./pages/showcase/showcase.page').then((m) => m.ShowcaseComponent),
-        },
-      ]),
   {
     path: 'dashboard',
     canActivate: [authGuard],
