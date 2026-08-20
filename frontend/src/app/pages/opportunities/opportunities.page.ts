@@ -18,7 +18,7 @@
  * @reviewed 2026-08-11
  */
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
 import { ApiClient } from '../../core/api/api-client';
 
@@ -61,7 +61,7 @@ const STATUS_VARIANT: Record<Opportunity['status'], 'warning' | 'info' | 'succes
   selector: 'app-opportunities-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, RouterLinkActive, UiIconComponent],
+  imports: [RouterLink, UiIconComponent],
   template: `
     <section class="page">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">

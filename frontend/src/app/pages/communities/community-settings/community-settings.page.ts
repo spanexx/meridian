@@ -21,7 +21,6 @@ import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
 import { UiSwitchComponent } from '../../../ui/switch/switch.component';
 import { UiModalComponent } from '../../../ui/modal/modal.component';
-import { UiToastComponent } from '../../../ui/toast/toast.component';
 import { ApiClient } from '../../../core/api/api-client';
 import { type CommunityParameter } from '../../../core/models';
 
@@ -110,7 +109,6 @@ const SAFETY_RAILS: readonly string[] = [
     UiIconComponent,
     UiSwitchComponent,
     UiModalComponent,
-    UiToastComponent,
   ],
   templateUrl: './community-settings.template.html',
 })

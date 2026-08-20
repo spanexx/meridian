@@ -38,7 +38,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../ui/icon/icon.component';
 import { ApiClient } from '../../core/api/api-client';
@@ -119,7 +118,7 @@ const GRADIENT_VAR: Readonly<Record<CommunityRow['avatarGradient'], string>> = {
   selector: 'app-communities-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, UiIconComponent, DecimalPipe],
+  imports: [RouterLink, UiIconComponent],
   templateUrl: './communities.template.html',
 })
 export class CommunitiesPageComponent {

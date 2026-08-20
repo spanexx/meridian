@@ -20,7 +20,7 @@
 
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DecimalPipe, TitleCasePipe } from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import { UiIconComponent } from '../../../../ui/icon/icon.component';
 import { ApiClient } from '../../../../core/api/api-client';
 
@@ -113,7 +113,7 @@ const MEMBER_PROFILES: readonly Member[] = [
   selector: 'app-member-detail-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, UiIconComponent, DecimalPipe, TitleCasePipe],
+  imports: [RouterLink, UiIconComponent, TitleCasePipe],
   templateUrl: './member-detail.template.html',
 })
 export class MemberDetailPageComponent {
