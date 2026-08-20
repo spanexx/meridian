@@ -37,7 +37,7 @@ jobs:
 
       - name: Lint
         # STRICT since 2026-08-19: eslint 9 + angular-eslint flat config are
-        # wired; any error or warning fails the job (mirrors pre-commit [11/11]).
+        # wired; any error or warning fails the job (mirrors pre-commit [12/12]).
         # Bare `npm run lint`: defaults.run.working-directory is already
         # `frontend` — `npm --prefix frontend` doubled the path to
         # frontend/frontend/package.json, breaking CI on this branch's first

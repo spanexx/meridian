@@ -2,7 +2,7 @@
 """
 Pre-commit guardrails for the meridian repo.
 
-Runs eleven blocks of checks against staged files:
+Runs twelve blocks of checks against staged files:
   1. YAML validity (workflows + manifests)
   2. Secrets scan (.env, .pem, .key, hardcoded tokens)
   3. Comment-policy header presence + DISCOVERY/MISTAKE/DRIFT format
@@ -17,11 +17,15 @@ Runs eleven blocks of checks against staged files:
  10. Link targets (links resolve to registered routes)
  11. ESLint (strict: ZERO problems — errors AND warnings block the
      commit; the repo runs eslint 9 + angular-eslint flat config).
+ 12. E2E (Playwright full suite) — added 2026-08-20 after CI caught
+     dashboard e2e races the older 11 checks could not: the hook ran
+     vitest + build + lint but never exercised the real browser, so
+     e2e failures shipped to CI instead of being blocked locally.
 
 Exit code 0 = pass, 1 = block the commit.
 
 @owner   spanexx
-@reviewed 2026-08-19
+@reviewed 2026-08-20
 """
 from __future__ import annotations
 
@@ -130,7 +134,7 @@ def is_header_exempt(path: Path) -> bool:
 
 
 def check_yaml(files: list[Path]) -> int:
-    header("[1/11] YAML validity")
+    header("[1/12] YAML validity")
     errors = 0
     yaml_files = [f for f in files if f.suffix in {".yml", ".yaml"} and f.exists()]
     if not yaml_files:
@@ -153,7 +157,7 @@ def check_yaml(files: list[Path]) -> int:
 
 
 def check_secrets(files: list[Path]) -> int:
-    header("[2/11] Secrets scan")
+    header("[2/12] Secrets scan")
     errors = 0
     candidates = [f for f in files if f.exists() and f.suffix not in {".png", ".jpg", ".gif", ".ico"}]
     for f in candidates:
@@ -171,7 +175,7 @@ def check_secrets(files: list[Path]) -> int:
 
 
 def check_comments(files: list[Path]) -> int:
-    header("[3/11] Comment policy")
+    header("[3/12] Comment policy")
     errors = 0
 
     source_files = [
@@ -224,7 +228,7 @@ def check_types(files: list[Path]) -> int:
     gate (CI builds it anyway); it covers TS + templates + fileReplacements
     in one shot.
     """
-    header("[4/11] Type check (ng build --configuration production)")
+    header("[4/12] Type check (ng build --configuration production)")
     ts_files = [f for f in files if f.exists() and f.suffix in {".ts", ".tsx"}]
     if not ts_files:
         ok("no TS files staged")
@@ -250,7 +254,7 @@ def check_types(files: list[Path]) -> int:
 
 
 def check_unit_tests(files: list[Path]) -> int:
-    header("[5/11] Unit tests (vitest)")
+    header("[5/12] Unit tests (vitest)")
     ts_files = [f for f in files if f.exists() and f.suffix in {".ts", ".tsx"}]
     if not ts_files:
         ok("no TS files staged")
@@ -286,7 +290,7 @@ def check_icons(files: list[Path]) -> int:
     the dictionary renders an invisible (0-child) SVG — the bug class
     that shipped twice in PR #19/#20 (sun/cog paths never committed).
     """
-    header("[6/11] Icon cross-check")
+    header("[6/12] Icon cross-check")
     errors = 0
     icon_ts = REPO_ROOT / "frontend/src/app/ui/icon/icon.component.ts"
     if not icon_ts.exists():
@@ -331,7 +335,7 @@ def check_router_links(files: list[Path]) -> int:
     external link or asset). External links (http/https/mailto)
     are exempt.
     """
-    header("[8/11] Router links")
+    header("[8/12] Router links")
     errors = 0
     template_files = [
         f for f in files
@@ -386,7 +390,7 @@ def check_link_targets(files: list[Path]) -> int:
       - Pure fragment links (#anchor)
       - Routes registered in app.routes.ts (everything else must match)
     """
-    header("[9/11] Link targets")
+    header("[9/12] Link targets")
     errors = 0
     template_files = [
         f for f in files
@@ -517,7 +521,7 @@ def check_new_page(files: list[Path]) -> int:
     packages can't import the component), and the route is
     unreachable.
     """
-    header("[7/11] New-page pack")
+    header("[7/12] New-page pack")
     errors = 0
     page_files = [
         f for f in files
@@ -569,7 +573,7 @@ def check_tdd(files: list[Path]) -> int:
       - The file is in a test directory itself (src/__tests__, *.spec.ts)
       - The file is auto-generated (has `// AUTO-GENERATED`)
     """
-    header("[10/11] TDD enforcement")
+    header("[10/12] TDD enforcement")
     errors = 0
     source_files = [
         f for f in files
@@ -695,7 +699,7 @@ def check_lint(files: list[Path]) -> int:
     fire on the full project. Use `npx eslint . --fix` for the
     auto-fixable set before committing.
     """
-    header("[11/11] ESLint (strict)")
+    header("[11/12] ESLint (strict)")
     frontend_dir = REPO_ROOT / "frontend"
     eslint_config = frontend_dir / "eslint.config.js"
     if not eslint_config.exists():
@@ -721,6 +725,47 @@ def check_lint(files: list[Path]) -> int:
     return 0
 
 
+def check_e2e(files: list[Path]) -> int:
+    """
+    E2E gate (Playwright): runs the real browser against the built app.
+
+    Added 2026-08-20: CI caught dashboard e2e races that the older 11
+    checks could not stop — vitest builds components in jsdom, the prod
+    build type-checks, and lint reads source; none of them exercise the
+    real DOM + async list rendering, so e2e failures shipped to CI and
+    failed the PR instead of being blocked at commit time.
+
+    The full suite runs (not just staged specs) because routes/pages
+    interact through the shared shell + stores — the same rationale as
+    check_lint running the whole project. Run the suite explicitly with
+    `npx playwright test` (from frontend/) when iterating; the hook
+    re-runs it on every commit.
+    """
+    header("[12/12] E2E (Playwright)")
+    frontend_dir = REPO_ROOT / "frontend"
+    staged_in_frontend = [f for f in files if "frontend" in str(f)]
+    if not staged_in_frontend:
+        ok("no frontend files staged")
+        return 0
+    pkg = frontend_dir / "package.json"
+    if not pkg.exists() or "@playwright/test" not in pkg.read_text(errors="ignore"):
+        warn("frontend/@playwright/test missing; skipping e2e")
+        return 0
+    result = subprocess.run(
+        ["npx", "--no-install", "playwright", "test"],
+        cwd=frontend_dir,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        fail("playwright e2e reported failures (last 4000 chars):")
+        tail = (result.stdout + result.stderr)[-4000:]
+        print(tail, file=sys.stderr)
+        return 1
+    ok("playwright e2e clean")
+    return 0
+
+
 def main() -> int:
     files = staged_files()
     if not files:
@@ -741,6 +786,7 @@ def main() -> int:
     total_errors += check_link_targets(files)
     total_errors += check_tdd(files)
     total_errors += check_lint(files)
+    total_errors += check_e2e(files)
 
     print()
     if total_errors > 0:

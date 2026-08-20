@@ -53,7 +53,7 @@ steps:
 
   - name: Commit
     run: "git commit per git-conventions (one logical change = one commit)"
-    expect: pre-commit 11-check gate passes
+    expect: pre-commit 12-check gate passes
 
   - name: Repeat
     run: "Next backlog job; stop when the pack is SHIPPED and handoff written"
@@ -61,6 +61,6 @@ steps:
 
 verify:
   - "sessions/decisions.md contains a row for each pack shipped under the loop"
-  - "each commit passed the pre-commit gate (11/11)"
+  - "each commit passed the pre-commit gate (12/12)"
   - "full verification gate green at pack end (vitest / eslint / build / e2e / audit)"
   - "docs/features/<slug>/ PRD-TRD + IMPL marked SHIPPED with the code"

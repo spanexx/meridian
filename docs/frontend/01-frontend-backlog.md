@@ -25,7 +25,7 @@ backend begins, the order to build it in, and the evidence for each gap.
 | Theme system (copper tokens, light/dark) | Done, but logic copy-pasted in 5 files (Pack B fix) |
 | Unit tests | 981 green (`vitest`) |
 | E2E (Playwright + screenshots) | green, incl. payouts byte-identical check |
-| Pre-commit guardrails | 11/11 — now incl. **strict ESLint** (errors AND warnings block; eslint 9 + angular-eslint flat config; CI mirrors it) |
+| Pre-commit guardrails | 12/12 — strict ESLint (errors AND warnings block; eslint 9 + angular-eslint flat config; CI mirrors it) + full Playwright e2e added 2026-08-20 after CI caught e2e races the 11 checks could not (vitest/build/lint never ran a real browser) |
 | HTTP / API layer (**Pack A**) | **Done** — typed `ApiClient` + transport seam (`API_TRANSPORT` token; MockTransport dev / HttpTransport prod, flip = `environment.useMock`), 31 seeded mock routes (incl. auth register + 2FA), HttpClient + functional interceptors (auth/correlation/error), canonical models, money/date/error utils, env files + fileReplacements |
 | State management | **Pack B SHIPPED** — ThemeService (single owner) + PoolStore + AuthStore; dashboard KPIs + greeting + profile identity now one-source via stores |
 | Auth | **Pack C SHIPPED** — TokenStore + Bearer interceptor + login/register wired with token persistence; authGuard + roleGuard on every protected route; silent 401→refresh retry (single-flight); 2FA challenge surface on /login; KYC + 2FA status + sign-out on /profile |
@@ -239,7 +239,7 @@ top of Pack B. Scope per `docs/features/auth/PRD-TRD-auth.md` (B1–B6):
   never carry Bearer.
 
 Verification (all green): eslint 0 problems; vitest 1048/1048; prod
-build exit 0 (11/11 pre-commit checks on each commit); Playwright
+build exit 0 (12/12 pre-commit checks on each commit); Playwright
 157/157.
 
 ## Open decisions
