@@ -1,0 +1,62 @@
+name: orchestrator
+description: |
+  Orchestrator agent loop for the frontend A–E packs. Routes each job to a
+  delegated agent (cline-one for deep implementation, opencode-action for
+  research/prep), runs one agent at a time, and integrates, tests, and
+  commits each job before starting the next.
+
+triggers:
+  - Multi-pack execution goal is active (frontend A–E, backend packs)
+  - User says "restart the goal" or "continue the packs"
+  - A backlog has multiple independent jobs to run in sequence
+
+steps:
+  - name: Route the job
+    run: |
+      Match the job to an agent per the routing table:
+      - cline-one: deep implementation, complex refactors
+      - opencode-action: codebase research, prep, local/online searches
+    expect: exactly one agent owns the job; do not parallelize next steps
+
+  - name: Send job and wait
+    run: "Delegate to the chosen agent; do not start the next job until it returns"
+    expect: agent report recorded in its report file (.cline-one-reports/ or .opencode-reports/)
+
+  - name: Prepare integration while waiting
+    run: "Read the agent's target files, review the diff, check the backlog state"
+    expect: integration surface ready before the agent returns
+
+  - name: Review the job output
+    run: "Diff review against the locked direction (docs/, CONTEXT.md, PRD-TRD)"
+    expect: no scope drift; mismatches rejected or sent back
+
+  - name: Integrate
+    run: "Apply the reviewed changes to the working tree"
+    expect: files staged explicitly (git add <specific files>)
+
+  - name: Test
+    run: |
+      Run the scope-appropriate gates before committing:
+      frontend: npx vitest run && npx eslint . && npx ng build --configuration production
+                && npx playwright test && npm audit --omit=dev
+      backend:  go vet ./... && go test ./... && go build ./...
+    expect: all gates green; never commit red
+
+  - name: Commit
+    run: "git commit per git-conventions (one logical change = one commit)"
+    expect: pre-commit 11-check gate passes
+
+  - name: Repeat
+    run: "Next backlog job; stop when the pack is SHIPPED and handoff written"
+    expect: pack marked SHIPPED in docs/frontend/01-frontend-backlog.md
+
+verify:
+  - "sessions/decisions.md contains a row for each pack shipped under the loop"
+  - "each commit passed the pre-commit gate (11/11)"
+  - "full verification gate green at pack end (vitest / eslint / build / e2e / audit)"
+  - "docs/features/<slug>/ PRD-TRD + IMPL marked SHIPPED with the code"
+
+notes:
+  - "One agent at a time — never fan out two implementation agents concurrently."
+  - "Scrutinize every job before delegating; prepare the codebase while the agent works."
+  - "The loop is integrate-and-commit: review → integrate → test → commit per job, then repeat."
