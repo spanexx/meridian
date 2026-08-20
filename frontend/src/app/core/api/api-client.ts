@@ -7,8 +7,20 @@
  * return the container objects the docs define, e.g.
  * { opportunities, summary? } / { transactions } / { payouts }.
  *
+ * RESERVED SURFACE (BRIDGE 2026-08-21): methods still without a page
+ * consumer — deposit, withdrawal, transactions, twoFactorSetup/Verify/
+ * Disable, opportunitiesMine, vettingQueue, payoutsMine, memberMe,
+ * memberSettings — are DOCUMENTED CONTRACT STUBS reserved for Pack D
+ * (flows: money movement, 2FA enrollment, vetting queue, member
+ * settings). The backend-readiness audits (opencode + cline-one
+ * 2026-08-20) flagged them as dead call sites; they are NOT deleted
+ * because docs/apis/* declare the contracts and the mock gateway seeds
+ * them, so the transport seam stays backend-switch truthful. Pack D
+ * wires each consumer; until then they are tested via MockGateway +
+ * api-client.spec.ts as contract coverage.
+ *
  * @owner   agent-maintained
- * @reviewed 2026-08-18
+ * @reviewed 2026-08-21
  */
 import { Injectable, Inject } from '@angular/core';
 import { ApiTransport, API_TRANSPORT, RequestOptions } from './api-transport';
