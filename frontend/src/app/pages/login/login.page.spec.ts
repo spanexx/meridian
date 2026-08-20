@@ -43,6 +43,12 @@ async function renderStandalone(): Promise<ComponentFixture<LoginPageComponent>>
       expires_in: 3600,
       member: {},
     }),
+    login2fa: vi.fn().mockResolvedValue({
+      access_token: 'a2',
+      refresh_token: 'r2',
+      token_type: 'bearer',
+      expires_in: 3600,
+    }),
   } as unknown as ApiClient;
   await TestBed.configureTestingModule({
     providers: [provideRouter(AUTH_ROUTES), { provide: ApiClient, useValue: mockClient }],
@@ -156,6 +162,86 @@ describe('LoginPage (wireframe-aligned)', () => {
     c.twoFA();
     fixture.detectChanges();
     expect(c.toast()?.message).toBe('2FA code sent by email');
+  });
+
+  it('submit() on a 2FA challenge flips the page to the code step (no /dashboard nav)', async () => {
+    const fixture = await renderStandalone();
+    const c = fixture.componentInstance;
+    const router = TestBed.inject(Router);
+    const nav = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const mock = TestBed.inject(ApiClient) as unknown as { login: ReturnType<typeof vi.fn> };
+    mock.login.mockResolvedValue({ requires_2fa: true, temp_token: 'temp-99', message: 'Enter code' });
+    vi.useFakeTimers();
+    await c.submit();
+    fixture.detectChanges();
+    // Page must NOT navigate to /dashboard on a 2FA challenge.
+    expect(nav).not.toHaveBeenCalled();
+    expect(c.step()).toBe('code');
+    expect(c.pending2fa()?.temp_token).toBe('temp-99');
+    vi.useRealTimers();
+  });
+
+  it('submitCode() calls AuthStore.login2fa and navigates to /dashboard on success', async () => {
+    const fixture = await renderStandalone();
+    const c = fixture.componentInstance;
+    const router = TestBed.inject(Router);
+    const nav = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const mock = TestBed.inject(ApiClient) as unknown as {
+      login: ReturnType<typeof vi.fn>;
+      login2fa: ReturnType<typeof vi.fn>;
+    };
+    mock.login.mockResolvedValue({ requires_2fa: true, temp_token: 'temp-77', message: 'm' });
+    await c.submit();
+    expect(c.step()).toBe('code');
+    vi.useFakeTimers();
+    await c.submitCode('123456');
+    expect(mock.login2fa).toHaveBeenCalledWith('temp-77', '123456');
+    vi.advanceTimersByTime(900);
+    expect(nav).toHaveBeenCalledWith(['/dashboard']);
+    vi.useRealTimers();
+  });
+
+  it('submitCode() failure toasts and keeps the user on the code step', async () => {
+    const fixture = await renderStandalone();
+    const c = fixture.componentInstance;
+    const router = TestBed.inject(Router);
+    const nav = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const mock = TestBed.inject(ApiClient) as unknown as {
+      login: ReturnType<typeof vi.fn>;
+      login2fa: ReturnType<typeof vi.fn>;
+    };
+    mock.login.mockResolvedValue({ requires_2fa: true, temp_token: 'temp-88', message: 'm' });
+    await c.submit();
+    expect(c.step()).toBe('code');
+    mock.login2fa.mockRejectedValueOnce(new Error('bad code'));
+    await c.submitCode('000000');
+    expect(c.step()).toBe('code');
+    expect(c.toast()?.message).toContain('Code incorrect');
+    expect(nav).not.toHaveBeenCalled();
+  });
+
+  it('backToCreds() resets the page to the credentials step', async () => {
+    const fixture = await renderStandalone();
+    const c = fixture.componentInstance;
+    const mock = TestBed.inject(ApiClient) as unknown as { login: ReturnType<typeof vi.fn> };
+    mock.login.mockResolvedValue({ requires_2fa: true, temp_token: 't1', message: 'm' });
+    await c.submit();
+    expect(c.step()).toBe('code');
+    c.backToCreds();
+    expect(c.step()).toBe('creds');
+    expect(c.pending2fa()).toBeNull();
+  });
+
+  it('onCodeInput() sanitizes input to digits and caps at 6 chars', async () => {
+    const fixture = await renderStandalone();
+    const c = fixture.componentInstance;
+    const input = document.createElement('input');
+    input.value = 'ab12cd34ef56';
+    c.onCodeInput({ target: input } as unknown as Event);
+    expect(c.code()).toBe('123456');
+    input.value = '7';
+    c.onCodeInput({ target: input } as unknown as Event);
+    expect(c.code()).toBe('7');
   });
 
   it('toggleTheme() flips the document theme between dark and light', async () => {
