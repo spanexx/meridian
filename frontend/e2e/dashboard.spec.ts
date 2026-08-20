@@ -35,13 +35,20 @@ test.describe('dashboard page (wireframe-driven)', () => {
   test('renders Active Executions section with rows linking to detail', async ({ page }) => {
     await page.goto('/dashboard');
     await expect(page.locator('h2', { hasText: 'Active Executions' })).toBeVisible();
+    // Rows are async (ApiClient.executionsList via the mock) — use a
+    // retrying assertion, not an immediate count() (DISCOVERY 2026-08-19:
+    // the count raced on CI's slower machine and read 0 before render).
     const rows = page.locator('a[href*="/executions/"]');
+    await expect(rows.first()).toBeVisible();
     expect(await rows.count()).toBeGreaterThan(0);
   });
 
   test('renders Latest Opportunities section', async ({ page }) => {
     await page.goto('/dashboard');
     await expect(page.locator('h2', { hasText: 'Latest Opportunities' })).toBeVisible();
+    // Same race guard: wait for an opportunity ref to appear (retrying)
+    // before asserting the section text (DISCOVERY 2026-08-19).
+    await expect(page.getByText(/O-\d{3,}/).first()).toBeVisible();
     const text = await page.locator('main').innerText();
     expect(text).toMatch(/O-\d{3,}/);
   });
