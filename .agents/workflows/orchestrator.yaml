@@ -1,9 +1,9 @@
 name: orchestrator
 description: |
   Orchestrator agent loop for multi-pack execution goals (frontend A–E,
-  backend packs). Routes each job to a delegated agent, runs one agent at
-  a time, and integrates, tests, and commits each job before starting the
-  next.
+  backend packs). Routes each job to a delegated agent, runs independent
+  jobs concurrently, and integrates, tests, and commits each job before
+  starting the next.
 
 triggers:
   - Multi-pack execution goal is active (frontend A–E, backend packs)
@@ -15,19 +15,20 @@ routing:
   opencode-action: codebase research, prep, local/online searches
 
 rules:
-  - "One agent at a time — never run two implementation agents concurrently."
+  - "Agents may run concurrently as long as their jobs do not conflict (disjoint files/areas)."
+  - "Serial only when two jobs touch the same files or depend on each other — run the second after the first integrates."
   - "Scrutinize every job before delegating; match the job to the right agent from the routing table."
-  - "Prepare the codebase while the agent works (read target files, check backlog state, set up the integration surface)."
+  - "Prepare the codebase while agents work (read target files, check backlog state, set up the integration surface)."
   - "Never commit red: every job passes the scope-appropriate gates before its commit."
   - "One logical change = one commit, per git-conventions."
 
 steps:
   - name: Route the job
-    run: "Match the job to an agent from the routing table (one agent owns it)"
-    expect: exactly one agent per job; no parallel implementation agents
+    run: "Match the job to an agent from the routing table; one agent per job"
+    expect: exactly one agent per job; jobs with disjoint files/areas may run concurrently
 
   - name: Send job and wait
-    run: "Delegate to the chosen agent; do not start the next job until it returns"
+    run: "Delegate to the chosen agent; jobs whose files overlap are sent only after the earlier one integrates"
     expect: agent report recorded in its report file (.cline-one-reports/ or .opencode-reports/)
 
   - name: Prepare integration while waiting
