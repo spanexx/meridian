@@ -21,16 +21,50 @@
  */
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { GovernancePageComponent } from './governance.page';
+import { vi } from 'vitest';
+import { GovernancePageComponent, toParameterViewModel, toProposalViewModel, toRecentVotesViewModel, toSafetyRailsViewModel } from './governance.page';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
+import { ApiClient } from '../../../core/api/api-client';
+import {
+  SEED_GOVERNANCE_PARAMETERS,
+  SEED_PROPOSALS,
+  SEED_RECENT_VOTES,
+  SEED_SAFETY_RAILS,
+} from '../../../core/api/mock-seed';
 
 async function renderPage(communityId = 'alpha') {
+  const mockClient = {
+    governanceProposals: vi.fn().mockResolvedValue({ proposals: SEED_PROPOSALS }),
+    governanceParameters: vi.fn().mockResolvedValue({ parameters: SEED_GOVERNANCE_PARAMETERS }),
+    governanceSafetyRails: vi.fn().mockResolvedValue({ rails: SEED_SAFETY_RAILS }),
+    governanceRecentVotes: vi.fn().mockResolvedValue({ votes: SEED_RECENT_VOTES }),
+    governanceVote: vi.fn().mockResolvedValue({
+      vote_id: 'vote_x',
+      proposal_id: 'prop_001',
+      vote: 'approve',
+      weight: 1,
+      tally: {
+        approve_weighted: 8,
+        reject_weighted: 2,
+        required_weighted_votes: 5,
+        approvals_remaining: 0,
+        your_weight_if_eligible: 1,
+        has_voted: true,
+      },
+      reputation_earned: 1,
+    }),
+  } as unknown as ApiClient;
   await TestBed.configureTestingModule({
     imports: [GovernancePageComponent, UiIconComponent],
-    providers: [provideRouter([])],
+    providers: [provideRouter([]), { provide: ApiClient, useValue: mockClient }],
   }).compileComponents();
   const fixture = TestBed.createComponent(GovernancePageComponent);
   fixture.componentRef.setInput('id', communityId);
+  fixture.detectChanges();
+  // The constructor loads governance data async — settle the microtasks
+  // so seeded content is present for the queried DOM (Job E async load).
+  await Promise.resolve();
+  await Promise.resolve();
   fixture.detectChanges();
   return fixture;
 }
@@ -177,22 +211,38 @@ describe('GovernancePageComponent', () => {
     expect(p2.querySelector('[data-count-reject]')?.textContent).toBe('3');
   });
 
-  it('clicking Approve increments vote for that proposal', async () => {
+  it('clicking Approve calls the vote API and applies the server tally', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { onVoteApprove: (id: number) => void; voteCount: (id: number, kind: string) => number };
-    expect(c.voteCount(0, 'approve')).toBe(7);
-    c.onVoteApprove(0);
+    const c = f.componentInstance as unknown as {
+      onVoteApprove: (id: string) => Promise<void>;
+      voteCount: (id: string, kind: string) => number;
+    };
+    const mock = TestBed.inject(ApiClient) as unknown as { governanceVote: ReturnType<typeof vi.fn> };
+    expect(c.voteCount('prop_001', 'approve')).toBe(7);
+    await c.onVoteApprove('prop_001');
     f.detectChanges();
-    expect(c.voteCount(0, 'approve')).toBe(8);
+    // Server truth: the mock resolves a tally of 8/2 for the vote payload.
+    expect(mock.governanceVote).toHaveBeenCalledWith('prop_001', { vote: 'approve' });
+    expect(c.voteCount('prop_001', 'approve')).toBe(8);
   });
 
-  it('clicking Reject increments reject vote', async () => {
+  it('clicking Reject calls the vote API with "reject"', async () => {
     const f = await renderPage();
-    const c = f.componentInstance as unknown as { onVoteReject: (id: number) => void; voteCount: (id: number, kind: string) => number };
-    expect(c.voteCount(1, 'reject')).toBe(3);
-    c.onVoteReject(1);
+    const c = f.componentInstance as unknown as {
+      onVoteReject: (id: string) => Promise<void>;
+      voteCount: (id: string, kind: string) => number;
+    };
+    const mock = TestBed.inject(ApiClient) as unknown as { governanceVote: ReturnType<typeof vi.fn> };
+    mock.governanceVote.mockResolvedValue({
+      vote_id: 'vote_y', proposal_id: 'prop_002', vote: 'reject', weight: 1,
+      tally: { approve_weighted: 4, reject_weighted: 4, required_weighted_votes: 5, approvals_remaining: 1, your_weight_if_eligible: 1, has_voted: true },
+      reputation_earned: 1,
+    });
+    expect(c.voteCount('prop_002', 'reject')).toBe(3);
+    await c.onVoteReject('prop_002');
     f.detectChanges();
-    expect(c.voteCount(1, 'reject')).toBe(4);
+    expect(mock.governanceVote).toHaveBeenCalledWith('prop_002', { vote: 'reject' });
+    expect(c.voteCount('prop_002', 'reject')).toBe(4);
   });
 
   // ─── Community-Governed Parameters ────────────────────────────────────
@@ -351,4 +401,45 @@ describe('GovernancePageComponent', () => {
     expect(c.id()).toBe('alpha');
   });
 
+  // ─── Canonical → view mappers (Job E; pure + unit-tested) ────────────
+  it('toProposalViewModel maps canonical rows into the wireframe view model', () => {
+    const rows = toProposalViewModel(SEED_PROPOSALS);
+    expect(rows).toHaveLength(2);
+    expect(rows[0].id).toBe('prop_001');
+    expect(rows[0].title).toBe('Raise ROI floor to 18%');
+    expect(rows[0].proposer).toBe('Dana Voss');
+    expect(rows[0].proposerTier).toBe('T4');
+    expect(rows[0].requiredVotes).toBe(5);
+    expect(rows[0].approve).toBe(7);
+    expect(rows[0].reject).toBe(2);
+    expect(rows[1].title).toBe('Win-rate target 70% → 75%');
+    expect(rows[1].approve).toBe(4);
+    expect(rows[1].reject).toBe(3);
+  });
+
+  it('toParameterViewModel maps canonical parameters + applies presentation provenance', () => {
+    const rows = toParameterViewModel(SEED_GOVERNANCE_PARAMETERS);
+    expect(rows).toHaveLength(5);
+    expect(rows[0]).toEqual({ label: 'ROI floor', currentValue: '15%', setDate: 'Feb 14', approvalPct: 87 });
+    expect(rows[4].label).toBe('Distribution shares');
+    expect(rows[4].currentValue).toBe('46/30/12/8/4');
+  });
+
+  it('toSafetyRailsViewModel surfaces canonical labels verbatim', () => {
+    const rails = toSafetyRailsViewModel(SEED_SAFETY_RAILS);
+    expect(rails).toHaveLength(5);
+    expect(rails[0]).toContain('Reconciliation');
+    expect(rails[rails.length - 1]).toContain('Technical');
+  });
+
+  it('toRecentVotesViewModel maps title/date/%/passed from canonical rows', () => {
+    const votes = toRecentVotesViewModel(SEED_RECENT_VOTES);
+    expect(votes).toHaveLength(4);
+    expect(votes[0].title).toBe('ROI floor 15%');
+    expect(votes[0].date).toBe('Feb 14');
+    expect(votes[0].approvalPct).toBe(87);
+    expect(votes[0].passed).toBe(true);
+    expect(votes.filter((v) => v.passed).length).toBe(3);
+    expect(votes.filter((v) => !v.passed).length).toBe(1);
+  });
 });

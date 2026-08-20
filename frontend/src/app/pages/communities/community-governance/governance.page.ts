@@ -13,8 +13,16 @@
  * :id from /community/:id/governance). Defaults to 'alpha' so
  * the page renders before the route binds.
  *
+ * Backend-readiness (Job E, 2026-08-21): the page previously rendered
+ * 100% module-local fixtures with NO ApiClient at all (flagged by the
+ * opencode + cline-one audits). It now consumes the canonical
+ * /governance/* endpoints through pure mappers that preserve the
+ * wireframe view contract. Wireframe-only presentation data (covered
+ * below per the established community-members MEMBER_PRESENTATION /
+ * opportunities OPP_PRESENTATION precedent) stays module-local.
+ *
  * @owner   spanexx
- * @reviewed 2026-08-13
+ * @reviewed 2026-08-21
  */
 
 import {
@@ -24,24 +32,29 @@ import {
   computed,
   inject,
   input,
+  signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { UiIconComponent } from '../../../ui/icon/icon.component';
 import { UiModalComponent } from '../../../ui/modal/modal.component';
+import { ApiClient } from '../../../core/api/api-client';
+import type { GovernanceParameter, ProposalListRow, RecentVoteRow } from '../../../core/models';
 
-interface Proposal {
-  readonly id: number;
-  readonly title: string;
-  readonly proposer: string;
-  readonly proposerTier: string;
+/** View model rendered by the Active Proposals card. */
+export interface Proposal {
+  readonly id: string;            // canonical proposal_id
+  readonly title: string;         // display_title
+  readonly proposer: string;      // proposer.display_name
+  readonly proposerTier: string;  // proposer.tier
   readonly rationale: string;
-  readonly hoursLeft: number;
-  readonly requiredVotes: number;
-  approve: number;
-  reject: number;
+  readonly hoursLeft: number;     // derived from expires_at (clamped ≥ 0)
+  readonly requiredVotes: number; // tally.required_weighted_votes
+  approve: number;                // tally.approve_weighted (mutable: vote)
+  reject: number;                 // tally.reject_weighted (mutable: vote)
 }
 
-interface Parameter {
+/** View model for the Community-Governed Parameters grid. */
+export interface Parameter {
   readonly label: string;
   readonly currentValue: string;
   readonly setDate: string;
@@ -53,29 +66,43 @@ interface DistributionShare {
   readonly value: string;
 }
 
-interface RecentVote {
+/** View model for the Recent Votes sidebar. */
+export interface RecentVote {
   readonly title: string;
   readonly date: string;
   readonly approvalPct: number;
   readonly passed: boolean;
 }
 
-const PARAMETER_OPTIONS: readonly string[] = [
-  'ROI floor',
-  'Win-rate target',
-  'Distribution shares',
-  'Reserve ratio target',
-  'Vetting thresholds',
-  'Single-execution cap',
-];
+// ─── canonical → view mappers (pure; unit-tested) ──────────────────────
 
-const PARAMETERS: readonly Parameter[] = [
-  { label: 'ROI floor', currentValue: '15%', setDate: 'Feb 14', approvalPct: 87 },
-  { label: 'Win-rate target', currentValue: '70%', setDate: 'Jan 8', approvalPct: 81 },
-  { label: 'Reserve target', currentValue: '12%', setDate: 'Dec 12', approvalPct: 90 },
-  { label: 'Single-execution cap', currentValue: '$50k', setDate: 'Nov 30', approvalPct: 84 },
-];
+/** Canonical key → wireframe parameter label. */
+const PARAMETER_LABEL_BY_KEY: Readonly<Record<string, string>> = {
+  roi_floor: 'ROI floor',
+  win_rate_target: 'Win-rate target',
+  reserve_target: 'Reserve target',
+  single_execution_cap: 'Single-execution cap',
+  distribution_shares: 'Distribution shares',
+};
 
+/**
+ * Wireframe-only provenance (set date + approval %) — not in the canonical
+ * GovernanceParameter (key/value/unit/votable only), so supplied per key
+ * following the MEMBER_PRESENTATION precedent.
+ */
+const PARAMETER_PRESENTATION: Readonly<Record<string, { setDate: string; approvalPct: number }>> = {
+  roi_floor:            { setDate: 'Feb 14', approvalPct: 87 },
+  win_rate_target:      { setDate: 'Jan 8',  approvalPct: 81 },
+  reserve_target:       { setDate: 'Dec 12', approvalPct: 90 },
+  single_execution_cap: { setDate: 'Nov 30', approvalPct: 84 },
+  distribution_shares:  { setDate: 'Feb 14', approvalPct: 87 },
+};
+
+/**
+ * Wireframe-only named distribution breakdown. The canonical value is the
+ * compact string '46/30/12/8/4' (distribution_shares parameter); the 5
+ * named categories come from the wireframe, keyed by that canonical value.
+ */
 const DISTRIBUTION_SHARES: readonly DistributionShare[] = [
   { name: 'Capital', value: '46%' },
   { name: 'Signal', value: '30%' },
@@ -84,20 +111,64 @@ const DISTRIBUTION_SHARES: readonly DistributionShare[] = [
   { name: 'Platform', value: '4%' },
 ];
 
-const SAFETY_RAILS: readonly string[] = [
-  'Reconciliation & audit trail',
-  'No-ponzi · no unearned returns',
-  'KYC & identity rules',
-  'Human control over money & reputation',
-  'Technical architecture (kernel/engines/providers)',
-];
+/** Round a canonical ISO timestamp into whole hours left (clamp ≥ 0). */
+function hoursLeftOf(expiresAt: string): number {
+  const ms = new Date(expiresAt).getTime() - Date.now();
+  return Math.max(0, Math.round(ms / 3_600_000));
+}
 
-const RECENT_VOTES: readonly RecentVote[] = [
-  { title: 'ROI floor 15%', date: 'Feb 14', approvalPct: 87, passed: true },
-  { title: 'Vetting timeout 48h', date: 'Jan 22', approvalPct: 76, passed: true },
-  { title: 'Deployment cap 50%', date: 'Jan 8', approvalPct: 72, passed: true },
-  { title: 'Reserve floor 15%', date: 'Dec 3', approvalPct: 41, passed: false },
-];
+/**
+ * Map canonical GET /governance/proposals rows into the page view model.
+ * Tally votes, required votes, proposer + provenance are canonical; hours
+ * left derives from expires_at (clamped — the fixed mock seed dates are in
+ * the past, a live backend returns real expiries).
+ */
+export function toProposalViewModel(rows: ProposalListRow[]): Proposal[] {
+  return rows.map((r) => ({
+    id: r.proposal_id,
+    title: r.display_title,
+    proposer: r.proposer.display_name,
+    proposerTier: r.proposer.tier,
+    rationale: r.rationale,
+    hoursLeft: hoursLeftOf(r.expires_at),
+    requiredVotes: r.tally.required_weighted_votes,
+    approve: r.tally.approve_weighted,
+    reject: r.tally.reject_weighted,
+  }));
+}
+
+/** Map canonical GovernanceParameter[] into the grid view (label + presentation provenance). */
+export function toParameterViewModel(rows: GovernanceParameter[]): Parameter[] {
+  return rows.map((r) => {
+    const presentation = PARAMETER_PRESENTATION[r.key] ?? { setDate: '—', approvalPct: 0 };
+    return {
+      label: PARAMETER_LABEL_BY_KEY[r.key] ?? r.key,
+      currentValue: r.value,
+      setDate: presentation.setDate,
+      approvalPct: presentation.approvalPct,
+    };
+  });
+}
+
+/** Safety rails are never community-voted; surface the canonical label list verbatim. */
+export function toSafetyRailsViewModel(rows: { label: string }[]): string[] {
+  return rows.map((r) => r.label);
+}
+
+/** Map RecentVoteRow[] into the sidebar view (title/date/%/passed). */
+export function toRecentVotesViewModel(rows: RecentVoteRow[]): RecentVote[] {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return rows.map((r) => {
+    const d = new Date(r.decided_at);
+    const date = `${months[d.getUTCMonth()]} ${d.getUTCDate()}`;
+    return {
+      title: r.display_title,
+      date,
+      approvalPct: r.approval_percent,
+      passed: r.status === 'passed',
+    };
+  });
+}
 
 @Component({
   selector: 'app-governance-page',
@@ -121,32 +192,13 @@ export class GovernancePageComponent {
   });
 
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly client = inject(ApiClient);
 
-  // Mutable active proposals (vote tally can change via Approve/Reject).
-  private readonly _proposals: Proposal[] = [
-    {
-      id: 0,
-      title: 'Raise ROI floor to 18%',
-      proposer: 'Dana Voss',
-      proposerTier: 'T4',
-      rationale: 'Market conditions support a higher floor.',
-      hoursLeft: 22,
-      requiredVotes: 5,
-      approve: 7,
-      reject: 2,
-    },
-    {
-      id: 1,
-      title: 'Win-rate target 70% → 75%',
-      proposer: 'Ravi Kumar',
-      proposerTier: 'T4',
-      rationale: 'Recent execution quality supports a tighter target.',
-      hoursLeft: 22,
-      requiredVotes: 5,
-      approve: 4,
-      reject: 3,
-    },
-  ];
+  /** Mutable active proposals (vote tally can change via Approve/Reject). */
+  private readonly _proposals = signal<Proposal[]>([]);
+  private readonly _parameters = signal<Parameter[]>([]);
+  private readonly _safetyRails = signal<string[]>([]);
+  private readonly _recentVotes = signal<RecentVote[]>([]);
 
   private _proposeModalOpen = false;
   private _proposeParameter = PARAMETER_OPTIONS[0];
@@ -161,25 +213,15 @@ export class GovernancePageComponent {
   get lastProposalSummary(): string | null { return this._lastProposalSummary; }
 
   parameterOptions(): readonly string[] { return PARAMETER_OPTIONS; }
-  parameters(): readonly Parameter[] {
-    return [
-      ...PARAMETERS,
-      {
-        label: 'Distribution shares',
-        currentValue: '46/30/12/8/4',
-        setDate: 'Feb 14',
-        approvalPct: 87,
-      },
-    ];
-  }
+  parameters(): readonly Parameter[] { return this._parameters(); }
   distributionShares(): readonly DistributionShare[] { return DISTRIBUTION_SHARES; }
-  safetyRails(): readonly string[] { return SAFETY_RAILS; }
-  recentVotes(): readonly RecentVote[] { return RECENT_VOTES; }
-  activeProposals(): readonly Proposal[] { return this._proposals; }
+  safetyRails(): readonly string[] { return this._safetyRails(); }
+  recentVotes(): readonly RecentVote[] { return this._recentVotes(); }
+  activeProposals(): readonly Proposal[] { return this._proposals(); }
 
   /** Read-only tally accessor used by the template + tests. */
-  voteCount(id: number, kind: 'approve' | 'reject'): number {
-    const p = this._proposals.find((x) => x.id === id);
+  voteCount(id: string, kind: 'approve' | 'reject'): number {
+    const p = this._proposals().find((x) => x.id === id);
     if (!p) return 0;
     return kind === 'approve' ? p.approve : p.reject;
   }
@@ -210,15 +252,65 @@ export class GovernancePageComponent {
     this.cdr.markForCheck();
   }
 
-  /** User-facing Approve click on a proposal: increments tally. */
-  onVoteApprove(id: number): void {
-    const p = this._proposals.find((x) => x.id === id);
-    if (p) p.approve += 1;
+  /** User-facing Approve click: cast the vote; server tally is the truth. */
+  onVoteApprove(id: string): Promise<void> {
+    return this.castVote(id, 'approve');
+  }
+  /** User-facing Reject click: cast the vote; server tally is the truth. */
+  onVoteReject(id: string): Promise<void> {
+    return this.castVote(id, 'reject');
+  }
+
+  private async castVote(id: string, vote: 'approve' | 'reject'): Promise<void> {
+    try {
+      const res = await this.client.governanceVote(id, { vote });
+      this._proposals.update((rows) =>
+        rows.map((p) =>
+          p.id === id ? { ...p, approve: res.tally.approve_weighted, reject: res.tally.reject_weighted } : p,
+        ),
+      );
+    } catch {
+      // Offline-safe fallback: keep the optimistic local increment so the
+      // user's click is never silently dropped (same pattern as logout()).
+      this._proposals.update((rows) =>
+        rows.map((p) => (p.id === id ? { ...p, [vote]: p[vote] + 1 } : p)),
+      );
+    }
     this.cdr.markForCheck();
   }
-  onVoteReject(id: number): void {
-    const p = this._proposals.find((x) => x.id === id);
-    if (p) p.reject += 1;
-    this.cdr.markForCheck();
+
+  constructor() {
+    // Job E (backend-readiness audit): consume the canonical governance
+    // endpoints instead of module-local fixtures.
+    this.client.governanceProposals().then((r) => {
+      this._proposals.set(toProposalViewModel(r.proposals));
+      this.cdr.markForCheck();
+    }).catch(() => undefined);
+    this.client.governanceParameters().then((r) => {
+      this._parameters.set(toParameterViewModel(r.parameters));
+      this.cdr.markForCheck();
+    }).catch(() => undefined);
+    this.client.governanceSafetyRails().then((r) => {
+      this._safetyRails.set(toSafetyRailsViewModel(r.rails));
+      this.cdr.markForCheck();
+    }).catch(() => undefined);
+    this.client.governanceRecentVotes().then((r) => {
+      this._recentVotes.set(toRecentVotesViewModel(r.votes));
+      this.cdr.markForCheck();
+    }).catch(() => undefined);
   }
 }
+
+/**
+ * Propose-modal parameter options — wireframe-facing labels (the canonical
+ * parameter keys map to these in PARAMETER_LABEL_BY_KEY). The modal is a
+ * local UX surface; the canonical keys are used by the governance API.
+ */
+const PARAMETER_OPTIONS: readonly string[] = [
+  'ROI floor',
+  'Win-rate target',
+  'Distribution shares',
+  'Reserve ratio target',
+  'Vetting thresholds',
+  'Single-execution cap',
+];
