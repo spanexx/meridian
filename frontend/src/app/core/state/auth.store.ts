@@ -57,15 +57,36 @@ export class AuthStore {
     return this.client.register(payload);
   }
 
-  /** Refresh the member profile from /auth/me. Failures leave member null. */
+  /**
+   * Refresh the member profile from /auth/me.
+   *
+   * BRIDGE 2026-08-20: audits flagged an N+1 — authGuard fires loadMe()
+   * on every protected route AND dashboard/profile constructors fire it
+   * again, doubling /auth/me per navigation. Mirrors PoolStore: concurrent
+   * calls share one in-flight request, and a warm member short-circuits
+   * the network entirely. Failures leave member null (previous member is
+   * NOT cleared on a failed refetch — a stale-but-present profile is
+   * preferable to a blanked one).
+   */
   async loadMe(): Promise<void> {
-    try {
-      const { member } = await this.client.me();
-      this.member.set(member);
-    } catch {
-      this.member.set(null);
-    }
+    if (this.member() !== null) return;
+    if (this.loadMeInflight) return this.loadMeInflight;
+    this.loadMeInflight = this.client
+      .me()
+      .then(({ member }) => {
+        this.member.set(member);
+      })
+      .catch(() => {
+        this.member.set(null);
+      })
+      .finally(() => {
+        this.loadMeInflight = null;
+      });
+    return this.loadMeInflight;
   }
+
+  /** In-flight /auth/me shared by concurrent loadMe() calls. */
+  private loadMeInflight: Promise<void> | null = null;
 
   /**
    * Rotate the token pair via POST /auth/refresh. Returns true on

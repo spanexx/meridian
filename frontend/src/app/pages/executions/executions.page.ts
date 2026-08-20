@@ -4,12 +4,16 @@
  * Per wireframe/meridian/executions/index.html:
  *   - title 'Executions' + 'Active and completed arbitrage operations.'
  *   - Search input + 'Pool' link button in the header
- *   - 4 status tabs with counts (All 16 / Active 3 / Completed 12 / Failed 1)
+ *   - 4 status tabs with counts derived LIVE from the loaded rows
  *   - 2-column grid of execution cards
  *   - Each card: ref + status badge + title + O-#### subtitle + thumbnail
  *     + Deployed/Recovered/ROI 3-up + progress bar + bottom row
  *     (status line + metadata line)
- *   - 16-row dataset
+ *
+ * Backend-readiness (Job C): the constructor consumes GET /executions and
+ * maps ExecutionDetail[] rows through toExecutionViewModel() (pure, unit-
+ * tested) into the Execution view model the template renders. There is no
+ * module-local dataset.
  *
  * @owner   spanexx
  * @reviewed 2026-08-11
@@ -17,6 +21,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiClient } from '../../core/api/api-client';
+import { parseApiMoney } from '../../core/utils/money';
+import type { ExecutionDetail, ExecutionStatus } from '../../core/models';
 
 interface Execution {
   ref: string;
@@ -33,6 +39,85 @@ interface Execution {
   progress: number;       // 0..100
   statusLine: string;     // e.g. '3 of 8 sold'
   metaLine: string;       // e.g. 'Live · 4d 12h'
+}
+
+// ─── canonical ExecutionDetail → Execution view mapper (pure; unit-tested) ───
+
+/** Badge text + tone per canonical lifecycle status (reproduces the wireframe). */
+const BADGE_BY_STATUS: Record<ExecutionStatus, { label: string; badgeVariant: Execution['badgeVariant'] }> = {
+  FUNDING:     { label: 'Listed',    badgeVariant: 'warning' },
+  ACQUIRING:   { label: 'Acquiring', badgeVariant: 'info' },
+  HOLDING:     { label: 'Listed',    badgeVariant: 'warning' },
+  LIQUIDATING: { label: 'All Sold',  badgeVariant: 'success' },
+  COMPLETED:   { label: 'Settled',   badgeVariant: 'success' },
+  FAILED:      { label: 'Defaulted', badgeVariant: 'danger' },
+  CANCELLED:   { label: 'Listed',    badgeVariant: 'warning' },
+};
+
+/** COMPLETED → 'completed', FAILED → 'failed', every other lifecycle → 'active'. */
+function statusOf(s: ExecutionStatus): Execution['status'] {
+  return s === 'COMPLETED' ? 'completed' : s === 'FAILED' ? 'failed' : 'active';
+}
+
+/** sold/total * 100, or 0 for failed, 100 for completed. */
+function progressOf(d: ExecutionDetail): number {
+  if (d.status === 'COMPLETED') return 100;
+  if (d.status === 'FAILED') return 0;
+  const total = d.inventory.total_items;
+  return total > 0 ? Math.round((d.inventory.sold / total) * 100) : 0;
+}
+
+/** e.g. '3 of 8 sold' / '0 of 12 units' / failed '2 of 5 buyers refunded'. */
+function statusLineOf(d: ExecutionDetail): string {
+  const sold = d.inventory.sold;
+  const total = d.inventory.total_items;
+  if (d.status === 'FAILED') return `${sold} of ${total} buyers refunded`;
+  if (sold === 0 && total > 0) return `${sold} of ${total} units`;
+  return `${sold} of ${total} sold`;
+}
+
+/** e.g. 'Payout cleared' / 'Loss realised' / 'Live · 4d 12h' / 'ETA 4 days'. */
+function metaLineOf(d: ExecutionDetail): string {
+  if (d.status === 'FAILED') return 'Loss realised';
+  if (d.status === 'COMPLETED') return 'Payout cleared';
+  if (d.status === 'LIQUIDATING') return 'Payout pending →';
+  if (d.status === 'ACQUIRING') {
+    const days = Math.max(1, Math.round((new Date(d.timeline.estimated_completion).getTime() - Date.now()) / 86_400_000));
+    return `ETA ${days} days`;
+  }
+  // HOLDING (and unnamed lifecycle states): 'Live · {d}d {h}h' from the planned flight.
+  const windowMs = Math.max(0, new Date(d.timeline.estimated_completion).getTime() - new Date(d.timeline.started_at).getTime());
+  const totalHours = windowMs / 3_600_000;
+  const days = Math.floor(totalHours / 24);
+  const hours = Math.min(23, Math.round(totalHours % 24));
+  return `Live · ${days}d ${hours}h`;
+}
+
+function toExecution(d: ExecutionDetail): Execution {
+  return {
+    ref: d.execution_id,
+    title: d.title,
+    relatedOpp: d.opportunity.id,
+    relatedOppTitle: d.opportunity.title,
+    imageSeed: d.image_seed,
+    status: statusOf(d.status),
+    badge: BADGE_BY_STATUS[d.status].label,
+    badgeVariant: BADGE_BY_STATUS[d.status].badgeVariant,
+    deployed: parseApiMoney(d.capital.allocated),
+    recovered: parseApiMoney(d.capital.recovered),
+    roi: d.financials.projected_roi,
+    progress: progressOf(d),
+    statusLine: statusLineOf(d),
+    metaLine: metaLineOf(d),
+  };
+}
+
+/**
+ * Map canonical GET /executions rows (ExecutionDetail[]) into the page view
+ * model. Pure + unit-tested in executions.page.spec.ts.
+ */
+export function toExecutionViewModel(details: ExecutionDetail[]): Execution[] {
+  return details.map(toExecution);
 }
 
 @Component({
@@ -57,7 +142,7 @@ interface Execution {
 
       <!-- Status tabs -->
       <div class="tabs mb-6" data-testid="status-filter">
-        @for (s of statuses; track s.key) {
+        @for (s of statuses(); track s.key) {
           <button
             type="button"
             class="tab"
@@ -151,40 +236,35 @@ export class ExecutionsPageComponent {
   /** Status tab currently selected. */
   readonly status = signal<'all' | Execution['status']>('all');
 
-  /** Status tabs with counts (matches wireframe). */
-  readonly statuses = [
-    { key: 'all',       label: 'All',       count: 16 },
-    { key: 'active',    label: 'Active',    count: 3 },
-    { key: 'completed', label: 'Completed', count: 12 },
-    { key: 'failed',    label: 'Failed',    count: 1 },
-  ] as const;
+  /** Status tabs with counts from the LIVE rows (All = length; the rest by status). */
+  readonly statuses = computed<readonly { key: 'all' | Execution['status']; label: string; count: number }[]>(() => {
+    const rows = this.all();
+    let active = 0;
+    let completed = 0;
+    let failed = 0;
+    for (const r of rows) {
+      if (r.status === 'active') active += 1;
+      else if (r.status === 'completed') completed += 1;
+      else failed += 1;
+    }
+    return [
+      { key: 'all', label: 'All', count: rows.length },
+      { key: 'active', label: 'Active', count: active },
+      { key: 'completed', label: 'Completed', count: completed },
+      { key: 'failed', label: 'Failed', count: failed },
+    ];
+  });
 
   /** Filter by status tab. */
   readonly visibleExecutions = computed<Execution[]>(() => {
     const s = this.status();
-    if (s === 'all') return this.all;
-    return this.all.filter((e) => e.status === s);
+    const rows = this.all();
+    if (s === 'all') return rows;
+    return rows.filter((e) => e.status === s);
   });
 
-  /** 16-row dataset, ordered as the wireframe (active first). */
-  readonly all: Execution[] = [
-    { ref: 'E-1042', title: 'Limited Edition Sneaker Resale',  relatedOpp: 'O-2037', relatedOppTitle: 'Travis Scott × Nike',   imageSeed: 'sneaker-thumb',  status: 'active',    badge: 'Listed',     badgeVariant: 'warning', deployed: 18500, recovered: 4280,  roi: 12.4,  progress: 37,  statusLine: '3 of 8 sold', metaLine: 'Live · 4d 12h' },
-    { ref: 'E-1039', title: 'Vintage Watch Liquidation',        relatedOpp: 'O-2021', relatedOppTitle: 'Estate lot',             imageSeed: 'watch-thumb',    status: 'active',    badge: 'All Sold',   badgeVariant: 'success', deployed: 32000, recovered: 37985, roi: 18.7,  progress: 100, statusLine: '5 of 5 sold', metaLine: 'Payout pending →' },
-    { ref: 'E-1036', title: 'Wholesale Electronics',            relatedOpp: 'O-2018', relatedOppTitle: 'Shenzhen bulk',          imageSeed: 'electronics-thumb', status: 'active', badge: 'Acquiring',  badgeVariant: 'info',    deployed: 45000, recovered: 0,     roi: 0,    progress: 25,  statusLine: '0 of 12 units', metaLine: 'ETA 4 days' },
-    { ref: 'E-1033', title: 'Designer Furniture Resale',        relatedOpp: 'O-2014', relatedOppTitle: 'Herman Miller · 12 chairs', imageSeed: 'furniture-thumb', status: 'completed', badge: 'Settled', badgeVariant: 'success', deployed: 7800,  recovered: 9240,  roi: 18.5,  progress: 100, statusLine: '12 of 12 sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1031', title: 'Vintage Camera Lot',               relatedOpp: 'O-2011', relatedOppTitle: 'Leica M3 · 2 units',     imageSeed: 'camera-thumb',   status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 5400,  recovered: 7620,  roi: 41.0,  progress: 100, statusLine: '2 of 2 sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1028', title: 'Vinyl Record Collection',          relatedOpp: 'O-2008', relatedOppTitle: '320 records',            imageSeed: 'vinyl-thumb',    status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 3200,  recovered: 4115,  roi: 28.6,  progress: 100, statusLine: '320 of 320 sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1025', title: 'PS5 Bundle Bulk',                  relatedOpp: 'O-2005', relatedOppTitle: '8 bundles',               imageSeed: 'ps5-thumb',      status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 22000, recovered: 25340, roi: 15.2,  progress: 100, statusLine: '8 of 8 bundles sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1022', title: 'Bulk Lego Set Resale',             relatedOpp: 'O-2002', relatedOppTitle: 'Retired Star Wars sets',  imageSeed: 'lego-thumb',     status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 8200,  recovered: 11004, roi: 34.2,  progress: 100, statusLine: '6 of 6 lots sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1019', title: 'Restaurant Equipment Resale',      relatedOpp: 'O-1998', relatedOppTitle: 'Espresso machine',        imageSeed: 'espresso-thumb', status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 4500,  recovered: 5526,  roi: 22.8,  progress: 100, statusLine: '1 of 1 sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1016', title: 'Yeezy Boost 350 V2 (Bone)',        relatedOpp: 'O-1995', relatedOppTitle: 'Deadstock · size 10',     imageSeed: 'yeezy-thumb',    status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 7600,  recovered: 9272,  roi: 22.0,  progress: 100, statusLine: '1 of 1 sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1013', title: 'Topps 1986 Fleer Jordan #57',      relatedOpp: 'O-1992', relatedOppTitle: 'PSA 9 graded',            imageSeed: 'topps-thumb',    status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 12000, recovered: 13680, roi: 14.0,  progress: 100, statusLine: '1 of 1 sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1010', title: 'Wüsthof Classic 8" chef knife',   relatedOpp: 'O-1989', relatedOppTitle: '3-piece set',             imageSeed: 'knife-thumb',    status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 240,   recovered: 269,   roi: 12.0,  progress: 100, statusLine: '3 of 3 sets sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1007', title: 'Gibson Les Paul Studio',           relatedOpp: 'O-1986', relatedOppTitle: '2018 sunburst',           imageSeed: 'gibson-thumb',   status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 2200,  recovered: 2442,  roi: 11.0,  progress: 100, statusLine: '1 of 1 sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1004', title: 'Stone Island Shadow Project',      relatedOpp: 'O-1983', relatedOppTitle: 'FW23 jacket',              imageSeed: 'stone-thumb',    status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 1100,  recovered: 1309,  roi: 19.0,  progress: 100, statusLine: '1 of 1 sold', metaLine: 'Payout cleared' },
-    { ref: 'E-1001', title: 'Herman Miller Aeron (size B)',     relatedOpp: 'O-1980', relatedOppTitle: 'Refurbished',             imageSeed: 'aeron-thumb',    status: 'completed', badge: 'Settled',    badgeVariant: 'success', deployed: 1800,  recovered: 1872,  roi: 4.0,   progress: 100, statusLine: '1 of 1 sold', metaLine: 'Payout cleared' },
-    { ref: 'E-0998', title: 'Eames Lounge Replica (no-auth)',   relatedOpp: 'O-1977', relatedOppTitle: 'No certificate',          imageSeed: 'eames-thumb',    status: 'failed',    badge: 'Defaulted',  badgeVariant: 'danger',  deployed: 1400,  recovered: 280,   roi: -80.0, progress: 0,   statusLine: '2 of 5 buyers refunded', metaLine: 'Loss realised' },
-  ];
+  /** Live Execution rows — canonicalized from the GET /executions seed. */
+  readonly all = signal<Execution[]>([]);
 
   formatMoney(n: number): string {
     return `$${n.toLocaleString('en-US')}`;
@@ -204,10 +284,10 @@ export class ExecutionsPageComponent {
   private readonly client = inject(ApiClient);
 
   constructor() {
-    // Backend-readiness pack: prove the data-layer wiring is in place.
-    // The 16-row wireframe demo (this.all) remains the display source
-    // until a canonical executions list endpoint replaces it; a real load
-    // would map executionsList() rows into the Execution view.
-    void this.client.executionsList().catch(() => undefined);
+    // Job C (backend-readiness audit): consume the canonical endpoint.
+    this.client
+      .executionsList()
+      .then((r) => this.all.set(toExecutionViewModel(r.executions)))
+      .catch(() => undefined);
   }
 }

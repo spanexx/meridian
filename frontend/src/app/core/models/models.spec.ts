@@ -155,7 +155,9 @@ describe('canonical models', () => {
     it('detail shape: string capital, object participants, numeric ratios', () => {
       const e: ExecutionDetail = {
         execution_id: 'exec_1',
+        title: 'Eames Replica Flip',
         opportunity: { id: 'opp_2', title: 'Travis Scott x Nike' },
+        image_seed: 'eames-thumb',
         status: 'LIQUIDATING',
         participants: {
           signal_contributor: { member_id: 'mem_1', display_name: 'Sarah Park', share: 25 },

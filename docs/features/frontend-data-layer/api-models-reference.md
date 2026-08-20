@@ -159,7 +159,9 @@ responses; no "subtitle" field anywhere (gap §4.4).
 
 ### Execution (journey 05)
 Contributor: { member_id, amount:string, percentage:number }
-Detail: { execution_id, opportunity: { id, title }, status,
+Detail: { execution_id, title, opportunity: { id, title },
+  image_seed: string,
+  status,
   participants: { signal_contributor: {member_id, display_name,
   share:number}|null, access_contributor: same|null, operator:
   {member_id, display_name}|null },

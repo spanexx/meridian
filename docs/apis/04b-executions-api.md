@@ -51,7 +51,9 @@ List **all** executions (canonical board endpoint). Currently mock-only
     "executions": [
       {
         "execution_id": "E-1042",
+        "title": "Limited Edition Sneaker Resale",
         "opportunity": { "id": "O-2037", "title": "Travis Scott × Nike" },
+        "image_seed": "sneaker-thumb",
         "status": "HOLDING",
         "participants": {
           "signal_contributor": { "member_id": "mem_mike-rivera", "display_name": "Mike Rivera", "share": 30 },
@@ -62,10 +64,10 @@ List **all** executions (canonical board endpoint). Currently mock-only
         "inventory": { "total_items": 8, "sold": 3, "listed": 5, "in_storage": 0, "returned": 0 },
         "financials": { "revenue_to_date": "4280.00", "costs_to_date": "18200.00", "projected_profit": "4061.00", "projected_roi": 12.4 },
         "timeline": {
-          "started_at": "2026-03-05T17:32:00Z",
-          "acquisition_completed_at": "2026-03-08T10:15:00Z",
-          "liquidation_started_at": "2026-03-09T09:14:00Z",
-          "estimated_completion": "2026-03-19T00:00:00Z"
+          "started_at": "2026-03-09T09:14:00Z",
+          "acquisition_completed_at": "2026-03-11T10:15:00Z",
+          "liquidation_started_at": "2026-03-12T09:14:00Z",
+          "estimated_completion": "2026-03-13T21:14:00Z"
         }
       }
     ]
@@ -235,7 +237,7 @@ truth). Money fields are **strings** (`"5000.00"`) per `00-api-conventions.md`
 | `ExecutionStatus` | `FUNDING` `ACQUIRING` `HOLDING` `LIQUIDATING` `COMPLETED` `FAILED` `CANCELLED` |
 | `ExecutionContributor` | `member_id: string; amount: string; percentage: number` |
 | `ExecutionParticipants` | `signal_contributor`/`access_contributor`: `{member_id, display_name, share} \| null`; `operator`: `{member_id, display_name} \| null` |
-| `ExecutionDetail` | `execution_id; opportunity {id, title}; status; participants; capital {allocated, spent, recovered, contributors_count}; inventory {total_items, sold, listed, in_storage, returned}; financials {revenue_to_date, costs_to_date, projected_profit, projected_roi}; timeline {started_at, acquisition_completed_at, liquidation_started_at, estimated_completion}` |
+| `ExecutionDetail` | `execution_id; title; opportunity {id, title}; image_seed; status; participants; capital {allocated, spent, recovered, contributors_count}; inventory {total_items, sold, listed, in_storage, returned}; financials {revenue_to_date, costs_to_date, projected_profit, projected_roi}; timeline {started_at, acquisition_completed_at, liquidation_started_at, estimated_completion}` |
 | `ExecutionCreateResponse` | `execution_id; opportunity_id; status; capital {allocated, from_pool, contributors: ExecutionContributor[]}; participants {signal_contributor: string; operator: string}; timeline {started_at}` |
 | `ExecutionCompleteResponse` | `execution_id; status; financials {total_cost, total_revenue, gross_profit, platform_fee, net_profit, roi}; timeline {started_at, completed_at, duration_days}; payout_scheduled: boolean; payout_id: string` |
 

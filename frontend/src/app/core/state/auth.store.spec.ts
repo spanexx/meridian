@@ -140,6 +140,29 @@ describe('AuthStore', () => {
     expect(store.member()).toBeNull();
   });
 
+  // BRIDGE 2026-08-20: audits (opencode + cline-one) flagged an N+1 —
+  // authGuard fires loadMe() on every route AND dashboard/profile
+  // constructors fire it again, so /auth/me ran 2× per protected page.
+  // Requirement: concurrent loadMe() calls share ONE in-flight request
+  // (PoolStore pattern); a second sequential call with a warm member is
+  // a no-op (no network).
+  it('concurrent loadMe() calls dedupe to a single /auth/me request', async () => {
+    const { store, mockClient } = setup();
+    const me = mockClient.me as ReturnType<typeof vi.fn>;
+    const first = store.loadMe();
+    const second = store.loadMe();
+    await Promise.all([first, second]);
+    expect(me).toHaveBeenCalledTimes(1);
+  });
+
+  it('loadMe() with a warm member does not refetch /auth/me', async () => {
+    const { store, mockClient } = setup();
+    await store.loadMe(); // warm the member
+    const me = mockClient.me as ReturnType<typeof vi.fn>;
+    await store.loadMe();
+    expect(me).toHaveBeenCalledTimes(1);
+  });
+
   it('logout() clears the token and the member', async () => {
     const { store, tokenStore } = setup();
     await store.login('a@b.com', 'pw');

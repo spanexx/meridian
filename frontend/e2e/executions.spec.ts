@@ -56,7 +56,11 @@ test.describe('executions page (wireframe-aligned)', () => {
 
   test('cards show status + Deployed/Recovered/ROI stats + progress bar', async ({ page }) => {
     await page.goto('/executions');
+    // Cards render ASYNC from GET /executions (Job C, 2026-08-21) — wait
+    // for the first card instead of an immediate count() (DISCOVERY
+    // 2026-08-19 pattern; the sync fixture masked this race before).
     const cards = page.locator('a.card.card-hover');
+    await expect(cards.first()).toBeVisible();
     expect(await cards.count()).toBeGreaterThan(0);
     const first = cards.first();
     // Semantics over classes: status badge + labeled stats + accessible
@@ -70,6 +74,9 @@ test.describe('executions page (wireframe-aligned)', () => {
 
   test('clicking "Failed" filters to exactly 1 card', async ({ page }) => {
     await page.goto('/executions');
+    // Wait for the async board to render before clicking a filter tab
+    // (Job C data race, same pattern as the cards test above).
+    await expect(page.locator('a.card.card-hover').first()).toBeVisible();
     const tabs = page.locator('[data-testid="status-filter"] button');
     const failed = tabs.nth(3);
     await failed.click();

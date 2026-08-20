@@ -306,6 +306,7 @@ interface ExecutionSeedRow {
   title: string;
   opp: string;
   oppTitle: string;
+  imageSeed: string;
   status: 'active' | 'completed' | 'failed';
   badge: string;
   deployed: number;
@@ -315,22 +316,22 @@ interface ExecutionSeedRow {
 }
 
 const EXECUTION_SEED_ROWS: ExecutionSeedRow[] = [
-  { ref: 'E-1042', title: 'Limited Edition Sneaker Resale', opp: 'O-2037', oppTitle: 'Travis Scott × Nike', status: 'active', badge: 'Listed', deployed: 18500, recovered: 4280, roi: 12.4, statusLine: '3 of 8 sold' },
-  { ref: 'E-1039', title: 'Vintage Watch Liquidation', opp: 'O-2021', oppTitle: 'Estate lot', status: 'active', badge: 'All Sold', deployed: 32000, recovered: 37985, roi: 18.7, statusLine: '5 of 5 sold' },
-  { ref: 'E-1036', title: 'Wholesale Electronics', opp: 'O-2018', oppTitle: 'Shenzhen bulk', status: 'active', badge: 'Acquiring', deployed: 45000, recovered: 0, roi: 0, statusLine: '0 of 12 units' },
-  { ref: 'E-1033', title: 'Designer Furniture Resale', opp: 'O-2014', oppTitle: 'Herman Miller · 12 chairs', status: 'completed', badge: 'Settled', deployed: 7800, recovered: 9240, roi: 18.5, statusLine: '12 of 12 sold' },
-  { ref: 'E-1031', title: 'Vintage Camera Lot', opp: 'O-2011', oppTitle: 'Leica M3 · 2 units', status: 'completed', badge: 'Settled', deployed: 5400, recovered: 7620, roi: 41.0, statusLine: '2 of 2 sold' },
-  { ref: 'E-1028', title: 'Vinyl Record Collection', opp: 'O-2008', oppTitle: '320 records', status: 'completed', badge: 'Settled', deployed: 3200, recovered: 4115, roi: 28.6, statusLine: '320 of 320 sold' },
-  { ref: 'E-1025', title: 'PS5 Bundle Bulk', opp: 'O-2005', oppTitle: '8 bundles', status: 'completed', badge: 'Settled', deployed: 22000, recovered: 25340, roi: 15.2, statusLine: '8 of 8 bundles sold' },
-  { ref: 'E-1022', title: 'Bulk Lego Set Resale', opp: 'O-2002', oppTitle: 'Retired Star Wars sets', status: 'completed', badge: 'Settled', deployed: 8200, recovered: 11004, roi: 34.2, statusLine: '6 of 6 lots sold' },
-  { ref: 'E-1019', title: 'Restaurant Equipment Resale', opp: 'O-1998', oppTitle: 'Espresso machine', status: 'completed', badge: 'Settled', deployed: 4500, recovered: 5526, roi: 22.8, statusLine: '1 of 1 sold' },
-  { ref: 'E-1016', title: 'Yeezy Boost 350 V2 (Bone)', opp: 'O-1995', oppTitle: 'Deadstock · size 10', status: 'completed', badge: 'Settled', deployed: 7600, recovered: 9272, roi: 22.0, statusLine: '1 of 1 sold' },
-  { ref: 'E-1013', title: 'Topps 1986 Fleer Jordan #57', opp: 'O-1992', oppTitle: 'PSA 9 graded', status: 'completed', badge: 'Settled', deployed: 12000, recovered: 13680, roi: 14.0, statusLine: '1 of 1 sold' },
-  { ref: 'E-1010', title: 'Wüsthof Classic 8" chef knife', opp: 'O-1989', oppTitle: '3-piece set', status: 'completed', badge: 'Settled', deployed: 240, recovered: 269, roi: 12.0, statusLine: '3 of 3 sets sold' },
-  { ref: 'E-1007', title: 'Gibson Les Paul Studio', opp: 'O-1986', oppTitle: '2018 sunburst', status: 'completed', badge: 'Settled', deployed: 2200, recovered: 2442, roi: 11.0, statusLine: '1 of 1 sold' },
-  { ref: 'E-1004', title: 'Stone Island Shadow Project', opp: 'O-1983', oppTitle: 'FW23 jacket', status: 'completed', badge: 'Settled', deployed: 1100, recovered: 1309, roi: 19.0, statusLine: '1 of 1 sold' },
-  { ref: 'E-1001', title: 'Herman Miller Aeron (size B)', opp: 'O-1980', oppTitle: 'Refurbished', status: 'completed', badge: 'Settled', deployed: 1800, recovered: 1872, roi: 4.0, statusLine: '1 of 1 sold' },
-  { ref: 'E-0998', title: 'Eames Lounge Replica (no-auth)', opp: 'O-1977', oppTitle: 'No certificate', status: 'failed', badge: 'Defaulted', deployed: 1400, recovered: 280, roi: -80.0, statusLine: '2 of 5 buyers refunded' },
+  { ref: 'E-1042', title: 'Limited Edition Sneaker Resale', imageSeed: 'sneaker-thumb', opp: 'O-2037', oppTitle: 'Travis Scott × Nike', status: 'active', badge: 'Listed', deployed: 18500, recovered: 4280, roi: 12.4, statusLine: '3 of 8 sold' },
+  { ref: 'E-1039', title: 'Vintage Watch Liquidation', imageSeed: 'watch-thumb', opp: 'O-2021', oppTitle: 'Estate lot', status: 'active', badge: 'All Sold', deployed: 32000, recovered: 37985, roi: 18.7, statusLine: '5 of 5 sold' },
+  { ref: 'E-1036', title: 'Wholesale Electronics', imageSeed: 'electronics-thumb', opp: 'O-2018', oppTitle: 'Shenzhen bulk', status: 'active', badge: 'Acquiring', deployed: 45000, recovered: 0, roi: 0, statusLine: '0 of 12 units' },
+  { ref: 'E-1033', title: 'Designer Furniture Resale', imageSeed: 'furniture-thumb', opp: 'O-2014', oppTitle: 'Herman Miller · 12 chairs', status: 'completed', badge: 'Settled', deployed: 7800, recovered: 9240, roi: 18.5, statusLine: '12 of 12 sold' },
+  { ref: 'E-1031', title: 'Vintage Camera Lot', imageSeed: 'camera-thumb', opp: 'O-2011', oppTitle: 'Leica M3 · 2 units', status: 'completed', badge: 'Settled', deployed: 5400, recovered: 7620, roi: 41.0, statusLine: '2 of 2 sold' },
+  { ref: 'E-1028', title: 'Vinyl Record Collection', imageSeed: 'vinyl-thumb', opp: 'O-2008', oppTitle: '320 records', status: 'completed', badge: 'Settled', deployed: 3200, recovered: 4115, roi: 28.6, statusLine: '320 of 320 sold' },
+  { ref: 'E-1025', title: 'PS5 Bundle Bulk', imageSeed: 'ps5-thumb', opp: 'O-2005', oppTitle: '8 bundles', status: 'completed', badge: 'Settled', deployed: 22000, recovered: 25340, roi: 15.2, statusLine: '8 of 8 bundles sold' },
+  { ref: 'E-1022', title: 'Bulk Lego Set Resale', imageSeed: 'lego-thumb', opp: 'O-2002', oppTitle: 'Retired Star Wars sets', status: 'completed', badge: 'Settled', deployed: 8200, recovered: 11004, roi: 34.2, statusLine: '6 of 6 lots sold' },
+  { ref: 'E-1019', title: 'Restaurant Equipment Resale', imageSeed: 'espresso-thumb', opp: 'O-1998', oppTitle: 'Espresso machine', status: 'completed', badge: 'Settled', deployed: 4500, recovered: 5526, roi: 22.8, statusLine: '1 of 1 sold' },
+  { ref: 'E-1016', title: 'Yeezy Boost 350 V2 (Bone)', imageSeed: 'yeezy-thumb', opp: 'O-1995', oppTitle: 'Deadstock · size 10', status: 'completed', badge: 'Settled', deployed: 7600, recovered: 9272, roi: 22.0, statusLine: '1 of 1 sold' },
+  { ref: 'E-1013', title: 'Topps 1986 Fleer Jordan #57', imageSeed: 'topps-thumb', opp: 'O-1992', oppTitle: 'PSA 9 graded', status: 'completed', badge: 'Settled', deployed: 12000, recovered: 13680, roi: 14.0, statusLine: '1 of 1 sold' },
+  { ref: 'E-1010', title: 'Wüsthof Classic 8" chef knife', imageSeed: 'knife-thumb', opp: 'O-1989', oppTitle: '3-piece set', status: 'completed', badge: 'Settled', deployed: 240, recovered: 269, roi: 12.0, statusLine: '3 of 3 sets sold' },
+  { ref: 'E-1007', title: 'Gibson Les Paul Studio', imageSeed: 'gibson-thumb', opp: 'O-1986', oppTitle: '2018 sunburst', status: 'completed', badge: 'Settled', deployed: 2200, recovered: 2442, roi: 11.0, statusLine: '1 of 1 sold' },
+  { ref: 'E-1004', title: 'Stone Island Shadow Project', imageSeed: 'stone-thumb', opp: 'O-1983', oppTitle: 'FW23 jacket', status: 'completed', badge: 'Settled', deployed: 1100, recovered: 1309, roi: 19.0, statusLine: '1 of 1 sold' },
+  { ref: 'E-1001', title: 'Herman Miller Aeron (size B)', imageSeed: 'aeron-thumb', opp: 'O-1980', oppTitle: 'Refurbished', status: 'completed', badge: 'Settled', deployed: 1800, recovered: 1872, roi: 4.0, statusLine: '1 of 1 sold' },
+  { ref: 'E-0998', title: 'Eames Lounge Replica (no-auth)', imageSeed: 'eames-thumb', opp: 'O-1977', oppTitle: 'No certificate', status: 'failed', badge: 'Defaulted', deployed: 1400, recovered: 280, roi: -80.0, statusLine: '2 of 5 buyers refunded' },
 ];
 
 /** Participants shared by every execution (execution-detail.page.ts side card). */
@@ -368,10 +369,11 @@ function executionStatusOf(r: ExecutionSeedRow): ExecutionDetail['status'] {
 function executionTimelineOf(r: ExecutionSeedRow): ExecutionDetail['timeline'] {
   if (r.ref === 'E-1042') {
     return {
-      started_at: '2026-03-05T17:32:00Z',
-      acquisition_completed_at: '2026-03-08T10:15:00Z',
-      liquidation_started_at: '2026-03-09T09:14:00Z',
-      estimated_completion: '2026-03-19T00:00:00Z',
+      // Aligned to the wireframe's 'Live · 4d 12h' flight: started → est = 4.5 days.
+      started_at: '2026-03-09T09:14:00Z',
+      acquisition_completed_at: '2026-03-11T10:15:00Z',
+      liquidation_started_at: '2026-03-12T09:14:00Z',
+      estimated_completion: '2026-03-13T21:14:00Z',
     };
   }
   if (r.ref === 'E-1039') {
@@ -415,7 +417,9 @@ function executionFromRow(r: ExecutionSeedRow): ExecutionDetail {
         : 0;
   return {
     execution_id: r.ref,
+    title: r.title,
     opportunity: { id: r.opp, title: r.oppTitle },
+    image_seed: r.imageSeed,
     status: executionStatusOf(r),
     participants: E1042_PARTICIPANTS,
     capital: {

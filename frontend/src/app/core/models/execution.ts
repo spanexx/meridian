@@ -42,7 +42,11 @@ export interface ExecutionParticipants {
 /** GET /executions/{id} detail (journey 05). */
 export interface ExecutionDetail {
   execution_id: string;
+  /** The execution's own display title (distinct from the opportunity title). */
+  title: string;
   opportunity: { id: string; title: string };
+  /** Thumbnail reference the board cards render (picsum seed in the mock world). */
+  image_seed: string;
   status: ExecutionStatus;
   participants: ExecutionParticipants;
   capital: {

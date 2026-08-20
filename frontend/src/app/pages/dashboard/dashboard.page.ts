@@ -440,8 +440,9 @@ export class DashboardPageComponent {
 
   constructor() {
     void this.store.load();
-    // Pack B: hand the session member fetch to AuthStore (one source).
-    void this.auth.loadMe();
+    // Pack B: the session member flows through AuthStore; the authGuard
+    // warmed it on route entry, so no duplicate /auth/me here (N+1 fix,
+    // 2026-08-20 audits).
     this.client
       .executionsList()
       .then((r) => this.executions.set(r.executions.slice(0, 3).map(toExecutionRow)))

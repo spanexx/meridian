@@ -49,6 +49,12 @@ async function renderStandalone(): Promise<ComponentFixture<LoginPageComponent>>
       token_type: 'bearer',
       expires_in: 3600,
     }),
+    // AuthStore.login2fa() awaits loadMe() → client.me(); the mock must
+    // provide it or the chain rejects before the page navigates.
+    me: vi.fn().mockResolvedValue({
+      member: { member_id: 'mem_1', profile: { first_name: 'Alex', last_name: 'Chen', display_name: 'Alex Chen' }, email: 'alex@meridian.com', roles: ['VETTER', 'MEMBER'], kyc_status: 'VERIFIED', two_factor_enabled: true },
+      session: { created_at: '', expires_at: '' },
+    }),
   } as unknown as ApiClient;
   await TestBed.configureTestingModule({
     providers: [provideRouter(AUTH_ROUTES), { provide: ApiClient, useValue: mockClient }],
