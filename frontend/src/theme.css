@@ -1,5 +1,6 @@
 /* MERIDIAN — theme (dark default + light) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Inter is self-hosted (@font-face in src/fonts.scss) since 2026-08-21 —
+   the Google Fonts CDN @import was dropped for offline-safe builds. */
 
 /* ---------- Dark (default) ---------- */
 :root, html[data-theme='dark'] {

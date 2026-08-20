@@ -52,11 +52,11 @@ test.describe('opportunities page (wireframe-aligned)', () => {
     await expect(tabs.nth(0)).toContainText('All');
     await expect(tabs.nth(0)).toContainText('24');
     await expect(tabs.nth(1)).toContainText('Pending');
-    await expect(tabs.nth(1)).toContainText('8');
+    await expect(tabs.nth(1)).toContainText('7');
     await expect(tabs.nth(2)).toContainText('In Vetting');
-    await expect(tabs.nth(2)).toContainText('5');
+    await expect(tabs.nth(2)).toContainText('4');
     await expect(tabs.nth(3)).toContainText('Approved');
-    await expect(tabs.nth(3)).toContainText('3');
+    await expect(tabs.nth(3)).toContainText('5');
     await expect(tabs.nth(4)).toContainText('Executing');
     await expect(tabs.nth(4)).toContainText('2');
     await expect(tabs.nth(5)).toContainText('Rejected');
@@ -71,8 +71,9 @@ test.describe('opportunities page (wireframe-aligned)', () => {
 
   test('table has 9 columns including an empty arrow column', async ({ page }) => {
     await page.goto('/opportunities');
-    const headers = await page.locator('thead th').allTextContents();
-    expect(headers).toEqual([
+    // Columnheaders only appear once the async load resolves; toHaveText
+    // retries until the table body is populated (Job D async render).
+    await expect(page.getByRole('columnheader')).toHaveText([
       'Ref', 'Title', 'Category', 'Submitted by',
       'Est. ROI', 'Capital', 'Votes', 'Status', '',
     ]);
@@ -113,7 +114,8 @@ test.describe('opportunities page (wireframe-aligned)', () => {
   test('Submitted-by cells show avatar circles + names', async ({ page }) => {
     await page.goto('/opportunities');
     const avatars = page.locator('tbody td .avatar');
-    expect(await avatars.count()).toBeGreaterThan(0);
+    // first avatar only appears once the async load resolves — retry.
+    await expect(avatars.first()).toBeVisible();
     const first = avatars.first();
     const initials = await first.textContent();
     expect(initials?.trim().length).toBeGreaterThan(0);
@@ -148,11 +150,11 @@ test.describe('opportunities page (wireframe-aligned)', () => {
     const select = page.locator('[data-testid="status-select"]');
     await expect(select).toBeVisible();
     await expect(page.locator('[data-testid="status-filter"]')).toBeHidden();
-    for (const opt of ['All 24', 'Pending 8', 'In Vetting 5', 'Approved 3', 'Executing 2', 'Rejected 6']) {
+    for (const opt of ['All 24', 'Pending 7', 'In Vetting 4', 'Approved 5', 'Executing 2', 'Rejected 6']) {
       await expect(select.locator('option', { hasText: opt })).toHaveCount(1);
     }
     // filtering via the dropdown mirrors the tab behavior
-    await select.selectOption({ label: 'Pending 8' });
+    await select.selectOption({ label: 'Pending 7' });
     await expect(page.locator('tbody tr').first()).toBeVisible();
     await expect(page.locator('tbody tr').first()).toHaveAttribute('data-status', 'pending');
   });

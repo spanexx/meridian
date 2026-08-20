@@ -24,6 +24,7 @@ import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import type { OpportunitiesPageComponent } from './opportunities.page';
+import { toOpportunityViewModel } from './opportunities.page';
 import { ApiClient } from '../../core/api/api-client';
 import { SEED_OPPORTUNITIES } from '../../core/api/mock-seed';
 
@@ -189,7 +190,7 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
   it('underlying dataset has 24 rows (3 pages of 8)', async () => {
     const fixture = await renderStandalone();
     const comp = fixture.componentInstance;
-    expect(comp.all.length).toBe(24);
+    expect(comp.all().length).toBe(24);
   });
 
   it('Est. ROI cells render with leading "+" and emerald color class', async () => {
@@ -384,5 +385,81 @@ describe('OpportunitiesPage (wireframe-aligned)', () => {
     const root = fixture.nativeElement as HTMLElement;
     const allBtn = root.querySelector('[data-testid="status-filter"] button') as HTMLElement;
     expect(allBtn.classList.contains('active')).toBe(true);
+  });
+});
+describe('toOpportunityViewModel (canonical row → view mapper)', () => {
+  const rows = toOpportunityViewModel(SEED_OPPORTUNITIES);
+
+  it('maps every canonical row without dropping refs (24 rows)', () => {
+    expect(rows).toHaveLength(24);
+    expect(rows.map((o) => o.ref)).toEqual(SEED_OPPORTUNITIES.map((r) => r.opportunity_id));
+  });
+
+  it('maps title / estRoi / capital from canonical financials', () => {
+    const lego = rows.find((o) => o.ref === 'O-2051')!;
+    expect(lego.title).toBe('Bulk Lego Set Resale');
+    expect(lego.estRoi).toBe(34.2);
+    expect(lego.capital).toBe(8200);
+    const espresso = rows.find((o) => o.ref === 'O-1963')!;
+    expect(espresso.estRoi).toBe(25.0);
+    expect(espresso.capital).toBe(6800);
+  });
+
+  it('maps status: SUBMITTED→pending, VETTING→vetting, APPROVED→approved, EXECUTED→executing, REJECTED→rejected', () => {
+    const byRef = (ref: string) => rows.find((o) => o.ref === ref)!.status;
+    expect(byRef('O-2048')).toBe('pending');   // SUBMITTED
+    expect(byRef('O-2051')).toBe('vetting');   // VETTING
+    expect(byRef('O-2045')).toBe('approved');  // APPROVED
+    expect(byRef('O-2037')).toBe('executing'); // EXECUTED
+    expect(byRef('O-2031')).toBe('rejected');  // REJECTED
+    // live status counts from the seeded rows (7/5/2/6/4 across the 5 statuses)
+    expect(rows.filter((o) => o.status === 'pending').length).toBe(7);
+    expect(rows.filter((o) => o.status === 'vetting').length).toBe(4);
+    expect(rows.filter((o) => o.status === 'approved').length).toBe(5);
+    expect(rows.filter((o) => o.status === 'executing').length).toBe(2);
+    expect(rows.filter((o) => o.status === 'rejected').length).toBe(6);
+  });
+
+  it('maps votes from vetting_status; null when no vetting block (renders "—")', () => {
+    const vetting = rows.find((o) => o.ref === 'O-2051')!;
+    expect(vetting.votesUp).toBe(4);
+    expect(vetting.votesDown).toBe(0);
+    const pending = rows.find((o) => o.ref === 'O-2048')!;
+    expect(pending.votesUp).toBeNull();
+    expect(pending.votesDown).toBeNull();
+  });
+
+  it('maps submitter name from submitted_by.display_name + initials/gradient', () => {
+    const o = rows.find((r) => r.ref === 'O-2051')!;
+    expect(o.submitter.name).toBe('Sarah Park');
+    expect(o.submitter.initials).toBe('SP');
+    expect(o.submitter.gradient).toContain('gradient-copper');
+  });
+
+  it('supplies the wireframe-only subtitle and product category from presentation', () => {
+    const o = rows.find((r) => r.ref === 'O-2045')!;
+    expect(o.subtitle).toBe('First pressings · 320 records');
+    expect(o.category).toBe('collectibles');
+  });
+});
+
+describe('OpportunitiesPage pagination slicing (from live rows)', () => {
+  it('slices 24 rows into 3 pages of 8 (All tab)', async () => {
+    const fixture = await renderStandalone();
+    const c = fixture.componentInstance;
+    expect(c.all().length).toBe(24);
+    expect(c.totalPages()).toBe(3);
+    expect(c.pagedRows()).toHaveLength(8);
+    expect(c.pagedRows().map((o) => o.ref)[0]).toBe('O-2051');
+  });
+
+  it('page 2 starts at the 9th canonical row', async () => {
+    const fixture = await renderStandalone();
+    const c = fixture.componentInstance;
+    c.page.set(2);
+    fixture.detectChanges();
+    const refs = c.pagedRows().map((o) => o.ref);
+    expect(refs).toHaveLength(8);
+    expect(refs[0]).toBe('O-2031');
   });
 });
